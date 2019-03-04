@@ -1,0 +1,74 @@
+{
+    "title": "Istio Handbook - Istio 服务网格进阶实战 by ServiceMesher(服务网格中文社区)",
+    "description": "Istio Handbook - Istio 服务网格进阶实战，云原生应用的网络层",
+    "language": "zh-hans",
+    "author": "Jimmy Song（宋净超）",
+    "links": {
+        "sidebar": {
+            "ServiceMesher 社区": "http://www.servicemesher.com",
+            "Istio 官网（中文）": "https://istio.io/zh/"
+        }
+    },
+    "plugins": [
+        "github",
+        "codesnippet",
+        "splitter",
+        "page-toc-button",
+        "image-captions",
+        "editlink",
+        "back-to-top-button",
+        "-lunr", "-search", "search-plus",
+        "github-buttons@2.1.0",
+        "favicon@^0.0.2",
+        "tbfed-pagefooter@^0.0.1",
+        "3-ba",
+        "theme-default",
+        "-highlight", "prism", "prism-themes",
+        "sitemap-general",
+        "lightbox",
+        "ga"
+    ],
+    "pluginsConfig": {
+        "theme-default": {
+            "showLevel": true
+        },
+        "github": {
+            "url": "https://github.com/rootsongjc/istio-handbook"
+        },
+        "editlink": {
+            "base": "https://github.com/rootsongjc/istio-handbook/blob/master/",
+            "label": "编辑本页"
+        },
+        "image-captions": {
+            "caption": "图片 - _CAPTION_"
+        },
+        "github-buttons": {
+            "repo": "rootsongjc/istio-handbook",
+            "types": ["star"],
+            "size": "small"
+        },
+        "tbfed-pagefooter": {
+            "copyright": "<p><a href=https://ws1.sinaimg.cn/large/006tNbRwly1fw3l1sxoijj304g0563z7.jpg data-lightbox=2fd927ee-fa64-4eca-8ed5-6bd72b573a3c>点击关注【ServiceMesher】 微信公众号回复【加群】加入社区</a></p>Copyright © <a href=http://www.servicemesher.com>servicemesher.com</a> 2018-2019",
+            "modify_label": " Updated at ",
+            "modify_format": "YYYY-MM-DD HH:mm:ss"
+        },
+        "favicon": {
+            "shortcut": "favicon.ico",
+            "bookmark": "favicon.ico"
+        },
+        "3-ba": {
+            "token": "11f7d254cfa4e0ca44b175c66d379ecc"
+        },
+        "prism": {
+            "css": [
+            "prism-themes/themes/prism-ghcolors.css"
+            ]
+        },
+        "sitemap-general": {
+            "prefix": "https://jimmysong.io/istio-handbook/"
+        },
+        "ga": {
+            "token": "UA-93485976-2"
+        }
+    }
+}
