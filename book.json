@@ -1,8 +1,8 @@
 {
     "title": "Istio Handbook - Istio 服务网格进阶实战 by ServiceMesher(服务网格中文社区)",
-    "description": "Istio Handbook - Istio 服务网格进阶实战，云原生应用的网络层",
+    "description": "Istio Handbook - Istio 服务网格进阶实战，管理后 Kubernetes 时代的服务",
     "language": "zh-hans",
-    "author": "Jimmy Song（宋净超）",
+    "author": "ServiceMesher 社区",
     "links": {
         "sidebar": {
             "ServiceMesher 社区": "http://www.servicemesher.com",
@@ -33,17 +33,17 @@
             "showLevel": true
         },
         "github": {
-            "url": "https://github.com/rootsongjc/istio-handbook"
+            "url": "https://github.com/servicemesher/istio-handbook"
         },
         "editlink": {
-            "base": "https://github.com/rootsongjc/istio-handbook/blob/master/",
+            "base": "https://github.com/servicemesher/istio-handbook/blob/master/",
             "label": "编辑本页"
         },
         "image-captions": {
             "caption": "图片 - _CAPTION_"
         },
         "github-buttons": {
-            "repo": "rootsongjc/istio-handbook",
+            "repo": "servicemesher/istio-handbook",
             "types": ["star"],
             "size": "small"
         },
@@ -65,7 +65,7 @@
             ]
         },
         "sitemap-general": {
-            "prefix": "https://jimmysong.io/istio-handbook/"
+            "prefix": "http://www.servicemesher.com/istio-handbook/"
         },
         "ga": {
             "token": "UA-93485976-2"
