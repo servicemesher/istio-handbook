@@ -13,8 +13,8 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 ## 版权
 
 <p align="center">
-  <a href="https://jimmysong.io/istio-handbook">
-    <img src="cover.jpg" width="40%" alt="Istio handbook - istio服务网格实践指南" />
+  <a href="http://www.servicemesher.com/istio-handbook">
+    <img src="cover.jpg" width="40%" alt="Istio handbook - Istio 服务网格进阶实战" />
   </a>
 </p>
 
@@ -24,7 +24,7 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 
 ## 参与本书
 
-参与本书的撰写，请先加入 [ServiceMesher 社区](http://www.servicemesher.com/contact) 并参阅 [Istio 网站样式指南](https://istio.io/zh/about/contribute/style-guide/)。
+请参阅[本书写作规范](CODE_OF_CONDUCT.md)，加入 ServiceMesher 后进入 Slack channel 讨论。
 
 ## ServiceMesher 社区
 
