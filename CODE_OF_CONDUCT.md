@@ -36,7 +36,7 @@ category: "translation|original|evolution"
 **说明**
 
 - owners：原则上不超过2人；
-- reviewers：只要修改过文章都人都是 reviewer；
+- reviewers：只要修改过文章的人都是 reviewer；
 - description：本文章的摘要，不要超过200字；
 - publishDate：文章第一次合并的日期；
 - updateDate：最新一次修改的日期；
