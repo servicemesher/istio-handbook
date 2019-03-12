@@ -1,9 +1,9 @@
 ---
 owners: ["rootsongjc"]
-reviewers: [""]
+reviewers: ["haiker2011"]
 description: "本文从高层次上介绍了 Istio 的架构。"
 publishDate: 2019-03-10
-updateDate: 2019-03-10
+updateDate: 2019-03-12
 tags: ["service mesh"]
 category: "evolution"
 ---
@@ -25,7 +25,7 @@ category: "evolution"
   - 可观察性
   - 安全性
   - 可运维性
-- Istio 是可定制可扩展的，组建是可拔插的
+- Istio 是可定制可扩展的，组件是可拔插的
 - Istio 作为控制平面，在每个服务中注入一个 Envoy 代理以 Sidecar 形式运行来拦截所有进出服务的流量，同时对流量加以控制
 - 应用程序应该关注于业务逻辑（这才能生钱），非功能性需求交给 Service Mesh
 

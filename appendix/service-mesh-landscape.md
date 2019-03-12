@@ -3,7 +3,7 @@ owners: ["rootsongjc"]
 reviewers: ["haiker2011"]
 description: "本文描绘了服务网格的全景图。"
 publishDate: 2019-03-10
-updateDate: 2019-03-10
+updateDate: 2019-03-12
 tags: ["service mesh","landscape"]
 category: "original"
 ---
