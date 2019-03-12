@@ -1,9 +1,9 @@
 ---
 owners: ["rootsongjc"]
-reviewers: [""]
+reviewers: ["haiker2011"]
 description: "本文介绍了 istio service mesh 中的 sidecar 注入及流量劫持的详细过程。"
 publishDate: 2019-03-10
-updateDate: 2019-03-10
+updateDate: 2019-03-12
 tags: ["sidecar","iptables","init-container"]
 category: "original"
 ---
