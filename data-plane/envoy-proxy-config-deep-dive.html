@@ -1,0 +1,1132 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Envoy proxy 配置详解 · Istio Handbook - Istio 服务网格进阶实战 by ServiceMesher(服务网格中文社区)</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="本文详解了 Envoy proxy 的配置。">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ServiceMesher 社区">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-page-toc-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-image-captions/image-captions.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-plus/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-tbfed-pagefooter/footer.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism-ghcolors.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-lightbox/lightbox.min.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="envoy-api.html" />
+    
+    
+    <link rel="prev" href="istio-sidecar-proxy-config.html" />
+    
+
+    
+        <link rel="shortcut icon" href='../favicon.ico' type="image/x-icon">
+    
+    
+        <link rel="bookmark" href='../favicon.ico' type="image/x-icon">
+    
+    
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"repo":"servicemesher/istio-handbook","types":["star"],"size":"small"};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="http://www.servicemesher.com" target="_blank" class="custom-link">ServiceMesher 社区</a>
+        </li>
+    
+        
+        <li>
+            <a href="https://istio.io/zh/" target="_blank" class="custom-link">Istio 官网（中文）</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        <li class="header">说明</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                        <b>1.1.</b>
+                    
+                    序
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">概念原理</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../concepts-and-principle/">
+            
+                <a href="../concepts-and-principle/">
+            
+                    
+                        <b>2.1.</b>
+                    
+                    Istio 概念原理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../concepts-and-principle/what-is-service-mesh.html">
+            
+                <a href="../concepts-and-principle/what-is-service-mesh.html">
+            
+                    
+                        <b>2.2.</b>
+                    
+                    什么是服务网格？
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="../concepts-and-principle/service-mesh-architectures.html">
+            
+                <a href="../concepts-and-principle/service-mesh-architectures.html">
+            
+                    
+                        <b>2.3.</b>
+                    
+                    服务网格架构
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.3.1" data-path="../concepts-and-principle/service-mesh-patterns.html">
+            
+                <a href="../concepts-and-principle/service-mesh-patterns.html">
+            
+                    
+                        <b>2.3.1.</b>
+                    
+                    服务网格的实现模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3.2" data-path="../concepts-and-principle/istio-architecture.html">
+            
+                <a href="../concepts-and-principle/istio-architecture.html">
+            
+                    
+                        <b>2.3.2.</b>
+                    
+                    Istio 架构解析
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" data-path="../concepts-and-principle/sidecar-pattern.html">
+            
+                <a href="../concepts-and-principle/sidecar-pattern.html">
+            
+                    
+                        <b>2.4.</b>
+                    
+                    Sidecar 模式
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.4.1" data-path="../concepts-and-principle/sidecar-injection-deep-dive.html">
+            
+                <a href="../concepts-and-principle/sidecar-injection-deep-dive.html">
+            
+                    
+                        <b>2.4.1.</b>
+                    
+                    Istio 中的 Sidecar 注入与流量劫持详解
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4.2" data-path="../concepts-and-principle/istio-sidecar-injector.html">
+            
+                <a href="../concepts-and-principle/istio-sidecar-injector.html">
+            
+                    
+                        <b>2.4.2.</b>
+                    
+                    Sidecar 的自动注入过程详解
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">数据平面</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                        <b>3.1.</b>
+                    
+                    数据平面介绍
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="envoy-terminology.html">
+            
+                <a href="envoy-terminology.html">
+            
+                    
+                        <b>3.2.</b>
+                    
+                    Envoy 中的基本术语
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" data-path="istio-sidecar-proxy-config.html">
+            
+                <a href="istio-sidecar-proxy-config.html">
+            
+                    
+                        <b>3.3.</b>
+                    
+                    Istio sidecar proxy 配置
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.4" data-path="envoy-proxy-config-deep-dive.html">
+            
+                <a href="envoy-proxy-config-deep-dive.html">
+            
+                    
+                        <b>3.4.</b>
+                    
+                    Envoy proxy 配置详解
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.5" data-path="envoy-api.html">
+            
+                <a href="envoy-api.html">
+            
+                    
+                        <b>3.5.</b>
+                    
+                    Envoy API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6" data-path="envoy-xds-protocol.html">
+            
+                <a href="envoy-xds-protocol.html">
+            
+                    
+                        <b>3.6.</b>
+                    
+                    xDS 协议解析
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.6.1" data-path="envoy-lds.html">
+            
+                <a href="envoy-lds.html">
+            
+                    
+                        <b>3.6.1.</b>
+                    
+                    LDS（监听器发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.2" data-path="envoy-rds.html">
+            
+                <a href="envoy-rds.html">
+            
+                    
+                        <b>3.6.2.</b>
+                    
+                    RDS（路由发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.3" data-path="envoy-cds.html">
+            
+                <a href="envoy-cds.html">
+            
+                    
+                        <b>3.6.3.</b>
+                    
+                    CDS（集群发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.4" data-path="envoy-eds.html">
+            
+                <a href="envoy-eds.html">
+            
+                    
+                        <b>3.6.4.</b>
+                    
+                    EDS（端点发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.5" data-path="envoy-sds.html">
+            
+                <a href="envoy-sds.html">
+            
+                    
+                        <b>3.6.5.</b>
+                    
+                    SDS（秘钥发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.6" data-path="envoy-ads.html">
+            
+                <a href="envoy-ads.html">
+            
+                    
+                        <b>3.6.6.</b>
+                    
+                    ADS（聚合发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.7" data-path="envoy-hds.html">
+            
+                <a href="envoy-hds.html">
+            
+                    
+                        <b>3.6.7.</b>
+                    
+                    HDS（健康发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7" data-path="envoy-advance-api.html">
+            
+                <a href="envoy-advance-api.html">
+            
+                    
+                        <b>3.7.</b>
+                    
+                    Envoy 高级 API
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.1" data-path="envoy-ms.html">
+            
+                <a href="envoy-ms.html">
+            
+                    
+                        <b>3.7.1.</b>
+                    
+                    MS（Metric 服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.2" data-path="envoy-rls.html">
+            
+                <a href="envoy-rls.html">
+            
+                    
+                        <b>3.7.2.</b>
+                    
+                    RLS（速率限制服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">控制平面</li>
+        
+        
+    
+
+    
+        
+        <li class="header">流量管理</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../traffic-management/">
+            
+                <a href="../traffic-management/">
+            
+                    
+                        <b>5.1.</b>
+                    
+                    Istio 中的流量管理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="../traffic-management/traffic-management-basic.html">
+            
+                <a href="../traffic-management/traffic-management-basic.html">
+            
+                    
+                        <b>5.2.</b>
+                    
+                    流量管理基础概念
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="../traffic-management/sidecar-traffic-routing-deep-dive.html">
+            
+                <a href="../traffic-management/sidecar-traffic-routing-deep-dive.html">
+            
+                    
+                        <b>5.3.</b>
+                    
+                    Istio 中的 Sidecar 的流量路由详解
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">安全</li>
+        
+        
+    
+
+    
+        
+        <li class="header">多集群部署</li>
+        
+        
+    
+
+    
+        
+        <li class="header">日志监控和追踪</li>
+        
+        
+    
+
+    
+        
+        <li class="header">策略和遥测</li>
+        
+        
+    
+
+    
+        
+        <li class="header">性能和可伸缩性</li>
+        
+        
+    
+
+    
+        
+        <li class="header">最佳实践</li>
+        
+        
+    
+
+    
+        
+        <li class="header">附录</li>
+        
+        
+    
+        <li class="chapter " data-level="12.1" data-path="../appendix/service-mesh-landscape.html">
+            
+                <a href="../appendix/service-mesh-landscape.html">
+            
+                    
+                        <b>12.1.</b>
+                    
+                    服务网格全景图
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Envoy proxy 配置详解</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div class="search-plus" id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <html><head></head><body><h1 id="envoy-proxy-&#x914D;&#x7F6E;&#x8BE6;&#x89E3;">Envoy proxy &#x914D;&#x7F6E;&#x8BE6;&#x89E3;</h1>
+<p>Istio envoy sidecar proxy &#x914D;&#x7F6E;&#x4E2D;&#x5305;&#x542B;&#x4EE5;&#x4E0B;&#x56DB;&#x4E2A;&#x90E8;&#x5206;&#x3002;</p>
+<ul>
+<li><strong>bootstrap</strong>&#xFF1A;Envoy proxy &#x542F;&#x52A8;&#x65F6;&#x5019;&#x52A0;&#x8F7D;&#x7684;&#x9759;&#x6001;&#x914D;&#x7F6E;&#x3002;</li>
+<li><strong>listeners</strong>&#xFF1A;&#x76D1;&#x542C;&#x5668;&#x914D;&#x7F6E;&#xFF0C;&#x4F7F;&#x7528; LDS &#x4E0B;&#x53D1;&#x3002;</li>
+<li><strong>clusters</strong>&#xFF1A;&#x96C6;&#x7FA4;&#x914D;&#x7F6E;&#xFF0C;&#x9759;&#x6001;&#x914D;&#x7F6E;&#x4E2D;&#x5305;&#x62EC; xds-grpc &#x548C; zipkin &#x5730;&#x5740;&#xFF0C;&#x52A8;&#x6001;&#x914D;&#x7F6E;&#x4F7F;&#x7528;  CDS &#x4E0B;&#x53D1;&#x3002;</li>
+<li><strong>routes</strong>&#xFF1A;&#x8DEF;&#x7531;&#x914D;&#x7F6E;&#xFF0C;&#x9759;&#x6001;&#x914D;&#x7F6E;&#x4E2D;&#x5305;&#x62EC;&#x4E86;&#x672C;&#x5730;&#x76D1;&#x542C;&#x7684;&#x670D;&#x52A1;&#x7684;&#x96C6;&#x7FA4;&#x4FE1;&#x606F;&#xFF0C;&#x5176;&#x4E2D;&#x5F15;&#x7528;&#x4E86; cluster&#xFF0C;&#x52A8;&#x6001;&#x914D;&#x7F6E;&#x4F7F;&#x7528; RDS &#x4E0B;&#x53D1;&#x3002;</li>
+</ul>
+<p>&#x6BCF;&#x4E2A;&#x90E8;&#x5206;&#x4E2D;&#x90FD;&#x5305;&#x542B;&#x9759;&#x6001;&#x914D;&#x7F6E;&#x4E0E;&#x52A8;&#x6001;&#x914D;&#x7F6E;&#xFF0C;&#x5176;&#x4E2D; bootstrap &#x914D;&#x7F6E;&#x53C8;&#x662F;&#x5728;&#x96C6;&#x7FA4;&#x542F;&#x52A8;&#x7684;&#x65F6;&#x5019;&#x901A;&#x8FC7; sidecar &#x542F;&#x52A8;&#x53C2;&#x6570;&#x6CE8;&#x5165;&#x7684;&#xFF0C;&#x914D;&#x7F6E;&#x6587;&#x4EF6;&#x5728; <code>/etc/istio/proxy/envoy-rev0.json</code>&#x3002;</p>
+<p>Enovy &#x7684;&#x914D;&#x7F6E; dump &#x51FA;&#x6765;&#x540E;&#x7684;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#x56FE;&#x6240;&#x793A;&#x3002;</p>
+<figure id="fig3.4.1"><a href="https://ws1.sinaimg.cn/large/006tNbRwly1fy2x2zk1hhj30ee0h9jtg.jpg" data-lightbox="a23ab795-8cf0-4e24-b728-0cc8efb29d4a" data-title="Envoy &#x914D;&#x7F6E;" target="_blank"><img src="https://ws1.sinaimg.cn/large/006tNbRwly1fy2x2zk1hhj30ee0h9jtg.jpg" alt="Envoy &#x914D;&#x7F6E;"></a><figcaption>&#x56FE;&#x7247; - Envoy &#x914D;&#x7F6E;</figcaption></figure>
+<p>&#x7531;&#x4E8E; bootstrap &#x4E2D;&#x7684;&#x914D;&#x7F6E;&#x662F;&#x6765;&#x81EA; Envoy &#x542F;&#x52A8;&#x65F6;&#x52A0;&#x8F7D;&#x7684;&#x9759;&#x6001;&#x6587;&#x4EF6;&#xFF0C;&#x4E3B;&#x8981;&#x914D;&#x7F6E;&#x4E86;&#x8282;&#x70B9;&#x4FE1;&#x606F;&#x3001;tracing&#x3001;admin &#x548C;&#x7EDF;&#x8BA1;&#x4FE1;&#x606F;&#x6536;&#x96C6;&#x7B49;&#x4FE1;&#x606F;&#xFF0C;&#x8FD9;&#x4E0D;&#x662F;&#x672C;&#x6587;&#x7684;&#x91CD;&#x70B9;&#xFF0C;&#x5927;&#x5BB6;&#x53EF;&#x4EE5;&#x81EA;&#x884C;&#x7814;&#x7A76;&#x3002;</p>
+<figure id="fig3.4.2"><a href="https://ws4.sinaimg.cn/large/006tNbRwly1fy2xid761zj30c70ai0tj.jpg" data-lightbox="34746e4b-d129-48f4-ba3e-804e17102530" data-title="bootstrap &#x914D;&#x7F6E;" target="_blank"><img src="https://ws4.sinaimg.cn/large/006tNbRwly1fy2xid761zj30c70ai0tj.jpg" alt="bootstrap &#x914D;&#x7F6E;"></a><figcaption>&#x56FE;&#x7247; - bootstrap &#x914D;&#x7F6E;</figcaption></figure>
+<p>&#x4E0A;&#x56FE;&#x662F; bootstrap &#x7684;&#x914D;&#x7F6E;&#x4FE1;&#x606F;&#x3002;</p>
+<p><a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/bootstrap/v2/bootstrap.proto.html#envoy-api-msg-config-bootstrap-v2-bootstrap" target="_blank">Bootstrap</a> &#x662F; Envoy &#x4E2D;&#x914D;&#x7F6E;&#x7684;&#x6839;&#x672C;&#x6765;&#x6E90;&#xFF0C;<a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/bootstrap/v2/bootstrap.proto.html#envoy-api-msg-config-bootstrap-v2-bootstrap" target="_blank">Bootstrap</a> &#x6D88;&#x606F;&#x4E2D;&#x6709;&#x4E00;&#x4E2A;&#x5173;&#x952E;&#x7684;&#x6982;&#x5FF5;&#xFF0C;&#x5C31;&#x662F;&#x9759;&#x6001;&#x548C;&#x52A8;&#x6001;&#x8D44;&#x6E90;&#x7684;&#x4E4B;&#x95F4;&#x7684;&#x533A;&#x522B;&#x3002;&#x4F8B;&#x5982; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/lds.proto.html#envoy-api-msg-listener" target="_blank">Listener</a> &#x6216; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/cds.proto.html#envoy-api-msg-cluster" target="_blank">Cluster</a> &#x8FD9;&#x4E9B;&#x8D44;&#x6E90;&#x65E2;&#x53EF;&#x4EE5;&#x4ECE; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/bootstrap/v2/bootstrap.proto.html#envoy-api-field-config-bootstrap-v2-bootstrap-static-resources" target="_blank">static_resources</a> &#x9759;&#x6001;&#x7684;&#x83B7;&#x5F97;&#x4E5F;&#x53EF;&#x4EE5;&#x4ECE; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/bootstrap/v2/bootstrap.proto.html#envoy-api-field-config-bootstrap-v2-bootstrap-dynamic-resources" target="_blank">dynamic_resources</a> &#x4E2D;&#x914D;&#x7F6E;&#x7684; <a href="http://www.servicemesher.com/envoy/configuration/listeners/lds.html#config-listeners-lds" target="_blank">LDS</a> &#x6216; <a href="http://www.servicemesher.com/envoy/configuration/cluster_manager/cds.html#config-cluster-manager-cds" target="_blank">CDS</a> &#x4E4B;&#x7C7B;&#x7684; xDS &#x670D;&#x52A1;&#x83B7;&#x53D6;&#x3002;</p>
+<h3 id="listener">Listener</h3>
+<p>Listener &#x987E;&#x540D;&#x601D;&#x4E49;&#xFF0C;&#x5C31;&#x662F;&#x76D1;&#x542C;&#x5668;&#xFF0C;&#x76D1;&#x542C; IP &#x5730;&#x5740;&#x548C;&#x7AEF;&#x53E3;&#xFF0C;&#x7136;&#x540E;&#x6839;&#x636E;&#x7B56;&#x7565;&#x8F6C;&#x53D1;&#x3002;</p>
+<p><strong>Listener &#x7684;&#x7279;&#x70B9;</strong></p>
+<ul>
+<li>&#x6BCF;&#x4E2A; Envoy &#x8FDB;&#x7A0B;&#x4E2D;&#x53EF;&#x4EE5;&#x6709;&#x591A;&#x4E2A; Listener&#xFF0C;Envoy &#x4E0E; Listener &#x4E4B;&#x95F4;&#x662F;&#x4E00;&#x5BF9;&#x591A;&#x7684;&#x5173;&#x7CFB;&#x3002;</li>
+<li>&#x6BCF;&#x4E2A; Listener &#x4E2D;&#x53EF;&#x4EE5;&#x914D;&#x7F6E;&#x4E00;&#x6761; filter &#x94FE;&#x8868;&#xFF08;filter_chains&#xFF09;&#xFF0C;Envoy &#x4F1A;&#x6839;&#x636E; filter &#x987A;&#x5E8F;&#x6267;&#x884C;&#x8FC7;&#x6EE4;&#x3002;</li>
+<li>Listener &#x53EF;&#x4EE5;&#x76D1;&#x542C;&#x4E0B;&#x6E38;&#x7684;&#x7AEF;&#x53E3;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x63A5;&#x6536;&#x6765;&#x81EA;&#x5176;&#x4ED6; listener &#x7684;&#x6570;&#x636E;&#xFF0C;&#x5F62;&#x6210;&#x94FE;&#x5F0F;&#x5904;&#x7406;&#x3002;</li>
+<li>filter &#x662F;&#x53EF;&#x6269;&#x5C55;&#x7684;&#x3002;</li>
+<li>&#x53EF;&#x4EE5;&#x9759;&#x6001;&#x914D;&#x7F6E;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528; LDS &#x52A8;&#x6001;&#x914D;&#x7F6E;&#x3002;</li>
+<li>&#x76EE;&#x524D;&#x53EA;&#x80FD;&#x76D1;&#x542C; TCP&#xFF0C;UDP &#x8FD8;&#x672A;&#x652F;&#x6301;&#x3002;</li>
+</ul>
+<p><strong>Listener &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;</strong></p>
+<p>Listener &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#xFF0C;&#x9664;&#x4E86; <code>name</code>&#x3001;<code>address</code> &#x548C; <code>filter_chains</code> &#x4E3A;&#x5FC5;&#x987B;&#x914D;&#x7F6E;&#x4E4B;&#x5916;&#xFF0C;&#x5176;&#x4ED6;&#x90FD;&#x4E3A;&#x53EF;&#x9009;&#x7684;&#x3002;</p>
+<pre class="language-"><code class="lang-json"><span class="token punctuation">{</span>
+  <span class="token property">&quot;name&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;address&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;filter_chains&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;use_original_dst&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;per_connection_buffer_limit_bytes&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;metadata&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;drain_type&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;listener_filters&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;transparent&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;freebind&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;socket_options&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;tcp_fast_open_queue_length&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;bugfix_reverse_write_filter_order&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x4E0B;&#x9762;&#x662F;&#x5173;&#x4E8E;&#x4E0A;&#x8FF0;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x4E2D;&#x7684;&#x5E38;&#x7528;&#x914D;&#x7F6E;&#x89E3;&#x6790;&#x3002;</p>
+<ul>
+<li><p><strong>name</strong>&#xFF1A;&#x8BE5; listener &#x7684; UUID&#xFF0C;&#x552F;&#x4E00;&#x9650;&#x5B9A;&#x540D;&#xFF0C;&#x9ED8;&#x8BA4;60&#x4E2A;&#x5B57;&#x7B26;&#xFF0C;&#x4F8B;&#x5982; <code>10.254.74.159_15011</code>&#xFF0C;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x547D;&#x4EE4;&#x53C2;&#x6570;&#x6307;&#x5B9A;&#x957F;&#x5EA6;&#x9650;&#x5236;&#x3002;</p>
+</li>
+<li><p><strong>address</strong>&#xFF1A;&#x76D1;&#x542C;&#x7684;&#x903B;&#x8F91;/&#x7269;&#x7406;&#x5730;&#x5740;&#x548C;&#x7AEF;&#x53E3;&#x53F7;&#xFF0C;&#x4F8B;&#x5982;</p>
+<pre class="language-"><code class="lang-json"><span class="token property">&quot;address&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+       <span class="token property">&quot;socket_address&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property">&quot;address&quot;</span><span class="token operator">:</span> <span class="token string">&quot;10.254.74.159&quot;</span><span class="token punctuation">,</span>
+        <span class="token property">&quot;port_value&quot;</span><span class="token operator">:</span> <span class="token number">15011</span>
+       <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</li>
+<li><p><strong>filter_chains</strong>&#xFF1A;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x5217;&#x8868;&#xFF0C;Envoy &#x4E2D;&#x5185;&#x7F6E;&#x4E86;&#x4E00;&#x4E9B;&#x901A;&#x7528;&#x7684; filter&#xFF0C;&#x6BCF;&#x79CD; filter &#x90FD;&#x6709;&#x7279;&#x5B9A;&#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF0C;Enovy &#x4F1A;&#x6839;&#x636E;&#x8BE5;&#x914D;&#x7F6E;&#x987A;&#x5E8F;&#x6267;&#x884C; filter&#x3002;Envoy &#x4E2D;&#x5185;&#x7F6E;&#x7684; filter &#x6709;&#xFF1A;<a href="https://www.envoyproxy.io/docs/envoy/v1.8.0/configuration/network_filters/client_ssl_auth_filter#config-network-filters-client-ssl-auth" target="_blank">envoy.client_ssl_auth</a>&#x3001;<a href="https://www.envoyproxy.io/docs/envoy/v1.8.0/configuration/network_filters/echo_filter#config-network-filters-echo" target="_blank">envoy.echo</a>&#x3001;<a href="https://www.envoyproxy.io/docs/envoy/v1.8.0/configuration/http_conn_man/http_conn_man#config-http-conn-man" target="_blank">enovy.http_connection_manager</a>&#x3001;<a href="https://www.envoyproxy.io/docs/envoy/v1.8.0/configuration/network_filters/mongo_proxy_filter#config-network-filters-mongo-proxy" target="_blank">envoy.mongo_proxy</a>&#x3001;<a href="https://www.envoyproxy.io/docs/envoy/v1.8.0/configuration/network_filters/rate_limit_filter#config-network-filters-rate-limit" target="_blank">envoy.rate_limit</a>&#x3001;<a href="https://www.envoyproxy.io/docs/envoy/v1.8.0/configuration/network_filters/redis_proxy_filter#config-network-filters-redis-proxy" target="_blank">enovy.redis_proxy</a>&#x3001;<a href="https://www.envoyproxy.io/docs/envoy/v1.8.0/configuration/network_filters/tcp_proxy_filter#config-network-filters-tcp-proxy" target="_blank">envoy.tcp_proxy</a>&#x3001;<a href="https://www.envoyproxy.io/docs/envoy/v1.8.0/intro/arch_overview/http_filters" target="_blank">http_filters</a>&#x3001;<a href="https://www.envoyproxy.io/docs/envoy/v1.8.0/configuration/thrift_filters/thrift_filters" target="_blank">thrift_filters</a>&#x7B49;&#x3002;&#x8FD9;&#x4E9B; filter &#x53EF;&#x4EE5;&#x5355;&#x72EC;&#x4F7F;&#x7528;&#x4E5F;&#x53EF;&#x4EE5;&#x7EC4;&#x5408;&#x4F7F;&#x7528;&#xFF0C;&#x8FD8;&#x53EF;&#x4EE5;&#x81EA;&#x5B9A;&#x4E49;&#x6269;&#x5C55;&#xFF0C;&#x4F8B;&#x5982;&#x4F7F;&#x7528; Istio &#x4E2D;&#x7684; <a href="https://istio.io/zh/docs/reference/config/istio.networking.v1alpha3/#envoyfilter" target="_blank">EnvoyFilter &#x914D;&#x7F6E;</a>&#x3002;</p>
+</li>
+<li><p><strong>use_original_dst</strong>&#xFF1A;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x5E03;&#x5C14;&#x503C;&#xFF0C;&#x5982;&#x679C;&#x4F7F;&#x7528; iptables &#x91CD;&#x5B9A;&#x5411;&#x8FDE;&#x63A5;&#xFF0C;&#x5219;&#x4EE3;&#x7406;&#x63A5;&#x6536;&#x7684;&#x7AEF;&#x53E3;&#x53EF;&#x80FD;&#x4E0E;<a href="http://www.servicemesher.com/envoy/configuration/listener_filters/original_dst_filter.html" target="_blank">&#x539F;&#x59CB;&#x76EE;&#x7684;&#x5730;&#x5740;</a>&#x7684;&#x7AEF;&#x53E3;&#x4E0D;&#x4E00;&#x6837;&#x3002;&#x5F53;&#x6B64;&#x6807;&#x5FD7;&#x8BBE;&#x7F6E;&#x4E3A; true &#x65F6;&#xFF0C;Listener &#x5C06;&#x91CD;&#x5B9A;&#x5411;&#x7684;&#x8FDE;&#x63A5;&#x5207;&#x6362;&#x5230;&#x4E0E;&#x539F;&#x59CB;&#x76EE;&#x7684;&#x5730;&#x5740;&#x5173;&#x8054;&#x7684; Listener&#x3002;&#x5982;&#x679C;&#x6CA1;&#x6709;&#x4E0E;&#x539F;&#x59CB;&#x76EE;&#x7684;&#x5730;&#x5740;&#x5173;&#x8054;&#x7684; Listener&#xFF0C;&#x5219;&#x8FDE;&#x63A5;&#x7531;&#x63A5;&#x6536;&#x5B83;&#x7684; Listener &#x5904;&#x7406;&#x3002;&#x9ED8;&#x8BA4;&#x4E3A; false&#x3002;&#x6CE8;&#x610F;&#xFF1A;&#x8BE5;&#x53C2;&#x6570;&#x5C06;&#x88AB;&#x5E9F;&#x5F03;&#xFF0C;&#x8BF7;&#x4F7F;&#x7528;<a href="http://www.servicemesher.com/envoy/configuration/listener_filters/original_dst_filter.html" target="_blank">&#x539F;&#x59CB;&#x76EE;&#x7684;&#x5730;&#x5740;</a>&#x7684; Listener filter &#x66FF;&#x4EE3;&#x3002;&#x8BE5;&#x53C2;&#x6570;&#x7684;&#x4E3B;&#x8981;&#x7528;&#x9014;&#x662F;&#xFF0C;Envoy &#x901A;&#x8FC7;&#x76D1;&#x542C; 15001 &#x7AEF;&#x53E3;&#x5C06;&#x5E94;&#x7528;&#x7684;&#x6D41;&#x91CF;&#x622A;&#x53D6;&#x540E;&#x518D;&#x7531;&#x5176;&#x4ED6; Listener &#x5904;&#x7406;&#x800C;&#x4E0D;&#x662F;&#x76F4;&#x63A5;&#x8F6C;&#x53D1;&#x51FA;&#x53BB;&#xFF0C;&#x8BE6;&#x60C5;&#x89C1; <a href="https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/#virtual-listener" target="_blank">Virtual Listener</a>&#x3002;</p>
+</li>
+</ul>
+<p>&#x5173;&#x4E8E; Listener &#x7684;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;&#x8BF7;&#x53C2;&#x8003; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/lds.proto#envoy-api-msg-listener" target="_blank">Envoy v2 API reference - listener</a>&#x3002;</p>
+<h3 id="cluster">Cluster</h3>
+<p>Cluster &#x662F;&#x6307; Envoy &#x8FDE;&#x63A5;&#x7684;&#x4E00;&#x7EC4;&#x903B;&#x8F91;&#x76F8;&#x540C;&#x7684;&#x4E0A;&#x6E38;&#x4E3B;&#x673A;&#x3002;Envoy &#x901A;&#x8FC7;<a href="http://www.servicemesher.com/envoy/intro/arch_overview/service_discovery.html" target="_blank">&#x670D;&#x52A1;&#x53D1;&#x73B0;</a>&#x6765;&#x53D1;&#x73B0; cluster &#x7684;&#x6210;&#x5458;&#x3002;&#x53EF;&#x4EE5;&#x9009;&#x62E9;&#x901A;&#x8FC7;<a href="http://www.servicemesher.com/envoy/intro/arch_overview/health_checking.html#arch-overview-health-checking" target="_blank">&#x4E3B;&#x52A8;&#x5065;&#x5EB7;&#x68C0;&#x67E5;</a>&#x6765;&#x786E;&#x5B9A;&#x96C6;&#x7FA4;&#x6210;&#x5458;&#x7684;&#x5065;&#x5EB7;&#x72B6;&#x6001;&#x3002;Envoy &#x901A;&#x8FC7;<a href="http://www.servicemesher.com/envoy/intro/arch_overview/load_balancing.html#arch-overview-load-balancing" target="_blank">&#x8D1F;&#x8F7D;&#x5747;&#x8861;&#x7B56;&#x7565;</a>&#x51B3;&#x5B9A;&#x5C06;&#x8BF7;&#x6C42;&#x8DEF;&#x7531;&#x5230; cluster &#x7684;&#x54EA;&#x4E2A;&#x6210;&#x5458;&#x3002;</p>
+<p><strong>Cluster &#x7684;&#x7279;&#x70B9;</strong></p>
+<ul>
+<li>&#x4E00;&#x7EC4;&#x903B;&#x8F91;&#x4E0A;&#x76F8;&#x540C;&#x7684;&#x4E3B;&#x673A;&#x6784;&#x6210;&#x4E00;&#x4E2A; cluster&#x3002;</li>
+<li>&#x53EF;&#x4EE5;&#x5728; cluster &#x4E2D;&#x5B9A;&#x4E49;&#x5404;&#x79CD;&#x8D1F;&#x8F7D;&#x5747;&#x8861;&#x7B56;&#x7565;&#x3002;</li>
+<li>&#x65B0;&#x52A0;&#x5165;&#x7684; cluster &#x9700;&#x8981;&#x4E00;&#x4E2A;&#x70ED;&#x8EAB;&#x7684;&#x8FC7;&#x7A0B;&#x624D;&#x53EF;&#x4EE5;&#x7ED9;&#x8DEF;&#x7531;&#x5F15;&#x7528;&#xFF0C;&#x8BE5;&#x8FC7;&#x7A0B;&#x662F;&#x539F;&#x5B50;&#x7684;&#xFF0C;&#x5373;&#x5728; cluster &#x70ED;&#x8EAB;&#x4E4B;&#x524D;&#x5BF9;&#x4E8E; Envoy &#x53CA; Service Mesh &#x7684;&#x5176;&#x4F59;&#x90E8;&#x5206;&#x6765;&#x8BF4;&#x662F;&#x4E0D;&#x53EF;&#x89C1;&#x7684;&#x3002;</li>
+<li>&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x591A;&#x79CD;&#x65B9;&#x5F0F;&#x6765;&#x914D;&#x7F6E; cluster&#xFF0C;&#x4F8B;&#x5982;&#x9759;&#x6001;&#x7C7B;&#x578B;&#x3001;&#x4E25;&#x683C;&#x9650;&#x5B9A; DNS&#x3001;&#x903B;&#x8F91; DNS&#x3001;EDS &#x7B49;&#x3002;</li>
+</ul>
+<p><strong>Cluster &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;</strong></p>
+<p>Cluster &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x5982;&#x4E0B;&#xFF0C;&#x9664;&#x4E86; <code>name</code> &#x5B57;&#x6BB5;&#xFF0C;&#x5176;&#x4ED6;&#x90FD;&#x662F;&#x53EF;&#x9009;&#x7684;&#x3002;</p>
+<pre class="language-"><code class="lang-json"><span class="token punctuation">{</span>
+  <span class="token property">&quot;name&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;alt_stat_name&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;type&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;eds_cluster_config&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;connect_timeout&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;per_connection_buffer_limit_bytes&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;lb_policy&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;hosts&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;load_assignment&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;health_checks&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;max_requests_per_connection&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;circuit_breakers&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;tls_context&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;common_http_protocol_options&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;http_protocol_options&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;http2_protocol_options&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;extension_protocol_options&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;dns_refresh_rate&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;dns_lookup_family&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;dns_resolvers&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;outlier_detection&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;cleanup_interval&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;upstream_bind_config&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;lb_subset_config&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;ring_hash_lb_config&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;original_dst_lb_config&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;least_request_lb_config&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;common_lb_config&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;transport_socket&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;metadata&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;protocol_selection&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;upstream_connection_options&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;close_connections_on_host_health_failure&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;drain_connections_on_host_removal&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x4E0B;&#x9762;&#x662F;&#x5173;&#x4E8E;&#x4E0A;&#x8FF0;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x4E2D;&#x7684;&#x5E38;&#x7528;&#x914D;&#x7F6E;&#x89E3;&#x6790;&#x3002;</p>
+<ul>
+<li><strong>name</strong>&#xFF1A;&#x5982;&#x679C;&#x4F60;&#x7559;&#x610F;&#x5230;&#x4F5C;&#x4E3A; Sidecar &#x542F;&#x52A8;&#x7684; Envoy &#x7684;&#x53C2;&#x6570;&#x7684;&#x4F1A;&#x6CE8;&#x610F;&#x5230; <code>--max-obj-name-len 189</code>&#xFF0C;&#x8BE5;&#x9009;&#x9879;&#x7528;&#x6765;&#x7528;&#x6765;&#x6307;&#x5B9A; cluster &#x7684;&#x540D;&#x5B57;&#xFF0C;&#x4F8B;&#x5982; <code>inbound|9080||ratings.default.svc.cluster.local</code>&#x3002;&#x8BE5;&#x540D;&#x5B57;&#x5B57;&#x7B26;&#x4E32;&#x7531; <code>|</code> &#x5206;&#x9694;&#x6210;&#x56DB;&#x4E2A;&#x90E8;&#x5206;&#xFF0C;&#x5206;&#x522B;&#x662F; <code>inbound</code> &#x6216; <code>outbound</code> &#x4EE3;&#x8868;&#x5165;&#x5411;&#x6D41;&#x91CF;&#x6216;&#x51FA;&#x5411;&#x6D41;&#x91CF;&#x3001;&#x7AEF;&#x53E3;&#x53F7;&#x3001;subcluster &#x540D;&#x79F0;&#x3001;FQDN&#xFF0C;&#x5176;&#x4E2D; subcluster &#x540D;&#x79F0;&#x5C06;&#x5BF9;&#x5E94;&#x4E8E; Istio <code>DestinationRule</code> &#x4E2D;&#x914D;&#x7F6E;&#x7684; <code>subnet</code>&#xFF0C;&#x5982;&#x679C;&#x662F;&#x6309;&#x7167;&#x591A;&#x7248;&#x672C;&#x6309;&#x6BD4;&#x4F8B;&#x8DEF;&#x7531;&#x7684;&#x8BDD;&#xFF0C;&#x8BE5;&#x503C;&#x53EF;&#x4EE5;&#x662F;&#x7248;&#x672C;&#x53F7;&#x3002;</li>
+<li><strong>type</strong>&#xFF1A;&#x5373;<a href="https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/service_discovery#arch-overview-service-discovery-types" target="_blank">&#x670D;&#x52A1;&#x53D1;&#x73B0;&#x7C7B;&#x578B;</a>&#xFF0C;&#x652F;&#x6301;&#x7684;&#x53C2;&#x6570;&#x6709; <code>STATIC</code>&#xFF08;&#x7F3A;&#x7701;&#x503C;&#xFF09;&#x3001;<code>STRICT_DNS</code>&#x3001;<code>LOGICAL_DNS</code>&#x3001;<code>EDS</code>&#x3001;<code>ORIGINAL_DST</code>&#x3002;</li>
+<li><strong>hosts</strong>&#xFF1A;&#x8FD9;&#x662F;&#x4E2A;&#x5217;&#x8868;&#xFF0C;&#x914D;&#x7F6E;&#x8D1F;&#x8F7D;&#x5747;&#x8861;&#x7684; IP &#x5730;&#x5740;&#x548C;&#x7AEF;&#x53E3;&#xFF0C;&#x53EA;&#x6709;&#x4F7F;&#x7528;&#x4E86;  <code>STATIC</code>&#x3001;<code>STRICT_DNS</code>&#x3001;<code>LOGICAL_DNS</code> &#x670D;&#x52A1;&#x53D1;&#x73B0;&#x7C7B;&#x578B;&#x65F6;&#x624D;&#x9700;&#x8981;&#x914D;&#x7F6E;&#x3002;</li>
+<li><strong>eds_cluster_config</strong>&#xFF1A;&#x5982;&#x679C;&#x4F7F;&#x7528; <code>EDS</code> &#x505A;&#x670D;&#x52A1;&#x53D1;&#x73B0;&#xFF0C;&#x5219;&#x9700;&#x8981;&#x914D;&#x7F6E;&#x8BE5;&#x9879;&#x76EE;&#xFF0C;&#x5176;&#x4E2D;&#x5305;&#x62EC;&#x7684;&#x914D;&#x7F6E;&#x6709; <code>service_name</code> &#x548C; <code>ads</code>&#x3002;</li>
+</ul>
+<p>&#x5173;&#x4E8E; Cluster &#x7684;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;&#x8BF7;&#x53C2;&#x8003; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/cds.proto#cluster" target="_blank">Envoy v2 API reference - cluster</a>&#x3002;</p>
+<h3 id="route">Route</h3>
+<p>&#x6211;&#x4EEC;&#x5728;&#x8FD9;&#x91CC;&#x6240;&#x8BF4;&#x7684;&#x8DEF;&#x7531;&#x6307;&#x7684;&#x662F; <a href="http://www.servicemesher.com/envoy/intro/arch_overview/http_routing.html" target="_blank">HTTP &#x8DEF;&#x7531;</a>&#xFF0C;&#x8FD9;&#x4E5F;&#x4F7F;&#x5F97; Envoy &#x53EF;&#x4EE5;&#x7528;&#x6765;&#x5904;&#x7406;&#x7F51;&#x683C;&#x8FB9;&#x7F18;&#x7684;&#x6D41;&#x91CF;&#x3002;HTTP &#x8DEF;&#x7531;&#x8F6C;&#x53D1;&#x662F;&#x901A;&#x8FC7;&#x8DEF;&#x7531;&#x8FC7;&#x6EE4;&#x5668;&#x5B9E;&#x73B0;&#x7684;&#x3002;&#x8BE5;&#x8FC7;&#x6EE4;&#x5668;&#x7684;&#x4E3B;&#x8981;&#x804C;&#x80FD;&#x5C31;&#x662F;&#x6267;&#x884C;<a href="https://www.envoyproxy.io/docs/envoy/latest/api-v1/route_config/route_config#config-http-conn-man-route-table" target="_blank">&#x8DEF;&#x7531;&#x8868;</a>&#x4E2D;&#x7684;&#x6307;&#x4EE4;&#x3002;&#x9664;&#x4E86;&#x53EF;&#x4EE5;&#x505A;&#x91CD;&#x5B9A;&#x5411;&#x548C;&#x8F6C;&#x53D1;&#xFF0C;&#x8DEF;&#x7531;&#x8FC7;&#x6EE4;&#x5668;&#x8FD8;&#x9700;&#x8981;&#x5904;&#x7406;&#x91CD;&#x8BD5;&#x3001;&#x7EDF;&#x8BA1;&#x4E4B;&#x7C7B;&#x7684;&#x4EFB;&#x52A1;&#x3002;</p>
+<p><strong>HTTP &#x8DEF;&#x7531;&#x7684;&#x7279;&#x70B9;</strong></p>
+<ul>
+<li>&#x524D;&#x7F00;&#x548C;&#x7CBE;&#x786E;&#x8DEF;&#x5F84;&#x5339;&#x914D;&#x89C4;&#x5219;&#x3002;</li>
+<li>&#x53EF;&#x8DE8;&#x8D8A;&#x591A;&#x4E2A;&#x4E0A;&#x6E38;&#x96C6;&#x7FA4;&#x8FDB;&#x884C;&#x57FA;&#x4E8E;<a href="https://www.envoyproxy.io/docs/envoy/latest/api-v1/route_config/route#config-http-conn-man-route-table-route-weighted-clusters" target="_blank">&#x6743;&#x91CD;/&#x767E;&#x5206;&#x6BD4;&#x7684;&#x8DEF;&#x7531;</a>&#x3002;</li>
+<li>&#x57FA;&#x4E8E;<a href="http://www.servicemesher.com/envoy/intro/arch_overview/http_routing.html#arch-overview-http-routing-priority" target="_blank">&#x4F18;&#x5148;&#x7EA7;</a>&#x7684;&#x8DEF;&#x7531;&#x3002;</li>
+<li>&#x57FA;&#x4E8E;<a href="https://www.envoyproxy.io/docs/envoy/latest/api-v1/route_config/route#config-http-conn-man-route-table-hash-policy" target="_blank">&#x54C8;&#x5E0C;</a>&#x7B56;&#x7565;&#x7684;&#x8DEF;&#x7531;&#x3002;</li>
+</ul>
+<p><strong>Route &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;</strong></p>
+<pre class="language-"><code class="lang-json"><span class="token punctuation">{</span>
+  <span class="token property">&quot;name&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;virtual_hosts&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;internal_only_headers&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;response_headers_to_add&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;response_headers_to_remove&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;request_headers_to_add&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;request_headers_to_remove&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;validate_clusters&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x4E0B;&#x9762;&#x662F;&#x5173;&#x4E8E;&#x4E0A;&#x8FF0;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x4E2D;&#x7684;&#x5E38;&#x7528;&#x914D;&#x7F6E;&#x89E3;&#x6790;&#x3002;</p>
+<ul>
+<li><strong>name</strong>&#xFF1A;&#x8BE5;&#x540D;&#x5B57;&#x8DDF; <code>envoy.http_connection_manager</code> filter &#x4E2D;&#x7684; <code>http_filters.rds.route_config_name</code> &#x4E00;&#x81F4;&#xFF0C;&#x5728; Istio Service Mesh &#x4E2D;&#x4E3A; Envoy &#x4E0B;&#x53D1;&#x7684;&#x914D;&#x7F6E;&#x4E2D;&#x7684; Route &#x662F;&#x4EE5;&#x76D1;&#x542C;&#x7684;&#x7AEF;&#x53E3;&#x53F7;&#x4F5C;&#x4E3A;&#x540D;&#x5B57;&#xFF0C;&#x800C;&#x540C;&#x4E00;&#x4E2A;&#x540D;&#x5B57;&#x4E0B;&#x9762;&#x7684; <code>virtual_hosts</code> &#x53EF;&#x4EE5;&#x6709;&#x591A;&#x4E2A;&#x503C;&#xFF08;&#x6570;&#x7EC4;&#x5F62;&#x5F0F;&#xFF09;&#x3002;</li>
+<li><strong>virtual_hosts</strong>&#xFF1A;&#x56E0;&#x4E3A; <strong>VirtualHosts</strong> &#x662F; Envoy &#x4E2D;&#x5F15;&#x5165;&#x7684;&#x4E00;&#x4E2A;&#x91CD;&#x8981;&#x6982;&#x5FF5;&#xFF0C;&#x6211;&#x4EEC;&#x5728;&#x4E0B;&#x6587;&#x5C06;&#x8BE6;&#x7EC6;&#x8BF4;&#x660E; <code>virtual_hosts</code> &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x3002;</li>
+<li><strong>validate_clusters</strong>&#xFF1A;&#x8FD9;&#x662F;&#x4E00;&#x4E2A;&#x5E03;&#x5C14;&#x503C;&#xFF0C;&#x7528;&#x6765;&#x8BBE;&#x7F6E;&#x5F00;&#x542F;&#x4F7F;&#x7528; cluster manager &#x6765;&#x68C0;&#x6D4B;&#x8DEF;&#x7531;&#x8868;&#x5F15;&#x7528;&#x7684; cluster &#x662F;&#x5426;&#x6709;&#x6548;&#x3002;&#x5982;&#x679C;&#x662F;&#x8DEF;&#x7531;&#x8868;&#x662F;&#x901A;&#x8FC7; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/network/http_connection_manager/v2/http_connection_manager.proto#envoy-api-field-config-filter-network-http-connection-manager-v2-httpconnectionmanager-route-config" target="_blank">route_config</a> &#x9759;&#x6001;&#x914D;&#x7F6E;&#x7684;&#x5219;&#x8BE5;&#x503C;&#x9ED8;&#x8BA4;&#x8BBE;&#x7F6E;&#x4E3A; true&#xFF0C;&#x5982;&#x679C;&#x662F;&#x4F7F;&#x7528; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/network/http_connection_manager/v2/http_connection_manager.proto#envoy-api-field-config-filter-network-http-connection-manager-v2-httpconnectionmanager-rds" target="_blank">rds</a> &#x52A8;&#x6001;&#x914D;&#x7F6E;&#x7684;&#x8BDD;&#xFF0C;&#x5219;&#x8BE5;&#x503C;&#x9ED8;&#x8BA4;&#x8BBE;&#x7F6E;&#x4E3A; false&#x3002;</li>
+</ul>
+<p>&#x5173;&#x4E8E; Route &#x7684;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;&#x8BF7;&#x53C2;&#x8003; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/rds.proto" target="_blank">Envoy v2 API reference - HTTP route configuration</a>&#x3002;</p>
+<h4 id="routevirtualhost">route.VirtualHost</h4>
+<p>VirtualHost &#x5373;&#x4E0A;&#x6587;&#x4E2D; Route &#x914D;&#x7F6E;&#x4E2D;&#x7684; <code>virtual_hosts</code>&#xFF0C;VirtualHost &#x662F;&#x8DEF;&#x7531;&#x914D;&#x7F6E;&#x4E2D;&#x7684;&#x9876;&#x7EA7;&#x5143;&#x7D20;&#x3002;&#x6BCF;&#x4E2A;&#x865A;&#x62DF;&#x4E3B;&#x673A;&#x90FD;&#x6709;&#x4E00;&#x4E2A;&#x903B;&#x8F91;&#x540D;&#x79F0;&#x4EE5;&#x53CA;&#x4E00;&#x7EC4;&#x6839;&#x636E;&#x4F20;&#x5165;&#x8BF7;&#x6C42;&#x7684; host header &#x8DEF;&#x7531;&#x5230;&#x5B83;&#x7684;&#x57DF;&#x3002;&#x8FD9;&#x5141;&#x8BB8;&#x5355;&#x4E2A; Listener &#x4E3A;&#x591A;&#x4E2A;&#x9876;&#x7EA7;&#x57DF;&#x8DEF;&#x5F84;&#x6811;&#x63D0;&#x4F9B;&#x670D;&#x52A1;&#x3002;&#x57FA;&#x4E8E;&#x57DF;&#x9009;&#x62E9;&#x4E86;&#x865A;&#x62DF;&#x4E3B;&#x673A;&#x540E; Envoy  &#x5C31;&#x4F1A;&#x5904;&#x7406;&#x8DEF;&#x7531;&#x4EE5;&#x67E5;&#x770B;&#x8981;&#x8DEF;&#x7531;&#x5230;&#x54EA;&#x4E2A;&#x4E0A;&#x6E38;&#x96C6;&#x7FA4;&#x6216;&#x662F;&#x5426;&#x6267;&#x884C;&#x91CD;&#x5B9A;&#x5411;&#x3002;</p>
+<p><strong>VirtualHost &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;</strong></p>
+<p>&#x4E0B;&#x9762;&#x662F; VirtualHost &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF0C;&#x9664;&#x4E86; <code>name</code> &#x548C; <code>domains</code> &#x662F;&#x5FC5;&#x987B;&#x914D;&#x7F6E;&#x9879;&#x5916;&#xFF0C;&#x5176;&#x4ED6;&#x7686;&#x4E3A;&#x53EF;&#x9009;&#x9879;&#x3002;</p>
+<pre class="language-"><code class="lang-json"><span class="token punctuation">{</span>
+  <span class="token property">&quot;name&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;domains&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;routes&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;require_tls&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;virtual_clusters&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;rate_limits&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;request_headers_to_add&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;request_headers_to_remove&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;response_headers_to_add&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;response_headers_to_remove&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;cors&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;per_filter_config&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;include_request_attempt_count&quot;</span><span class="token operator">:</span> <span class="token string">&quot;...&quot;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x4E0B;&#x9762;&#x662F;&#x5173;&#x4E8E;&#x4E0A;&#x8FF0;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x4E2D;&#x7684;&#x5E38;&#x7528;&#x914D;&#x7F6E;&#x89E3;&#x6790;&#x3002;</p>
+<ul>
+<li><strong>name</strong>&#xFF1A;&#x8BE5; VirtualHost &#x7684;&#x540D;&#x5B57;&#xFF0C;&#x4E00;&#x822C;&#x662F; FQDN &#x52A0;&#x7AEF;&#x53E3;&#xFF0C;&#x5982; <code>details.default.svc.cluster.local:9080</code>&#x3002;</li>
+<li><strong>domains</strong>&#xFF1A;&#x8FD9;&#x662F;&#x4E2A;&#x7528;&#x6765;&#x5339;&#x914D; VirtualHost &#x7684;&#x57DF;&#x540D;&#xFF08;host/authority header&#xFF09;&#x5217;&#x8868;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x901A;&#x914D;&#x7B26;&#xFF0C;&#x4F46;&#x662F;&#x901A;&#x914D;&#x7B26;&#x4E0D;&#x80FD;&#x5339;&#x914D;&#x7A7A;&#x5B57;&#x7B26;&#xFF0C;&#x9664;&#x4E86;&#x4EC5;&#x4F7F;&#x7528; <code>*</code> &#x4F5C;&#x4E3A; domains&#xFF0C;&#x6CE8;&#x610F;&#x5217;&#x8868;&#x4E2D;&#x7684;&#x503C;&#x4E0D;&#x80FD;&#x91CD;&#x590D;&#x548C;&#x5B58;&#x5728;&#x4EA4;&#x96C6;&#xFF0C;&#x53EA;&#x8981;&#x6709;&#x4E00;&#x6761; domain &#x88AB;&#x5339;&#x914D;&#x4E0A;&#x4E86;&#xFF0C;&#x5C31;&#x4F1A;&#x6267;&#x884C;&#x8DEF;&#x7531;&#x3002;Istio &#x4F1A;&#x4E3A;&#x8BE5;&#x503C;&#x914D;&#x7F6E;&#x6240;&#x6709;&#x5730;&#x5740;&#x89E3;&#x6790;&#x5F62;&#x5F0F;&#xFF0C;&#x5305;&#x62EC; IP &#x5730;&#x5740;&#x3001;FQDN &#x548C;&#x77ED;&#x57DF;&#x540D;&#x7B49;&#x3002;</li>
+<li><strong>routes</strong>&#xFF1A;&#x9488;&#x5BF9;&#x5165;&#x53E3;&#x6D41;&#x91CF;&#x7684;&#x6709;&#x5E8F;&#x8DEF;&#x7531;&#x5217;&#x8868;&#xFF0C;&#x7B2C;&#x4E00;&#x4E2A;&#x5339;&#x914D;&#x4E0A;&#x7684;&#x8DEF;&#x7531;&#x5C06;&#x88AB;&#x6267;&#x884C;&#x3002;&#x6211;&#x4EEC;&#x5728;&#x4E0B;&#x6587;&#x5C06;&#x8BE6;&#x7EC6;&#x8BF4;&#x660E; route &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x3002;</li>
+</ul>
+<p>&#x4E0B;&#x9762;&#x662F;&#x4E00;&#x4E2A;&#x5B9E;&#x9645;&#x7684; VirtualHost &#x7684;&#x4F8B;&#x5B50;&#xFF0C;&#x8BE5;&#x914D;&#x7F6E;&#x6765;&#x81EA; <a href="https://istio.io/zh/docs/examples/bookinfo/" target="_blank">Bookinfo &#x5E94;&#x7528;</a>&#x7684; details &#x5E94;&#x7528;&#x7684; Sidecar &#x670D;&#x52A1;&#x3002;</p>
+<pre class="language-"><code class="lang-json"><span class="token punctuation">{</span>
+            <span class="token property">&quot;name&quot;</span><span class="token operator">:</span> <span class="token string">&quot;details.default.svc.cluster.local:9080&quot;</span><span class="token punctuation">,</span>
+            <span class="token property">&quot;domains&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                <span class="token string">&quot;details.default.svc.cluster.local&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;details.default.svc.cluster.local:9080&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;details&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;details:9080&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;details.default.svc.cluster&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;details.default.svc.cluster:9080&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;details.default.svc&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;details.default.svc:9080&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;details.default&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;details.default:9080&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;10.254.4.113&quot;</span><span class="token punctuation">,</span>
+                <span class="token string">&quot;10.254.4.113:9080&quot;</span>
+            <span class="token punctuation">]</span><span class="token punctuation">,</span>
+            <span class="token property">&quot;routes&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">{</span>
+                    <span class="token property">&quot;match&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                        <span class="token property">&quot;prefix&quot;</span><span class="token operator">:</span> <span class="token string">&quot;/&quot;</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                    <span class="token property">&quot;route&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                        <span class="token property">&quot;cluster&quot;</span><span class="token operator">:</span> <span class="token string">&quot;outbound|9080||details.default.svc.cluster.local&quot;</span><span class="token punctuation">,</span>
+                        <span class="token property">&quot;timeout&quot;</span><span class="token operator">:</span> <span class="token string">&quot;0s&quot;</span><span class="token punctuation">,</span>
+                        <span class="token property">&quot;max_grpc_timeout&quot;</span><span class="token operator">:</span> <span class="token string">&quot;0s&quot;</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                    <span class="token property">&quot;decorator&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                        <span class="token property">&quot;operation&quot;</span><span class="token operator">:</span> <span class="token string">&quot;details.default.svc.cluster.local:9080/*&quot;</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                    <span class="token property">&quot;per_filter_config&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                        <span class="token property">&quot;mixer&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                            <span class="token property">&quot;forward_attributes&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                <span class="token property">&quot;attributes&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                    <span class="token property">&quot;destination.service.uid&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                        <span class="token property">&quot;string_value&quot;</span><span class="token operator">:</span> <span class="token string">&quot;istio://default/services/details&quot;</span>
+                                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                                    <span class="token property">&quot;destination.service.host&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                        <span class="token property">&quot;string_value&quot;</span><span class="token operator">:</span> <span class="token string">&quot;details.default.svc.cluster.local&quot;</span>
+                                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                                    <span class="token property">&quot;destination.service.namespace&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                        <span class="token property">&quot;string_value&quot;</span><span class="token operator">:</span> <span class="token string">&quot;default&quot;</span>
+                                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                                    <span class="token property">&quot;destination.service.name&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                        <span class="token property">&quot;string_value&quot;</span><span class="token operator">:</span> <span class="token string">&quot;details&quot;</span>
+                                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                                    <span class="token property">&quot;destination.service&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                        <span class="token property">&quot;string_value&quot;</span><span class="token operator">:</span> <span class="token string">&quot;details.default.svc.cluster.local&quot;</span>
+                                    <span class="token punctuation">}</span>
+                                <span class="token punctuation">}</span>
+                            <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                            <span class="token property">&quot;mixer_attributes&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                <span class="token property">&quot;attributes&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                    <span class="token property">&quot;destination.service.host&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                        <span class="token property">&quot;string_value&quot;</span><span class="token operator">:</span> <span class="token string">&quot;details.default.svc.cluster.local&quot;</span>
+                                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                                    <span class="token property">&quot;destination.service.uid&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                        <span class="token property">&quot;string_value&quot;</span><span class="token operator">:</span> <span class="token string">&quot;istio://default/services/details&quot;</span>
+                                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                                    <span class="token property">&quot;destination.service.name&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                        <span class="token property">&quot;string_value&quot;</span><span class="token operator">:</span> <span class="token string">&quot;details&quot;</span>
+                                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                                    <span class="token property">&quot;destination.service.namespace&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                        <span class="token property">&quot;string_value&quot;</span><span class="token operator">:</span> <span class="token string">&quot;default&quot;</span>
+                                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                                    <span class="token property">&quot;destination.service&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                                        <span class="token property">&quot;string_value&quot;</span><span class="token operator">:</span> <span class="token string">&quot;details.default.svc.cluster.local&quot;</span>
+                                    <span class="token punctuation">}</span>
+                                <span class="token punctuation">}</span>
+                            <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                            <span class="token property">&quot;disable_check_calls&quot;</span><span class="token operator">:</span> <span class="token boolean">true</span>
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">]</span>
+        <span class="token punctuation">}</span>
+</code></pre>
+<p>&#x5173;&#x4E8E; route.VirtualHost &#x7684;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;&#x8BF7;&#x53C2;&#x8003; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/route/route.proto#envoy-api-msg-route-virtualhost" target="_blank">Envoy v2 API reference - route.VirtualHost</a>&#x3002;</p>
+<h4 id="routeroute">route.Route</h4>
+<p>&#x8DEF;&#x7531;&#x65E2;&#x662F;&#x5982;&#x4F55;&#x5339;&#x914D;&#x8BF7;&#x6C42;&#x7684;&#x89C4;&#x8303;&#xFF0C;&#x4E5F;&#x662F;&#x5BF9;&#x4E0B;&#x4E00;&#x6B65;&#x505A;&#x4EC0;&#x4E48;&#x7684;&#x6307;&#x793A;&#xFF08;&#x4F8B;&#x5982;&#xFF0C;redirect&#x3001;forward&#x3001;rewrite&#x7B49;&#xFF09;&#x3002;</p>
+<p><strong>route.Route &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;</strong></p>
+<p>&#x4E0B;&#x9762;&#x662F;&#x662F; route.Route &#x7684;&#x6570;&#x636E;&#x7ED3;&#x6784;&#xFF0C;&#x9664;&#x4E86; <code>match</code> &#x4E4B;&#x5916;&#x5176;&#x4F59;&#x90FD;&#x662F;&#x53EF;&#x9009;&#x7684;&#x3002;</p>
+<pre class="language-"><code class="lang-json"><span class="token punctuation">{</span>
+  <span class="token property">&quot;match&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;route&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;redirect&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;direct_response&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;metadata&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;decorator&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;per_filter_config&quot;</span><span class="token operator">:</span> <span class="token string">&quot;{...}&quot;</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;request_headers_to_add&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;request_headers_to_remove&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;response_headers_to_add&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">&quot;response_headers_to_remove&quot;</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>&#x4E0B;&#x9762;&#x662F;&#x5173;&#x4E8E;&#x4E0A;&#x8FF0;&#x6570;&#x636E;&#x7ED3;&#x6784;&#x4E2D;&#x7684;&#x5E38;&#x7528;&#x914D;&#x7F6E;&#x89E3;&#x6790;&#x3002;</p>
+<ul>
+<li><strong>match</strong>&#xFF1A;&#x8DEF;&#x7531;&#x5339;&#x914D;&#x53C2;&#x6570;&#x3002;&#x4F8B;&#x5982; URL prefix&#xFF08;&#x524D;&#x7F00;&#xFF09;&#x3001;path&#xFF08;URL &#x7684;&#x5B8C;&#x6574;&#x8DEF;&#x5F84;&#xFF09;&#x3001;regex&#xFF08;&#x89C4;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#xFF09;&#x7B49;&#x3002;</li>
+<li><strong>route</strong>&#xFF1A;&#x8FD9;&#x91CC;&#x9762;&#x914D;&#x7F6E;&#x8DEF;&#x7531;&#x7684;&#x884C;&#x4E3A;&#xFF0C;&#x53EF;&#x4EE5;&#x662F; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/route/route.proto#envoy-api-field-route-route-route" target="_blank">route</a>&#x3001;<a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/route/route.proto#envoy-api-field-route-route-redirect" target="_blank">redirect</a> &#x548C; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/route/route.proto#envoy-api-field-route-route-direct-response" target="_blank">direct_response</a>&#xFF0C;&#x4E0D;&#x8FC7;&#x8FD9;&#x91CC;&#x9762;&#x6CA1;&#x6709;&#x4E13;&#x95E8;&#x7684;&#x4E00;&#x4E2A;&#x914D;&#x7F6E;&#x9879;&#x7528;&#x6765;&#x914D;&#x7F6E;&#x4EE5;&#x4E0A;&#x4E09;&#x79CD;&#x884C;&#x4E3A;&#xFF0C;&#x800C;&#x662F;&#x6839;&#x636E;&#x5B9E;&#x9645;&#x586B;&#x5145;&#x7684;&#x914D;&#x7F6E;&#x9879;&#x6765;&#x786E;&#x5B9A;&#x7684;&#x3002;&#x4F8B;&#x5982;&#x5728;&#x6B64;&#x5904;&#x6DFB;&#x52A0; <code>cluster</code> &#x914D;&#x7F6E;&#x5219;&#x6697;&#x793A;&#x8DEF;&#x7531;&#x52A8;&#x4F5C;&#x4E3A;&#x201D;route&#x201C;&#xFF0C;&#x8868;&#x793A;&#x5C06;&#x6D41;&#x91CF;&#x8DEF;&#x7531;&#x5230;&#x8BE5; cluster&#x3002;&#x8BE6;&#x60C5;&#x8BF7;&#x53C2;&#x8003; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/route/route.proto#route-routeaction" target="_blank">route.RouteAction</a>&#x3002;</li>
+<li><strong>decorator</strong>&#xFF1A;&#x88AB;&#x5339;&#x914D;&#x7684;&#x8DEF;&#x7531;&#x7684;&#x4FEE;&#x9970;&#x7B26;&#xFF0C;&#x8868;&#x793A;&#x88AB;&#x5339;&#x914D;&#x7684;&#x865A;&#x62DF;&#x4E3B;&#x673A;&#x548C; URL&#x3002;&#x8BE5;&#x914D;&#x7F6E;&#x91CC;&#x6709;&#x4E14;&#x53EA;&#x6709;&#x4E00;&#x4E2A;&#x5FC5;&#x987B;&#x914D;&#x7F6E;&#x7684;&#x9879; <code>operation</code>&#xFF0C;&#x4F8B;&#x5982; <code>details.default.svc.cluster.local:9080/*</code>&#x3002;</li>
+<li><strong>per_filter_config</strong>&#xFF1A;&#x8FD9;&#x662F;&#x4E00;&#x4E2A; map &#x7C7B;&#x578B;&#xFF0C;<code>per_filter_config</code> &#x5B57;&#x6BB5;&#x53EF;&#x7528;&#x4E8E;&#x4E3A; filter &#x63D0;&#x4F9B;&#x7279;&#x5B9A;&#x8DEF;&#x7531;&#x7684;&#x914D;&#x7F6E;&#x3002;Map &#x7684; key &#x5E94;&#x4E0E; filleter &#x540D;&#x79F0;&#x5339;&#x914D;&#xFF0C;&#x4F8B;&#x5982;&#x7528;&#x4E8E; HTTP buffer filter &#x7684; <code>envoy.buffer</code>&#x3002;&#x8BE5;&#x5B57;&#x6BB5;&#x662F;&#x7279;&#x5B9A;&#x4E8E; filter &#x7684;&#xFF0C;&#x8BE6;&#x60C5;&#x8BF7;&#x53C2;&#x8003; <a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/http_filters/http_filters#config-http-filters" target="_blank">HTTP filter</a>&#x3002;</li>
+</ul>
+<p>&#x5173;&#x4E8E; route.Route &#x7684;&#x8BE6;&#x7EC6;&#x4ECB;&#x7ECD;&#x8BF7;&#x53C2;&#x8003; <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/route/route.proto#envoy-api-msg-route-route" target="_blank">Envoy v2 API reference - route.Route</a>&#x3002;</p>
+<h2 id="&#x53C2;&#x8003;">&#x53C2;&#x8003;</h2>
+<ul>
+<li><a href="http://www.servicemesher.com/envoy/configuration/overview/v2_overview.html" target="_blank">Envoy v2 API &#x6982;&#x89C8; - servicemesher.com</a></li>
+<li><a href="http://www.servicemesher.com/envoy/configuration/listeners/lds.html" target="_blank">&#x76D1;&#x542C;&#x5668;&#x53D1;&#x73B0;&#x670D;&#x52A1;&#xFF08;LDS&#xFF09;- servicemesher.com</a></li>
+<li><a href="http://www.servicemesher.com/envoy/configuration/http_conn_man/rds.html" target="_blank">&#x8DEF;&#x7531;&#x53D1;&#x73B0;&#x670D;&#x52A1;&#xFF08;RDS&#xFF09;- servicemesher.com</a></li>
+<li><a href="http://www.servicemesher.com/envoy/configuration/cluster_manager/cds.html" target="_blank">&#x96C6;&#x7FA4;&#x53D1;&#x73B0;&#x670D;&#x52A1;&#xFF08;CDS&#xFF09;- servicemesher.com</a> </li>
+</ul>
+<footer class="page-footer"><span class="copyright"><p><a href="https://ws1.sinaimg.cn/large/006tNbRwly1fw3l1sxoijj304g0563z7.jpg" data-lightbox="2fd927ee-fa64-4eca-8ed5-6bd72b573a3c" target="_blank">&#x70B9;&#x51FB;&#x5173;&#x6CE8;&#x3010;ServiceMesher&#x3011; &#x5FAE;&#x4FE1;&#x516C;&#x4F17;&#x53F7;&#x56DE;&#x590D;&#x3010;&#x52A0;&#x7FA4;&#x3011;&#x52A0;&#x5165;&#x793E;&#x533A;</a></p>Copyright &#xA9; <a href="http://www.servicemesher.com" target="_blank">servicemesher.com</a> 2018-2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification"> Updated at 
+2019-03-12 11:55:52
+</span></footer></body></html>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="istio-sidecar-proxy-config.html" class="navigation navigation-prev " aria-label="Previous page: Istio sidecar proxy 配置">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="envoy-api.html" class="navigation navigation-next " aria-label="Next page: Envoy API">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"owners":["rootsongjc"],"reviewers":[""],"description":"本文详解了 Envoy proxy 的配置。","publishDate":"2019-03-10T00:00:00.000Z","updateDate":"2019-03-10T00:00:00.000Z","tags":["envoy"],"category":"original","title":"Envoy proxy 配置详解","level":"3.4","depth":1,"next":{"title":"Envoy API","level":"3.5","depth":1,"path":"data-plane/envoy-api.md","ref":"data-plane/envoy-api.md","articles":[]},"previous":{"title":"Istio sidecar proxy 配置","level":"3.3","depth":1,"path":"data-plane/istio-sidecar-proxy-config.md","ref":"data-plane/istio-sidecar-proxy-config.md","articles":[]},"dir":"ltr"},"config":{"plugins":["github","codesnippet","splitter","page-toc-button","image-captions","editlink","back-to-top-button","-lunr","-search","search-plus","github-buttons@2.1.0","favicon@^0.0.2","tbfed-pagefooter@^0.0.1","3-ba","theme-default","-highlight","prism","prism-themes","sitemap-general","lightbox","ga"],"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"<p><a href=https://ws1.sinaimg.cn/large/006tNbRwly1fw3l1sxoijj304g0563z7.jpg data-lightbox=2fd927ee-fa64-4eca-8ed5-6bd72b573a3c>点击关注【ServiceMesher】 微信公众号回复【加群】加入社区</a></p>Copyright © <a href=http://www.servicemesher.com>servicemesher.com</a> 2018-2019","modify_label":" Updated at ","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{"css":["prism-themes/themes/prism-ghcolors.css"]},"github":{"url":"https://github.com/servicemesher/istio-handbook"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/servicemesher/istio-handbook/blob/master/"},"splitter":{},"codesnippet":{},"sitemap-general":{"prefix":"http://www.servicemesher.com/istio-handbook/"},"fontsettings":{"theme":"white","family":"sans","size":2},"favicon":{"shortcut":"favicon.ico","bookmark":"favicon.ico"},"lightbox":{"jquery":true},"page-toc-button":{},"back-to-top-button":{},"prism-themes":{},"github-buttons":{"repo":"servicemesher/istio-handbook","types":["star"],"size":"small"},"3-ba":{"configuration":"auto","token":"11f7d254cfa4e0ca44b175c66d379ecc"},"ga":{"configuration":"auto","token":"UA-93485976-2"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"showLevel":true,"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"}},"search-plus":{},"image-captions":{"caption":"图片 - _CAPTION_","variable_name":"_pictures"}},"theme":"default","author":"ServiceMesher 社区","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{"_pictures":[{"backlink":"index.html#fig1.1.1","level":"1.1","list_caption":"Figure: ServiceMesher 微信公众号","alt":"ServiceMesher 微信公众号","nro":1,"url":"https://ws2.sinaimg.cn/large/006tNc79ly1fz6cq93dwmj31jt0beq9s.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"ServiceMesher 微信公众号","attributes":{},"skip":false,"key":"1.1.1"},{"backlink":"concepts-and-principle/what-is-service-mesh.html#fig2.2.1","level":"2.2","list_caption":"Figure: Service Mesh 架构图","alt":"Service Mesh 架构图","nro":2,"url":"https://ws1.sinaimg.cn/large/00704eQkly1fswh7dbs1pj30id0bpmxl.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Service Mesh 架构图","attributes":{},"skip":false,"key":"2.2.1"},{"backlink":"concepts-and-principle/service-mesh-architectures.html#fig2.3.1","level":"2.3","list_caption":"Figure: 服务网格架构示意图","alt":"服务网格架构示意图","nro":3,"url":"https://ws2.sinaimg.cn/large/0069RVTdly1fuail4d24jj31080rkgr7.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"服务网格架构示意图","attributes":{},"skip":false,"key":"2.3.1"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.1","level":"2.3.1","list_caption":"Figure: Service Mesh 架构示意图","alt":"Service Mesh 架构示意图","nro":4,"url":"https://ws1.sinaimg.cn/large/006tNbRwly1fubs6ts3sgj30vo0osdnj.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Service Mesh 架构示意图","attributes":{},"skip":false,"key":"2.3.1.1"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.2","level":"2.3.1","list_caption":"Figure: Ingress 或边缘代理架构示意图","alt":"Ingress 或边缘代理架构示意图","nro":5,"url":"https://ws4.sinaimg.cn/large/006tNbRwly1fubsk4v16hj30vo0bq75z.jpg","index":2,"caption_template":"图片 - _CAPTION_","label":"Ingress 或边缘代理架构示意图","attributes":{},"skip":false,"key":"2.3.1.2"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.3","level":"2.3.1","list_caption":"Figure: 路由器网格架构示意图","alt":"路由器网格架构示意图","nro":6,"url":"https://ws1.sinaimg.cn/large/006tNbRwly1fubsxrph3dj30vq0duq53.jpg","index":3,"caption_template":"图片 - _CAPTION_","label":"路由器网格架构示意图","attributes":{},"skip":false,"key":"2.3.1.3"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.4","level":"2.3.1","list_caption":"Figure: Proxy per node 架构示意图","alt":"Proxy per node 架构示意图","nro":7,"url":"https://ws3.sinaimg.cn/large/006tNbRwly1fubt5a97h7j30vq0bcq5p.jpg","index":4,"caption_template":"图片 - _CAPTION_","label":"Proxy per node 架构示意图","attributes":{},"skip":false,"key":"2.3.1.4"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.5","level":"2.3.1","list_caption":"Figure: Sidecar代理/Fabric模型示意图","alt":"Sidecar代理/Fabric模型示意图","nro":8,"url":"https://ws4.sinaimg.cn/large/006tNbRwly1fubvi0dnhlj30vo0ekwhx.jpg","index":5,"caption_template":"图片 - _CAPTION_","label":"Sidecar代理/Fabric模型示意图","attributes":{},"skip":false,"key":"2.3.1.5"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.6","level":"2.3.1","list_caption":"Figure: Sidecar 代理/控制平面架构示意图","alt":"Sidecar 代理/控制平面架构示意图","nro":9,"url":"https://ws4.sinaimg.cn/large/006tNbRwly1fubvr83wvgj30vq0mmdip.jpg","index":6,"caption_template":"图片 - _CAPTION_","label":"Sidecar 代理/控制平面架构示意图","attributes":{},"skip":false,"key":"2.3.1.6"},{"backlink":"concepts-and-principle/istio-architecture.html#fig2.3.2.1","level":"2.3.2","list_caption":"Figure: 来自 Twitter @daniseyu21","alt":"来自 Twitter @daniseyu21","nro":10,"url":"https://ws3.sinaimg.cn/large/006tNbRwly1fujrgeesk7j316c0tz10y.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"来自 Twitter @daniseyu21","attributes":{},"skip":false,"key":"2.3.2.1"},{"backlink":"concepts-and-principle/sidecar-pattern.html#fig2.4.1","level":"2.4","list_caption":"Figure: SOFAMesh 架构图","alt":"SOFAMesh 架构图","nro":11,"url":"https://ws4.sinaimg.cn/large/006tNbRwgy1fuyr4vizzwj31kw1biq98.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"SOFAMesh 架构图","attributes":{},"skip":false,"key":"2.4.1"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.1","level":"2.4.1","list_caption":"Figure: iptables 调用链","alt":"iptables 调用链","nro":12,"url":"https://ws4.sinaimg.cn/large/0069RVTdly1fv5hukl647j30k6145gnt.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"iptables 调用链","attributes":{},"skip":false,"key":"2.4.1.1"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.2","level":"2.4.1","list_caption":"Figure: iptables 调用链","alt":"iptables 调用链","nro":13,"url":"https://ws1.sinaimg.cn/large/0069RVTdgy1fv5dq2bptdj31110begnl.jpg","index":2,"caption_template":"图片 - _CAPTION_","label":"iptables 调用链","attributes":{},"skip":false,"key":"2.4.1.2"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.3","level":"2.4.1","list_caption":"Figure: iptables结构图","alt":"iptables结构图","nro":14,"url":"https://ws4.sinaimg.cn/large/0069RVTdgy1fv5dm4a9ygj30w50czdi3.jpg","index":3,"caption_template":"图片 - _CAPTION_","label":"iptables结构图","attributes":{},"skip":false,"key":"2.4.1.3"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.4","level":"2.4.1","list_caption":"Figure: Envoy sidecar 流量劫持流程示意图","alt":"Envoy sidecar 流量劫持流程示意图","nro":15,"url":"https://ws3.sinaimg.cn/large/006tKfTcly1g0xriynoarj31c70u0qkt.jpg","index":4,"caption_template":"图片 - _CAPTION_","label":"Envoy sidecar 流量劫持流程示意图","attributes":{},"skip":false,"key":"2.4.1.4"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.5","level":"2.4.1","list_caption":"Figure: istio sidecar iptables 注入","alt":"istio sidecar iptables 注入","nro":16,"url":"https://ws3.sinaimg.cn/large/006tNbRwly1fv92uvxu4dj31320giq6u.jpg","index":5,"caption_template":"图片 - _CAPTION_","label":"istio sidecar iptables 注入","attributes":{},"skip":false,"key":"2.4.1.5"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.6","level":"2.4.1","list_caption":"Figure: Istio bookinfo","alt":"Istio bookinfo","nro":17,"url":"https://ws3.sinaimg.cn/large/0069RVTdgy1fv5df9lq1aj317o0o6wia.jpg","index":6,"caption_template":"图片 - _CAPTION_","label":"Istio bookinfo","attributes":{},"skip":false,"key":"2.4.1.6"},{"backlink":"concepts-and-principle/istio-sidecar-injector.html#fig2.4.2.1","level":"2.4.2","list_caption":"Figure: Sidecar 注入流程图","alt":"Sidecar 注入流程图","nro":18,"url":"https://ws3.sinaimg.cn/large/006tKfTcly1g0bvoxmfvuj311i0fy0vh.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Sidecar 注入流程图","attributes":{},"skip":false,"key":"2.4.2.1"},{"backlink":"data-plane/istio-sidecar-proxy-config.html#fig3.3.1","level":"3.3","list_caption":"Figure: Envoy 配置","alt":"Envoy 配置","nro":19,"url":"https://ws3.sinaimg.cn/large/006tNbRwly1fyb74brsd5j30xg0lojvt.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Envoy 配置","attributes":{},"skip":false,"key":"3.3.1"},{"backlink":"data-plane/envoy-proxy-config-deep-dive.html#fig3.4.1","level":"3.4","list_caption":"Figure: Envoy 配置","alt":"Envoy 配置","nro":20,"url":"https://ws1.sinaimg.cn/large/006tNbRwly1fy2x2zk1hhj30ee0h9jtg.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Envoy 配置","attributes":{},"skip":false,"key":"3.4.1"},{"backlink":"data-plane/envoy-proxy-config-deep-dive.html#fig3.4.2","level":"3.4","list_caption":"Figure: bootstrap 配置","alt":"bootstrap 配置","nro":21,"url":"https://ws4.sinaimg.cn/large/006tNbRwly1fy2xid761zj30c70ai0tj.jpg","index":2,"caption_template":"图片 - _CAPTION_","label":"bootstrap 配置","attributes":{},"skip":false,"key":"3.4.2"},{"backlink":"data-plane/envoy-api.html#fig3.5.1","level":"3.5","list_caption":"Figure: Envoy proxy 架构图","alt":"Envoy proxy 架构图","nro":22,"url":"https://ws2.sinaimg.cn/large/006tNc79ly1fz69bsaqk7j314k0tsq90.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Envoy proxy 架构图","attributes":{},"skip":false,"key":"3.5.1"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.1","level":"3.6","list_caption":"Figure: ACK 后的版本更新","alt":"ACK 后的版本更新","nro":23,"url":"https://ws1.sinaimg.cn/mw690/7e0ee03agy1fvmxs5aod1j20cc06y74c.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"ACK 后的版本更新","attributes":{},"skip":false,"key":"3.6.1"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.2","level":"3.6","list_caption":"Figure: NACK 无版本更新","alt":"NACK 无版本更新","nro":24,"url":"https://ws1.sinaimg.cn/mw690/7e0ee03agy1fvmxtjqtcsj20cc06y0ss.jpg","index":2,"caption_template":"图片 - _CAPTION_","label":"NACK 无版本更新","attributes":{},"skip":false,"key":"3.6.2"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.3","level":"3.6","list_caption":"Figure: ACK 紧接着 NACK","alt":"ACK 紧接着 NACK","nro":25,"url":"https://ws1.sinaimg.cn/mw690/7e0ee03agy1fvmxtwzc96j20cc0923yp.jpg","index":3,"caption_template":"图片 - _CAPTION_","label":"ACK 紧接着 NACK","attributes":{},"skip":false,"key":"3.6.3"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.4","level":"3.6","list_caption":"Figure: CDS 响应导致 EDS 资源更新","alt":"CDS 响应导致 EDS 资源更新","nro":26,"url":"https://ws1.sinaimg.cn/large/006tNc79ly1fvph0p7u8zj31fm0lq0ve.jpg","index":4,"caption_template":"图片 - _CAPTION_","label":"CDS 响应导致 EDS 资源更新","attributes":{},"skip":false,"key":"3.6.4"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.5","level":"3.6","list_caption":"Figure: EDS 更新速率激发 nonces","alt":"EDS 更新速率激发 nonces","nro":27,"url":"https://ws4.sinaimg.cn/large/006tNc79ly1fvph04ln3fj31kw0rogqc.jpg","index":5,"caption_template":"图片 - _CAPTION_","label":"EDS 更新速率激发 nonces","attributes":{},"skip":false,"key":"3.6.5"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.6","level":"3.6","list_caption":"Figure: 请求变的陈旧","alt":"请求变的陈旧","nro":28,"url":"https://ws3.sinaimg.cn/large/006tNc79ly1fvpgy6xewrj31b415ctcy.jpg","index":6,"caption_template":"图片 - _CAPTION_","label":"请求变的陈旧","attributes":{},"skip":false,"key":"3.6.6"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.7","level":"3.6","list_caption":"Figure: EDS/CDS 在一个 ADS 流上多路复用","alt":"EDS/CDS 在一个 ADS 流上多路复用","nro":29,"url":"https://ws2.sinaimg.cn/large/006tNc79ly1fvpgxnl947j313q0wgq62.jpg","index":7,"caption_template":"图片 - _CAPTION_","label":"EDS/CDS 在一个 ADS 流上多路复用","attributes":{},"skip":false,"key":"3.6.7"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.8","level":"3.6","list_caption":"Figure: 增量 session 示例","alt":"增量 session 示例","nro":30,"url":"https://ws4.sinaimg.cn/large/006tNc79ly1fvpgwfbep7j31kw0vldli.jpg","index":8,"caption_template":"图片 - _CAPTION_","label":"增量 session 示例","attributes":{},"skip":false,"key":"3.6.8"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.9","level":"3.6","list_caption":"Figure: 增量重连示例","alt":"增量重连示例","nro":31,"url":"https://ws2.sinaimg.cn/large/006tNc79ly1fvpgx05z3kj31kw0phwif.jpg","index":9,"caption_template":"图片 - _CAPTION_","label":"增量重连示例","attributes":{},"skip":false,"key":"3.6.9"},{"backlink":"traffic-management/traffic-management-basic.html#fig5.2.1","level":"5.2","list_caption":"Figure: istio ingress gateway pod","alt":"istio ingress gateway pod","nro":32,"url":"https://ws4.sinaimg.cn/large/0069RVTdgy1fv7xh71h8fj31fn0dyq9g.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"istio ingress gateway pod","attributes":{},"skip":false,"key":"5.2.1"},{"backlink":"traffic-management/traffic-management-basic.html#fig5.2.2","level":"5.2","list_caption":"Figure: VirtualSerivce 和 DestimationRule 示意图","alt":"VirtualSerivce 和 DestimationRule 示意图","nro":33,"url":"../images/istio-virtualservice-and-destinationrule-illustration.png","index":2,"caption_template":"图片 - _CAPTION_","label":"VirtualSerivce 和 DestimationRule 示意图","attributes":{},"skip":false,"key":"5.2.2"},{"backlink":"traffic-management/sidecar-traffic-routing-deep-dive.html#fig5.3.1","level":"5.3","list_caption":"Figure: Bookinfo 示例","alt":"Bookinfo 示例","nro":34,"url":"https://ws1.sinaimg.cn/large/006tNbRwgy1fvlwjd3302j31bo0ro0x5.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Bookinfo 示例","attributes":{},"skip":false,"key":"5.3.1"},{"backlink":"traffic-management/sidecar-traffic-routing-deep-dive.html#fig5.3.2","level":"5.3","list_caption":"Figure: Bookinfo 示例与 Istio 组件连接关系图","alt":"Bookinfo 示例与 Istio 组件连接关系图","nro":35,"url":"https://ws4.sinaimg.cn/large/006tNbRwly1fyitp0jsghj31o70u0x6p.jpg","index":2,"caption_template":"图片 - _CAPTION_","label":"Bookinfo 示例与 Istio 组件连接关系图","attributes":{},"skip":false,"key":"5.3.2"},{"backlink":"traffic-management/sidecar-traffic-routing-deep-dive.html#fig5.3.3","level":"5.3","list_caption":"Figure: Envoy sidecar 流量劫持与路由转发示意图","alt":"Envoy sidecar 流量劫持与路由转发示意图","nro":36,"url":"../images/envoy-sidecar-traffic-interception-20190111.png","index":3,"caption_template":"图片 - _CAPTION_","label":"Envoy sidecar 流量劫持与路由转发示意图","attributes":{},"skip":false,"key":"5.3.3"}]},"title":"Istio Handbook - Istio 服务网格进阶实战 by ServiceMesher(服务网格中文社区)","language":"zh-hans","links":{"sidebar":{"ServiceMesher 社区":"http://www.servicemesher.com","Istio 官网（中文）":"https://istio.io/zh/"}},"gitbook":"*","description":"Istio Handbook - Istio 服务网格进阶实战，管理后 Kubernetes 时代的服务"},"file":{"path":"data-plane/envoy-proxy-config-deep-dive.md","mtime":"2019-03-12T03:55:52.647Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-03-12T03:56:20.786Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-page-toc-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-editlink/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-plus/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-plus/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-3-ba/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lightbox/jquery.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lightbox/lightbox.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

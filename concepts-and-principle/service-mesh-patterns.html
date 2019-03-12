@@ -1,0 +1,878 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>服务网格的实现模式 · Istio Handbook - Istio 服务网格进阶实战 by ServiceMesher(服务网格中文社区)</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="本文介绍了服务网格架构中的实现模式。">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="ServiceMesher 社区">
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-splitter/splitter.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-page-toc-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-image-captions/image-captions.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-back-to-top-button/plugin.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search-plus/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-tbfed-pagefooter/footer.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism-ghcolors.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-lightbox/lightbox.min.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="istio-architecture.html" />
+    
+    
+    <link rel="prev" href="service-mesh-architectures.html" />
+    
+
+    
+        <link rel="shortcut icon" href='../favicon.ico' type="image/x-icon">
+    
+    
+        <link rel="bookmark" href='../favicon.ico' type="image/x-icon">
+    
+    
+    
+
+    <style>
+    @media only screen and (max-width: 640px) {
+        .book-header .hidden-mobile {
+            display: none;
+        }
+    }
+    </style>
+    <script>
+        window["gitbook-plugin-github-buttons"] = {"repo":"servicemesher/istio-handbook","types":["star"],"size":"small"};
+    </script>
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="http://www.servicemesher.com" target="_blank" class="custom-link">ServiceMesher 社区</a>
+        </li>
+    
+        
+        <li>
+            <a href="https://istio.io/zh/" target="_blank" class="custom-link">Istio 官网（中文）</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        <li class="header">说明</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                        <b>1.1.</b>
+                    
+                    序
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">概念原理</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                        <b>2.1.</b>
+                    
+                    Istio 概念原理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="what-is-service-mesh.html">
+            
+                <a href="what-is-service-mesh.html">
+            
+                    
+                        <b>2.2.</b>
+                    
+                    什么是服务网格？
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="service-mesh-architectures.html">
+            
+                <a href="service-mesh-architectures.html">
+            
+                    
+                        <b>2.3.</b>
+                    
+                    服务网格架构
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="2.3.1" data-path="service-mesh-patterns.html">
+            
+                <a href="service-mesh-patterns.html">
+            
+                    
+                        <b>2.3.1.</b>
+                    
+                    服务网格的实现模式
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3.2" data-path="istio-architecture.html">
+            
+                <a href="istio-architecture.html">
+            
+                    
+                        <b>2.3.2.</b>
+                    
+                    Istio 架构解析
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" data-path="sidecar-pattern.html">
+            
+                <a href="sidecar-pattern.html">
+            
+                    
+                        <b>2.4.</b>
+                    
+                    Sidecar 模式
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.4.1" data-path="sidecar-injection-deep-dive.html">
+            
+                <a href="sidecar-injection-deep-dive.html">
+            
+                    
+                        <b>2.4.1.</b>
+                    
+                    Istio 中的 Sidecar 注入与流量劫持详解
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4.2" data-path="istio-sidecar-injector.html">
+            
+                <a href="istio-sidecar-injector.html">
+            
+                    
+                        <b>2.4.2.</b>
+                    
+                    Sidecar 的自动注入过程详解
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">数据平面</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../data-plane/">
+            
+                <a href="../data-plane/">
+            
+                    
+                        <b>3.1.</b>
+                    
+                    数据平面介绍
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="../data-plane/envoy-terminology.html">
+            
+                <a href="../data-plane/envoy-terminology.html">
+            
+                    
+                        <b>3.2.</b>
+                    
+                    Envoy 中的基本术语
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" data-path="../data-plane/istio-sidecar-proxy-config.html">
+            
+                <a href="../data-plane/istio-sidecar-proxy-config.html">
+            
+                    
+                        <b>3.3.</b>
+                    
+                    Istio sidecar proxy 配置
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" data-path="../data-plane/envoy-proxy-config-deep-dive.html">
+            
+                <a href="../data-plane/envoy-proxy-config-deep-dive.html">
+            
+                    
+                        <b>3.4.</b>
+                    
+                    Envoy proxy 配置详解
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.5" data-path="../data-plane/envoy-api.html">
+            
+                <a href="../data-plane/envoy-api.html">
+            
+                    
+                        <b>3.5.</b>
+                    
+                    Envoy API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6" data-path="../data-plane/envoy-xds-protocol.html">
+            
+                <a href="../data-plane/envoy-xds-protocol.html">
+            
+                    
+                        <b>3.6.</b>
+                    
+                    xDS 协议解析
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.6.1" data-path="../data-plane/envoy-lds.html">
+            
+                <a href="../data-plane/envoy-lds.html">
+            
+                    
+                        <b>3.6.1.</b>
+                    
+                    LDS（监听器发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.2" data-path="../data-plane/envoy-rds.html">
+            
+                <a href="../data-plane/envoy-rds.html">
+            
+                    
+                        <b>3.6.2.</b>
+                    
+                    RDS（路由发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.3" data-path="../data-plane/envoy-cds.html">
+            
+                <a href="../data-plane/envoy-cds.html">
+            
+                    
+                        <b>3.6.3.</b>
+                    
+                    CDS（集群发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.4" data-path="../data-plane/envoy-eds.html">
+            
+                <a href="../data-plane/envoy-eds.html">
+            
+                    
+                        <b>3.6.4.</b>
+                    
+                    EDS（端点发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.5" data-path="../data-plane/envoy-sds.html">
+            
+                <a href="../data-plane/envoy-sds.html">
+            
+                    
+                        <b>3.6.5.</b>
+                    
+                    SDS（秘钥发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.6" data-path="../data-plane/envoy-ads.html">
+            
+                <a href="../data-plane/envoy-ads.html">
+            
+                    
+                        <b>3.6.6.</b>
+                    
+                    ADS（聚合发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6.7" data-path="../data-plane/envoy-hds.html">
+            
+                <a href="../data-plane/envoy-hds.html">
+            
+                    
+                        <b>3.6.7.</b>
+                    
+                    HDS（健康发现服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7" data-path="../data-plane/envoy-advance-api.html">
+            
+                <a href="../data-plane/envoy-advance-api.html">
+            
+                    
+                        <b>3.7.</b>
+                    
+                    Envoy 高级 API
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.1" data-path="../data-plane/envoy-ms.html">
+            
+                <a href="../data-plane/envoy-ms.html">
+            
+                    
+                        <b>3.7.1.</b>
+                    
+                    MS（Metric 服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.2" data-path="../data-plane/envoy-rls.html">
+            
+                <a href="../data-plane/envoy-rls.html">
+            
+                    
+                        <b>3.7.2.</b>
+                    
+                    RLS（速率限制服务）
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">控制平面</li>
+        
+        
+    
+
+    
+        
+        <li class="header">流量管理</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../traffic-management/">
+            
+                <a href="../traffic-management/">
+            
+                    
+                        <b>5.1.</b>
+                    
+                    Istio 中的流量管理
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="../traffic-management/traffic-management-basic.html">
+            
+                <a href="../traffic-management/traffic-management-basic.html">
+            
+                    
+                        <b>5.2.</b>
+                    
+                    流量管理基础概念
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="../traffic-management/sidecar-traffic-routing-deep-dive.html">
+            
+                <a href="../traffic-management/sidecar-traffic-routing-deep-dive.html">
+            
+                    
+                        <b>5.3.</b>
+                    
+                    Istio 中的 Sidecar 的流量路由详解
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">安全</li>
+        
+        
+    
+
+    
+        
+        <li class="header">多集群部署</li>
+        
+        
+    
+
+    
+        
+        <li class="header">日志监控和追踪</li>
+        
+        
+    
+
+    
+        
+        <li class="header">策略和遥测</li>
+        
+        
+    
+
+    
+        
+        <li class="header">性能和可伸缩性</li>
+        
+        
+    
+
+    
+        
+        <li class="header">最佳实践</li>
+        
+        
+    
+
+    
+        
+        <li class="header">附录</li>
+        
+        
+    
+        <li class="chapter " data-level="12.1" data-path="../appendix/service-mesh-landscape.html">
+            
+                <a href="../appendix/service-mesh-landscape.html">
+            
+                    
+                        <b>12.1.</b>
+                    
+                    服务网格全景图
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >服务网格的实现模式</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div class="search-plus" id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <html><head></head><body><h1 id="&#x670D;&#x52A1;&#x7F51;&#x683C;&#x7684;&#x5B9E;&#x73B0;&#x6A21;&#x5F0F;">&#x670D;&#x52A1;&#x7F51;&#x683C;&#x7684;&#x5B9E;&#x73B0;&#x6A21;&#x5F0F;</h1>
+<p>&#x6211;&#x4EEC;&#x5728;&#x524D;&#x9762;&#x770B;&#x5230;&#x4E86;&#x901A;&#x8FC7;<strong>&#x5BA2;&#x6237;&#x7AEF;&#x5E93;</strong>&#x6765;&#x6CBB;&#x7406;&#x670D;&#x52A1;&#x7684;&#x67B6;&#x6784;&#x56FE;&#xFF0C;&#x90A3;&#x662F;&#x6211;&#x4EEC;&#x5728;&#x6539;&#x9020;&#x6210;Service Mesh&#x67B6;&#x6784;&#x524D;&#x4F7F;&#x7528;&#x5FAE;&#x670D;&#x52A1;&#x67B6;&#x6784;&#x901A;&#x5E38;&#x7684;&#x5F62;&#x5F0F;&#xFF0C;&#x4E0B;&#x56FE;&#x662F;&#x4F7F;&#x7528;Service Mesh&#x67B6;&#x6784;&#x7684;&#x6700;&#x7EC8;&#x5F62;&#x5F0F;&#x3002;</p>
+<figure id="fig2.3.1.1"><a href="https://ws1.sinaimg.cn/large/006tNbRwly1fubs6ts3sgj30vo0osdnj.jpg" data-lightbox="c63ff707-c35a-41e5-9e17-24179e23c05e" data-title="Service Mesh &#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;" target="_blank"><img src="https://ws1.sinaimg.cn/large/006tNbRwly1fubs6ts3sgj30vo0osdnj.jpg" alt="Service Mesh &#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;"></a><figcaption>&#x56FE;&#x7247; - Service Mesh &#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;</figcaption></figure>
+<p>&#x5F53;&#x7136;&#x5728;&#x8FBE;&#x5230;&#x8FD9;&#x4E00;&#x6700;&#x7EC8;&#x5F62;&#x6001;&#x4E4B;&#x524D;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x5C06;&#x67B6;&#x6784;&#x4E00;&#x6B65;&#x6B65;&#x6F14;&#x8FDB;&#xFF0C;&#x4E0B;&#x9762;&#x7ED9;&#x51FA;&#x7684;&#x662F;&#x53C2;&#x8003;&#x7684;&#x6F14;&#x8FDB;&#x8DEF;&#x7EBF;&#x3002;</p>
+<h2 id="ingress&#x6216;&#x8FB9;&#x7F18;&#x4EE3;&#x7406;">Ingress&#x6216;&#x8FB9;&#x7F18;&#x4EE3;&#x7406;</h2>
+<p>&#x5982;&#x679C;&#x4F60;&#x4F7F;&#x7528;&#x7684;&#x662F;Kubernetes&#x505A;&#x5BB9;&#x5668;&#x7F16;&#x6392;&#x8C03;&#x5EA6;&#xFF0C;&#x90A3;&#x4E48;&#x5728;&#x8FDB;&#x5316;&#x5230;Service Mesh&#x67B6;&#x6784;&#x4E4B;&#x524D;&#xFF0C;&#x901A;&#x5E38;&#x4F1A;&#x4F7F;&#x7528;Ingress Controller&#xFF0C;&#x505A;&#x96C6;&#x7FA4;&#x5185;&#x5916;&#x6D41;&#x91CF;&#x7684;&#x53CD;&#x5411;&#x4EE3;&#x7406;&#xFF0C;&#x5982;&#x4F7F;&#x7528;Traefik&#x6216;Nginx Ingress Controller&#x3002;</p>
+<figure id="fig2.3.1.2"><a href="https://ws4.sinaimg.cn/large/006tNbRwly1fubsk4v16hj30vo0bq75z.jpg" data-lightbox="6cd90a19-5c5e-4265-9f30-c78847d96b0d" data-title="Ingress &#x6216;&#x8FB9;&#x7F18;&#x4EE3;&#x7406;&#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;" target="_blank"><img src="https://ws4.sinaimg.cn/large/006tNbRwly1fubsk4v16hj30vo0bq75z.jpg" alt="Ingress &#x6216;&#x8FB9;&#x7F18;&#x4EE3;&#x7406;&#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;"></a><figcaption>&#x56FE;&#x7247; - Ingress &#x6216;&#x8FB9;&#x7F18;&#x4EE3;&#x7406;&#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;</figcaption></figure>
+<p>&#x8FD9;&#x6837;&#x53EA;&#x8981;&#x5229;&#x7528;Kubernetes&#x7684;&#x539F;&#x6709;&#x80FD;&#x529B;&#xFF0C;&#x5F53;&#x4F60;&#x7684;&#x5E94;&#x7528;&#x5FAE;&#x670D;&#x52A1;&#x5316;&#x5E76;&#x5BB9;&#x5668;&#x5316;&#x9700;&#x8981;&#x5F00;&#x653E;&#x5916;&#x90E8;&#x8BBF;&#x95EE;&#x4E14;&#x53EA;&#x9700;&#x8981;L7&#x4EE3;&#x7406;&#x7684;&#x8BDD;&#x8FD9;&#x79CD;&#x6539;&#x9020;&#x5341;&#x5206;&#x7B80;&#x5355;&#xFF0C;&#x4F46;&#x95EE;&#x9898;&#x662F;&#x65E0;&#x6CD5;&#x7BA1;&#x7406;&#x670D;&#x52A1;&#x95F4;&#x6D41;&#x91CF;&#x3002;</p>
+<h2 id="&#x8DEF;&#x7531;&#x5668;&#x7F51;&#x683C;">&#x8DEF;&#x7531;&#x5668;&#x7F51;&#x683C;</h2>
+<p>Ingress&#x6216;&#x8005;&#x8FB9;&#x7F18;&#x4EE3;&#x7406;&#x53EF;&#x4EE5;&#x5904;&#x7406;&#x8FDB;&#x51FA;&#x96C6;&#x7FA4;&#x7684;&#x6D41;&#x91CF;&#xFF0C;&#x4E3A;&#x4E86;&#x5E94;&#x5BF9;&#x96C6;&#x7FA4;&#x5185;&#x7684;&#x670D;&#x52A1;&#x95F4;&#x6D41;&#x91CF;&#x7BA1;&#x7406;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5728;&#x96C6;&#x7FA4;&#x5185;&#x52A0;&#x4E00;&#x4E2A;<code>Router</code>&#x5C42;&#xFF0C;&#x5373;&#x8DEF;&#x7531;&#x5668;&#x5C42;&#xFF0C;&#x8BA9;&#x96C6;&#x7FA4;&#x5185;&#x6240;&#x6709;&#x670D;&#x52A1;&#x95F4;&#x7684;&#x6D41;&#x91CF;&#x90FD;&#x901A;&#x8FC7;&#x8BE5;&#x8DEF;&#x7531;&#x5668;&#x3002;</p>
+<figure id="fig2.3.1.3"><a href="https://ws1.sinaimg.cn/large/006tNbRwly1fubsxrph3dj30vq0duq53.jpg" data-lightbox="cee15ed2-788c-4cf3-b317-01db56be599b" data-title="&#x8DEF;&#x7531;&#x5668;&#x7F51;&#x683C;&#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;" target="_blank"><img src="https://ws1.sinaimg.cn/large/006tNbRwly1fubsxrph3dj30vq0duq53.jpg" alt="&#x8DEF;&#x7531;&#x5668;&#x7F51;&#x683C;&#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;"></a><figcaption>&#x56FE;&#x7247; - &#x8DEF;&#x7531;&#x5668;&#x7F51;&#x683C;&#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;</figcaption></figure>
+<p>&#x8FD9;&#x4E2A;&#x67B6;&#x6784;&#x65E0;&#x9700;&#x5BF9;&#x539F;&#x6709;&#x7684;&#x5355;&#x4F53;&#x5E94;&#x7528;&#x548C;&#x65B0;&#x7684;&#x5FAE;&#x670D;&#x52A1;&#x5E94;&#x7528;&#x505A;&#x4EC0;&#x4E48;&#x6539;&#x9020;&#xFF0C;&#x53EF;&#x4EE5;&#x5F88;&#x8F7B;&#x6613;&#x7684;&#x8FC1;&#x79FB;&#x8FDB;&#x6765;&#xFF0C;&#x4F46;&#x662F;&#x5F53;&#x670D;&#x52A1;&#x591A;&#x4E86;&#x7BA1;&#x7406;&#x8D77;&#x6765;&#x5C31;&#x5F88;&#x9EBB;&#x70E6;&#x3002;</p>
+<h2 id="proxy-per-node">Proxy per Node</h2>
+<p>&#x8FD9;&#x79CD;&#x67B6;&#x6784;&#x662F;&#x5728;&#x6BCF;&#x4E2A;&#x8282;&#x70B9;&#x4E0A;&#x90FD;&#x90E8;&#x7F72;&#x4E00;&#x4E2A;&#x4EE3;&#x7406;&#xFF0C;&#x5982;&#x679C;&#x4F7F;&#x7528;Kubernetes&#x6765;&#x90E8;&#x7F72;&#x7684;&#x8BDD;&#x5C31;&#x662F;&#x4F7F;&#x7528;<code>DaemonSet</code>&#x5BF9;&#x8C61;&#xFF0C;Linkerd&#x7B2C;&#x4E00;&#x4EE3;&#x5C31;&#x662F;&#x4F7F;&#x7528;&#x8FD9;&#x79CD;&#x65B9;&#x5F0F;&#x90E8;&#x7F72;&#x7684;&#xFF0C;&#x4E00;&#x4EE3;&#x7684;Linkerd&#x4F7F;&#x7528;Scala&#x5F00;&#x53D1;&#xFF0C;&#x57FA;&#x4E8E;JVM&#x6BD4;&#x8F83;&#x6D88;&#x8017;&#x8D44;&#x6E90;&#xFF0C;&#x4E8C;&#x4EE3;&#x7684;Linkerd&#x4F7F;&#x7528;Go&#x5F00;&#x53D1;&#x3002;</p>
+<figure id="fig2.3.1.4"><a href="https://ws3.sinaimg.cn/large/006tNbRwly1fubt5a97h7j30vq0bcq5p.jpg" data-lightbox="0ca3a826-c15f-4924-90ec-b9440308b615" data-title="Proxy per node &#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;" target="_blank"><img src="https://ws3.sinaimg.cn/large/006tNbRwly1fubt5a97h7j30vq0bcq5p.jpg" alt="Proxy per node &#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;"></a><figcaption>&#x56FE;&#x7247; - Proxy per node &#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;</figcaption></figure>
+<p>&#x8FD9;&#x79CD;&#x67B6;&#x6784;&#x6709;&#x4E2A;&#x597D;&#x5904;&#x662F;&#x6BCF;&#x4E2A;&#x8282;&#x70B9;&#x53EA;&#x9700;&#x8981;&#x90E8;&#x7F72;&#x4E00;&#x4E2A;&#x4EE3;&#x7406;&#x5373;&#x53EF;&#xFF0C;&#x6BD4;&#x8D77;&#x5728;&#x6BCF;&#x4E2A;&#x5E94;&#x7528;&#x4E2D;&#x90FD;&#x6CE8;&#x5165;&#x4E00;&#x4E2A;sidecar&#x7684;&#x65B9;&#x5F0F;&#x66F4;&#x8282;&#x7701;&#x8D44;&#x6E90;&#xFF0C;&#x800C;&#x4E14;&#x66F4;&#x9002;&#x5408;&#x57FA;&#x4E8E;&#x7269;&#x7406;&#x673A;/&#x865A;&#x62DF;&#x673A;&#x7684;&#x5927;&#x578B;&#x5355;&#x4F53;&#x5E94;&#x7528;&#xFF0C;&#x4F46;&#x662F;&#x4E5F;&#x6709;&#x4E00;&#x4E9B;&#x526F;&#x4F5C;&#x7528;&#xFF0C;&#x6BD4;&#x5982;&#x7C92;&#x5EA6;&#x8FD8;&#x662F;&#x4E0D;&#x591F;&#x7EC6;&#xFF0C;&#x5982;&#x679C;&#x4E00;&#x4E2A;&#x8282;&#x70B9;&#x51FA;&#x95EE;&#x9898;&#xFF0C;&#x8BE5;&#x8282;&#x70B9;&#x4E0A;&#x7684;&#x6240;&#x6709;&#x670D;&#x52A1;&#x5C31;&#x90FD;&#x4F1A;&#x65E0;&#x6CD5;&#x8BBF;&#x95EE;&#xFF0C;&#x5BF9;&#x4E8E;&#x670D;&#x52A1;&#x6765;&#x8BF4;&#x4E0D;&#x662F;&#x5B8C;&#x5168;&#x900F;&#x660E;&#x7684;&#x3002;</p>
+<h2 id="sidecar&#x4EE3;&#x7406;fabric&#x6A21;&#x578B;">Sidecar&#x4EE3;&#x7406;/Fabric&#x6A21;&#x578B;</h2>
+<p>&#x8FD9;&#x4E2A;&#x4E00;&#x822C;&#x4E0D;&#x4F1A;&#x6210;&#x4E3A;&#x5178;&#x578B;&#x90E8;&#x7F72;&#x7C7B;&#x578B;&#xFF0C;&#x5F53;&#x4F01;&#x4E1A;&#x7684;&#x670D;&#x52A1;&#x7F51;&#x683C;&#x67B6;&#x6784;&#x6F14;&#x8FDB;&#x5230;&#x8FD9;&#x4E00;&#x6B65;&#x65F6;&#x901A;&#x5E38;&#x53EA;&#x4F1A;&#x6301;&#x7EED;&#x5F88;&#x77ED;&#x65F6;&#x95F4;&#xFF0C;&#x7136;&#x540E;&#x5C31;&#x4F1A;&#x589E;&#x52A0;&#x63A7;&#x5236;&#x5E73;&#x9762;&#x3002;&#x8DDF;&#x524D;&#x51E0;&#x4E2A;&#x9636;&#x6BB5;&#x6700;&#x5927;&#x7684;&#x4E0D;&#x540C;&#x5C31;&#x662F;&#xFF0C;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x548C;&#x4EE3;&#x7406;&#x88AB;&#x653E;&#x5728;&#x4E86;&#x540C;&#x4E00;&#x4E2A;&#x90E8;&#x7F72;&#x5355;&#x5143;&#x91CC;&#xFF0C;&#x53EF;&#x4EE5;&#x5BF9;&#x5E94;&#x7528;&#x7A0B;&#x5E8F;&#x7684;&#x6D41;&#x91CF;&#x505A;&#x66F4;&#x7EC6;&#x7C92;&#x5EA6;&#x7684;&#x63A7;&#x5236;&#x3002;</p>
+<figure id="fig2.3.1.5"><a href="https://ws4.sinaimg.cn/large/006tNbRwly1fubvi0dnhlj30vo0ekwhx.jpg" data-lightbox="c9175e18-a1e6-4e88-a175-84e7d99c5ffd" data-title="Sidecar&#x4EE3;&#x7406;/Fabric&#x6A21;&#x578B;&#x793A;&#x610F;&#x56FE;" target="_blank"><img src="https://ws4.sinaimg.cn/large/006tNbRwly1fubvi0dnhlj30vo0ekwhx.jpg" alt="Sidecar&#x4EE3;&#x7406;/Fabric&#x6A21;&#x578B;&#x793A;&#x610F;&#x56FE;"></a><figcaption>&#x56FE;&#x7247; - Sidecar&#x4EE3;&#x7406;/Fabric&#x6A21;&#x578B;&#x793A;&#x610F;&#x56FE;</figcaption></figure>
+<p>&#x8FD9;&#x5DF2;&#x7ECF;&#x662F;&#x6700;&#x63A5;&#x8FD1;Service Mesh&#x67B6;&#x6784;&#x7684;&#x4E00;&#x79CD;&#x5F62;&#x6001;&#x4E86;&#xFF0C;&#x552F;&#x4E00;&#x7F3A;&#x7684;&#x5C31;&#x662F;&#x63A7;&#x5236;&#x5E73;&#x9762;&#x4E86;&#x3002;&#x6240;&#x6709;&#x7684;sidecar&#x90FD;&#x652F;&#x6301;&#x70ED;&#x52A0;&#x8F7D;&#xFF0C;&#x914D;&#x7F6E;&#x7684;&#x53D8;&#x66F4;&#x53EF;&#x4EE5;&#x5F88;&#x5BB9;&#x6613;&#x7684;&#x5728;&#x6D41;&#x91CF;&#x63A7;&#x5236;&#x4E2D;&#x53CD;&#x5E94;&#x51FA;&#x6765;&#xFF0C;&#x4F46;&#x662F;&#x5982;&#x4F55;&#x64CD;&#x4F5C;&#x8FD9;&#x4E48;&#x591A;sidecar&#x5C31;&#x9700;&#x8981;&#x4E00;&#x4E2A;&#x7EDF;&#x4E00;&#x7684;&#x63A7;&#x5236;&#x5E73;&#x9762;&#x4E86;&#x3002;</p>
+<h2 id="sidecar&#x4EE3;&#x7406;&#x63A7;&#x5236;&#x5E73;&#x9762;">Sidecar&#x4EE3;&#x7406;/&#x63A7;&#x5236;&#x5E73;&#x9762;</h2>
+<p>&#x4E0B;&#x9762;&#x7684;&#x793A;&#x610F;&#x56FE;&#x662F;&#x76EE;&#x524D;&#x5927;&#x591A;&#x6570;Service Mesh&#x7684;&#x67B6;&#x6784;&#x56FE;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x8BF4;&#x662F;&#x6574;&#x4E2A;Service Mesh&#x67B6;&#x6784;&#x6F14;&#x8FDB;&#x7684;&#x6700;&#x7EC8;&#x5F62;&#x6001;&#x3002;</p>
+<figure id="fig2.3.1.6"><a href="https://ws4.sinaimg.cn/large/006tNbRwly1fubvr83wvgj30vq0mmdip.jpg" data-lightbox="7993bb1b-1b23-4bf7-9bf7-4a08b1eed2fe" data-title="Sidecar &#x4EE3;&#x7406;/&#x63A7;&#x5236;&#x5E73;&#x9762;&#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;" target="_blank"><img src="https://ws4.sinaimg.cn/large/006tNbRwly1fubvr83wvgj30vq0mmdip.jpg" alt="Sidecar &#x4EE3;&#x7406;/&#x63A7;&#x5236;&#x5E73;&#x9762;&#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;"></a><figcaption>&#x56FE;&#x7247; - Sidecar &#x4EE3;&#x7406;/&#x63A7;&#x5236;&#x5E73;&#x9762;&#x67B6;&#x6784;&#x793A;&#x610F;&#x56FE;</figcaption></figure>
+<p>&#x8FD9;&#x79CD;&#x67B6;&#x6784;&#x5C06;&#x4EE3;&#x7406;&#x4F5C;&#x4E3A;&#x6574;&#x4E2A;&#x670D;&#x52A1;&#x7F51;&#x683C;&#x4E2D;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x4F7F;&#x7528;Kubernetes&#x90E8;&#x7F72;&#x7684;&#x8BDD;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x4EE5;sidecar&#x7684;&#x5F62;&#x5F0F;&#x6CE8;&#x5165;&#xFF0C;&#x51CF;&#x8F7B;&#x4E86;&#x90E8;&#x7F72;&#x7684;&#x8D1F;&#x62C5;&#xFF0C;&#x53EF;&#x4EE5;&#x5BF9;&#x6BCF;&#x4E2A;&#x670D;&#x52A1;&#x7684;&#x505A;&#x7EC6;&#x7C92;&#x5EA6;&#x6743;&#x9650;&#x4E0E;&#x6D41;&#x91CF;&#x63A7;&#x5236;&#x3002;&#x4F46;&#x6709;&#x4E00;&#x70B9;&#x4E0D;&#x597D;&#x5C31;&#x662F;&#x4E3A;&#x6BCF;&#x4E2A;&#x670D;&#x52A1;&#x90FD;&#x6CE8;&#x5165;&#x4E00;&#x4E2A;&#x4EE3;&#x7406;&#x4F1A;&#x5360;&#x7528;&#x5F88;&#x591A;&#x8D44;&#x6E90;&#xFF0C;&#x56E0;&#x6B64;&#x8981;&#x60F3;&#x65B9;&#x8BBE;&#x6CD5;&#x964D;&#x4F4E;&#x6BCF;&#x4E2A;&#x4EE3;&#x7406;&#x7684;&#x8D44;&#x6E90;&#x6D88;&#x8017;&#x3002;</p>
+<h2 id="&#x591A;&#x96C6;&#x7FA4;&#x90E8;&#x7F72;&#x548C;&#x6269;&#x5C55;">&#x591A;&#x96C6;&#x7FA4;&#x90E8;&#x7F72;&#x548C;&#x6269;&#x5C55;</h2>
+<p>&#x4EE5;&#x4E0A;&#x90FD;&#x662F;&#x5355;&#x4E2A;&#x670D;&#x52A1;&#x7F51;&#x683C;&#x96C6;&#x7FA4;&#x7684;&#x67B6;&#x6784;&#xFF0C;&#x6240;&#x6709;&#x7684;&#x670D;&#x52A1;&#x90FD;&#x4F4D;&#x4E8E;&#x540C;&#x4E00;&#x4E2A;&#x96C6;&#x7FA4;&#x4E2D;&#xFF0C;&#x670D;&#x52A1;&#x7F51;&#x683C;&#x7BA1;&#x7406;&#x8FDB;&#x51FA;&#x96C6;&#x7FA4;&#x548C;&#x96C6;&#x7FA4;&#x5185;&#x90E8;&#x7684;&#x6D41;&#x91CF;&#xFF0C;&#x5F53;&#x6211;&#x4EEC;&#x9700;&#x8981;&#x7BA1;&#x7406;&#x591A;&#x4E2A;&#x96C6;&#x7FA4;&#x6216;&#x8005;&#x662F;&#x5F15;&#x5165;&#x5916;&#x90E8;&#x7684;&#x670D;&#x52A1;&#x65F6;&#x5C31;&#x9700;&#x8981;<a href="https://preliminary.istio.io/zh/docs/setup/kubernetes/mesh-expansion/" target="_blank">&#x7F51;&#x683C;&#x6269;&#x5C55;</a>&#x548C;<a href="https://preliminary.istio.io/zh/docs/setup/kubernetes/multicluster-install/" target="_blank">&#x591A;&#x96C6;&#x7FA4;&#x914D;&#x7F6E;</a>&#x3002;</p>
+<h2 id="&#x53C2;&#x8003;">&#x53C2;&#x8003;</h2>
+<ul>
+<li><a href="https://jimmysong.io/posts/the-enterprise-path-to-service-mesh-architectures/" target="_blank">&#x4F01;&#x4E1A;&#x7EA7;&#x670D;&#x52A1;&#x7F51;&#x683C;&#x67B6;&#x6784;&#x4E4B;&#x8DEF;&#x89E3;&#x8BFB;</a></li>
+</ul>
+<footer class="page-footer"><span class="copyright"><p><a href="https://ws1.sinaimg.cn/large/006tNbRwly1fw3l1sxoijj304g0563z7.jpg" data-lightbox="2fd927ee-fa64-4eca-8ed5-6bd72b573a3c" target="_blank">&#x70B9;&#x51FB;&#x5173;&#x6CE8;&#x3010;ServiceMesher&#x3011; &#x5FAE;&#x4FE1;&#x516C;&#x4F17;&#x53F7;&#x56DE;&#x590D;&#x3010;&#x52A0;&#x7FA4;&#x3011;&#x52A0;&#x5165;&#x793E;&#x533A;</a></p>Copyright &#xA9; <a href="http://www.servicemesher.com" target="_blank">servicemesher.com</a> 2018-2019 all right reserved&#xFF0C;powered by Gitbook</span><span class="footer-modification"> Updated at 
+2019-03-12 11:55:52
+</span></footer></body></html>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="service-mesh-architectures.html" class="navigation navigation-prev " aria-label="Previous page: 服务网格架构">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="istio-architecture.html" class="navigation navigation-next " aria-label="Next page: Istio 架构解析">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"owners":["rootsongjc"],"reviewers":[""],"description":"本文介绍了服务网格架构中的实现模式。","publishDate":"2019-03-10T00:00:00.000Z","updateDate":"2019-03-10T00:00:00.000Z","tags":["service mesh"],"category":"evolution","title":"服务网格的实现模式","level":"2.3.1","depth":2,"next":{"title":"Istio 架构解析","level":"2.3.2","depth":2,"path":"concepts-and-principle/istio-architecture.md","ref":"concepts-and-principle/istio-architecture.md","articles":[]},"previous":{"title":"服务网格架构","level":"2.3","depth":1,"path":"concepts-and-principle/service-mesh-architectures.md","ref":"concepts-and-principle/service-mesh-architectures.md","articles":[{"title":"服务网格的实现模式","level":"2.3.1","depth":2,"path":"concepts-and-principle/service-mesh-patterns.md","ref":"concepts-and-principle/service-mesh-patterns.md","articles":[]},{"title":"Istio 架构解析","level":"2.3.2","depth":2,"path":"concepts-and-principle/istio-architecture.md","ref":"concepts-and-principle/istio-architecture.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["github","codesnippet","splitter","page-toc-button","image-captions","editlink","back-to-top-button","-lunr","-search","search-plus","github-buttons@2.1.0","favicon@^0.0.2","tbfed-pagefooter@^0.0.1","3-ba","theme-default","-highlight","prism","prism-themes","sitemap-general","lightbox","ga"],"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"},"pluginsConfig":{"tbfed-pagefooter":{"copyright":"<p><a href=https://ws1.sinaimg.cn/large/006tNbRwly1fw3l1sxoijj304g0563z7.jpg data-lightbox=2fd927ee-fa64-4eca-8ed5-6bd72b573a3c>点击关注【ServiceMesher】 微信公众号回复【加群】加入社区</a></p>Copyright © <a href=http://www.servicemesher.com>servicemesher.com</a> 2018-2019","modify_label":" Updated at ","modify_format":"YYYY-MM-DD HH:mm:ss"},"prism":{"css":["prism-themes/themes/prism-ghcolors.css"]},"github":{"url":"https://github.com/servicemesher/istio-handbook"},"editlink":{"label":"编辑本页","multilingual":false,"base":"https://github.com/servicemesher/istio-handbook/blob/master/"},"splitter":{},"codesnippet":{},"sitemap-general":{"prefix":"http://www.servicemesher.com/istio-handbook/"},"fontsettings":{"theme":"white","family":"sans","size":2},"favicon":{"shortcut":"favicon.ico","bookmark":"favicon.ico"},"lightbox":{"jquery":true},"page-toc-button":{},"back-to-top-button":{},"prism-themes":{},"github-buttons":{"repo":"servicemesher/istio-handbook","types":["star"],"size":"small"},"3-ba":{"configuration":"auto","token":"11f7d254cfa4e0ca44b175c66d379ecc"},"ga":{"configuration":"auto","token":"UA-93485976-2"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"showLevel":true,"styles":{"ebook":"styles/ebook.css","epub":"styles/epub.css","mobi":"styles/mobi.css","pdf":"styles/pdf.css","print":"styles/print.css","website":"styles/website.css"}},"search-plus":{},"image-captions":{"caption":"图片 - _CAPTION_","variable_name":"_pictures"}},"theme":"default","author":"ServiceMesher 社区","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{"_pictures":[{"backlink":"index.html#fig1.1.1","level":"1.1","list_caption":"Figure: ServiceMesher 微信公众号","alt":"ServiceMesher 微信公众号","nro":1,"url":"https://ws2.sinaimg.cn/large/006tNc79ly1fz6cq93dwmj31jt0beq9s.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"ServiceMesher 微信公众号","attributes":{},"skip":false,"key":"1.1.1"},{"backlink":"concepts-and-principle/what-is-service-mesh.html#fig2.2.1","level":"2.2","list_caption":"Figure: Service Mesh 架构图","alt":"Service Mesh 架构图","nro":2,"url":"https://ws1.sinaimg.cn/large/00704eQkly1fswh7dbs1pj30id0bpmxl.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Service Mesh 架构图","attributes":{},"skip":false,"key":"2.2.1"},{"backlink":"concepts-and-principle/service-mesh-architectures.html#fig2.3.1","level":"2.3","list_caption":"Figure: 服务网格架构示意图","alt":"服务网格架构示意图","nro":3,"url":"https://ws2.sinaimg.cn/large/0069RVTdly1fuail4d24jj31080rkgr7.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"服务网格架构示意图","attributes":{},"skip":false,"key":"2.3.1"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.1","level":"2.3.1","list_caption":"Figure: Service Mesh 架构示意图","alt":"Service Mesh 架构示意图","nro":4,"url":"https://ws1.sinaimg.cn/large/006tNbRwly1fubs6ts3sgj30vo0osdnj.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Service Mesh 架构示意图","attributes":{},"skip":false,"key":"2.3.1.1"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.2","level":"2.3.1","list_caption":"Figure: Ingress 或边缘代理架构示意图","alt":"Ingress 或边缘代理架构示意图","nro":5,"url":"https://ws4.sinaimg.cn/large/006tNbRwly1fubsk4v16hj30vo0bq75z.jpg","index":2,"caption_template":"图片 - _CAPTION_","label":"Ingress 或边缘代理架构示意图","attributes":{},"skip":false,"key":"2.3.1.2"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.3","level":"2.3.1","list_caption":"Figure: 路由器网格架构示意图","alt":"路由器网格架构示意图","nro":6,"url":"https://ws1.sinaimg.cn/large/006tNbRwly1fubsxrph3dj30vq0duq53.jpg","index":3,"caption_template":"图片 - _CAPTION_","label":"路由器网格架构示意图","attributes":{},"skip":false,"key":"2.3.1.3"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.4","level":"2.3.1","list_caption":"Figure: Proxy per node 架构示意图","alt":"Proxy per node 架构示意图","nro":7,"url":"https://ws3.sinaimg.cn/large/006tNbRwly1fubt5a97h7j30vq0bcq5p.jpg","index":4,"caption_template":"图片 - _CAPTION_","label":"Proxy per node 架构示意图","attributes":{},"skip":false,"key":"2.3.1.4"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.5","level":"2.3.1","list_caption":"Figure: Sidecar代理/Fabric模型示意图","alt":"Sidecar代理/Fabric模型示意图","nro":8,"url":"https://ws4.sinaimg.cn/large/006tNbRwly1fubvi0dnhlj30vo0ekwhx.jpg","index":5,"caption_template":"图片 - _CAPTION_","label":"Sidecar代理/Fabric模型示意图","attributes":{},"skip":false,"key":"2.3.1.5"},{"backlink":"concepts-and-principle/service-mesh-patterns.html#fig2.3.1.6","level":"2.3.1","list_caption":"Figure: Sidecar 代理/控制平面架构示意图","alt":"Sidecar 代理/控制平面架构示意图","nro":9,"url":"https://ws4.sinaimg.cn/large/006tNbRwly1fubvr83wvgj30vq0mmdip.jpg","index":6,"caption_template":"图片 - _CAPTION_","label":"Sidecar 代理/控制平面架构示意图","attributes":{},"skip":false,"key":"2.3.1.6"},{"backlink":"concepts-and-principle/istio-architecture.html#fig2.3.2.1","level":"2.3.2","list_caption":"Figure: 来自 Twitter @daniseyu21","alt":"来自 Twitter @daniseyu21","nro":10,"url":"https://ws3.sinaimg.cn/large/006tNbRwly1fujrgeesk7j316c0tz10y.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"来自 Twitter @daniseyu21","attributes":{},"skip":false,"key":"2.3.2.1"},{"backlink":"concepts-and-principle/sidecar-pattern.html#fig2.4.1","level":"2.4","list_caption":"Figure: SOFAMesh 架构图","alt":"SOFAMesh 架构图","nro":11,"url":"https://ws4.sinaimg.cn/large/006tNbRwgy1fuyr4vizzwj31kw1biq98.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"SOFAMesh 架构图","attributes":{},"skip":false,"key":"2.4.1"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.1","level":"2.4.1","list_caption":"Figure: iptables 调用链","alt":"iptables 调用链","nro":12,"url":"https://ws4.sinaimg.cn/large/0069RVTdly1fv5hukl647j30k6145gnt.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"iptables 调用链","attributes":{},"skip":false,"key":"2.4.1.1"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.2","level":"2.4.1","list_caption":"Figure: iptables 调用链","alt":"iptables 调用链","nro":13,"url":"https://ws1.sinaimg.cn/large/0069RVTdgy1fv5dq2bptdj31110begnl.jpg","index":2,"caption_template":"图片 - _CAPTION_","label":"iptables 调用链","attributes":{},"skip":false,"key":"2.4.1.2"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.3","level":"2.4.1","list_caption":"Figure: iptables结构图","alt":"iptables结构图","nro":14,"url":"https://ws4.sinaimg.cn/large/0069RVTdgy1fv5dm4a9ygj30w50czdi3.jpg","index":3,"caption_template":"图片 - _CAPTION_","label":"iptables结构图","attributes":{},"skip":false,"key":"2.4.1.3"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.4","level":"2.4.1","list_caption":"Figure: Envoy sidecar 流量劫持流程示意图","alt":"Envoy sidecar 流量劫持流程示意图","nro":15,"url":"https://ws3.sinaimg.cn/large/006tKfTcly1g0xriynoarj31c70u0qkt.jpg","index":4,"caption_template":"图片 - _CAPTION_","label":"Envoy sidecar 流量劫持流程示意图","attributes":{},"skip":false,"key":"2.4.1.4"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.5","level":"2.4.1","list_caption":"Figure: istio sidecar iptables 注入","alt":"istio sidecar iptables 注入","nro":16,"url":"https://ws3.sinaimg.cn/large/006tNbRwly1fv92uvxu4dj31320giq6u.jpg","index":5,"caption_template":"图片 - _CAPTION_","label":"istio sidecar iptables 注入","attributes":{},"skip":false,"key":"2.4.1.5"},{"backlink":"concepts-and-principle/sidecar-injection-deep-dive.html#fig2.4.1.6","level":"2.4.1","list_caption":"Figure: Istio bookinfo","alt":"Istio bookinfo","nro":17,"url":"https://ws3.sinaimg.cn/large/0069RVTdgy1fv5df9lq1aj317o0o6wia.jpg","index":6,"caption_template":"图片 - _CAPTION_","label":"Istio bookinfo","attributes":{},"skip":false,"key":"2.4.1.6"},{"backlink":"concepts-and-principle/istio-sidecar-injector.html#fig2.4.2.1","level":"2.4.2","list_caption":"Figure: Sidecar 注入流程图","alt":"Sidecar 注入流程图","nro":18,"url":"https://ws3.sinaimg.cn/large/006tKfTcly1g0bvoxmfvuj311i0fy0vh.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Sidecar 注入流程图","attributes":{},"skip":false,"key":"2.4.2.1"},{"backlink":"data-plane/istio-sidecar-proxy-config.html#fig3.3.1","level":"3.3","list_caption":"Figure: Envoy 配置","alt":"Envoy 配置","nro":19,"url":"https://ws3.sinaimg.cn/large/006tNbRwly1fyb74brsd5j30xg0lojvt.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Envoy 配置","attributes":{},"skip":false,"key":"3.3.1"},{"backlink":"data-plane/envoy-proxy-config-deep-dive.html#fig3.4.1","level":"3.4","list_caption":"Figure: Envoy 配置","alt":"Envoy 配置","nro":20,"url":"https://ws1.sinaimg.cn/large/006tNbRwly1fy2x2zk1hhj30ee0h9jtg.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Envoy 配置","attributes":{},"skip":false,"key":"3.4.1"},{"backlink":"data-plane/envoy-proxy-config-deep-dive.html#fig3.4.2","level":"3.4","list_caption":"Figure: bootstrap 配置","alt":"bootstrap 配置","nro":21,"url":"https://ws4.sinaimg.cn/large/006tNbRwly1fy2xid761zj30c70ai0tj.jpg","index":2,"caption_template":"图片 - _CAPTION_","label":"bootstrap 配置","attributes":{},"skip":false,"key":"3.4.2"},{"backlink":"data-plane/envoy-api.html#fig3.5.1","level":"3.5","list_caption":"Figure: Envoy proxy 架构图","alt":"Envoy proxy 架构图","nro":22,"url":"https://ws2.sinaimg.cn/large/006tNc79ly1fz69bsaqk7j314k0tsq90.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Envoy proxy 架构图","attributes":{},"skip":false,"key":"3.5.1"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.1","level":"3.6","list_caption":"Figure: ACK 后的版本更新","alt":"ACK 后的版本更新","nro":23,"url":"https://ws1.sinaimg.cn/mw690/7e0ee03agy1fvmxs5aod1j20cc06y74c.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"ACK 后的版本更新","attributes":{},"skip":false,"key":"3.6.1"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.2","level":"3.6","list_caption":"Figure: NACK 无版本更新","alt":"NACK 无版本更新","nro":24,"url":"https://ws1.sinaimg.cn/mw690/7e0ee03agy1fvmxtjqtcsj20cc06y0ss.jpg","index":2,"caption_template":"图片 - _CAPTION_","label":"NACK 无版本更新","attributes":{},"skip":false,"key":"3.6.2"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.3","level":"3.6","list_caption":"Figure: ACK 紧接着 NACK","alt":"ACK 紧接着 NACK","nro":25,"url":"https://ws1.sinaimg.cn/mw690/7e0ee03agy1fvmxtwzc96j20cc0923yp.jpg","index":3,"caption_template":"图片 - _CAPTION_","label":"ACK 紧接着 NACK","attributes":{},"skip":false,"key":"3.6.3"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.4","level":"3.6","list_caption":"Figure: CDS 响应导致 EDS 资源更新","alt":"CDS 响应导致 EDS 资源更新","nro":26,"url":"https://ws1.sinaimg.cn/large/006tNc79ly1fvph0p7u8zj31fm0lq0ve.jpg","index":4,"caption_template":"图片 - _CAPTION_","label":"CDS 响应导致 EDS 资源更新","attributes":{},"skip":false,"key":"3.6.4"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.5","level":"3.6","list_caption":"Figure: EDS 更新速率激发 nonces","alt":"EDS 更新速率激发 nonces","nro":27,"url":"https://ws4.sinaimg.cn/large/006tNc79ly1fvph04ln3fj31kw0rogqc.jpg","index":5,"caption_template":"图片 - _CAPTION_","label":"EDS 更新速率激发 nonces","attributes":{},"skip":false,"key":"3.6.5"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.6","level":"3.6","list_caption":"Figure: 请求变的陈旧","alt":"请求变的陈旧","nro":28,"url":"https://ws3.sinaimg.cn/large/006tNc79ly1fvpgy6xewrj31b415ctcy.jpg","index":6,"caption_template":"图片 - _CAPTION_","label":"请求变的陈旧","attributes":{},"skip":false,"key":"3.6.6"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.7","level":"3.6","list_caption":"Figure: EDS/CDS 在一个 ADS 流上多路复用","alt":"EDS/CDS 在一个 ADS 流上多路复用","nro":29,"url":"https://ws2.sinaimg.cn/large/006tNc79ly1fvpgxnl947j313q0wgq62.jpg","index":7,"caption_template":"图片 - _CAPTION_","label":"EDS/CDS 在一个 ADS 流上多路复用","attributes":{},"skip":false,"key":"3.6.7"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.8","level":"3.6","list_caption":"Figure: 增量 session 示例","alt":"增量 session 示例","nro":30,"url":"https://ws4.sinaimg.cn/large/006tNc79ly1fvpgwfbep7j31kw0vldli.jpg","index":8,"caption_template":"图片 - _CAPTION_","label":"增量 session 示例","attributes":{},"skip":false,"key":"3.6.8"},{"backlink":"data-plane/envoy-xds-protocol.html#fig3.6.9","level":"3.6","list_caption":"Figure: 增量重连示例","alt":"增量重连示例","nro":31,"url":"https://ws2.sinaimg.cn/large/006tNc79ly1fvpgx05z3kj31kw0phwif.jpg","index":9,"caption_template":"图片 - _CAPTION_","label":"增量重连示例","attributes":{},"skip":false,"key":"3.6.9"},{"backlink":"traffic-management/traffic-management-basic.html#fig5.2.1","level":"5.2","list_caption":"Figure: istio ingress gateway pod","alt":"istio ingress gateway pod","nro":32,"url":"https://ws4.sinaimg.cn/large/0069RVTdgy1fv7xh71h8fj31fn0dyq9g.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"istio ingress gateway pod","attributes":{},"skip":false,"key":"5.2.1"},{"backlink":"traffic-management/traffic-management-basic.html#fig5.2.2","level":"5.2","list_caption":"Figure: VirtualSerivce 和 DestimationRule 示意图","alt":"VirtualSerivce 和 DestimationRule 示意图","nro":33,"url":"../images/istio-virtualservice-and-destinationrule-illustration.png","index":2,"caption_template":"图片 - _CAPTION_","label":"VirtualSerivce 和 DestimationRule 示意图","attributes":{},"skip":false,"key":"5.2.2"},{"backlink":"traffic-management/sidecar-traffic-routing-deep-dive.html#fig5.3.1","level":"5.3","list_caption":"Figure: Bookinfo 示例","alt":"Bookinfo 示例","nro":34,"url":"https://ws1.sinaimg.cn/large/006tNbRwgy1fvlwjd3302j31bo0ro0x5.jpg","index":1,"caption_template":"图片 - _CAPTION_","label":"Bookinfo 示例","attributes":{},"skip":false,"key":"5.3.1"},{"backlink":"traffic-management/sidecar-traffic-routing-deep-dive.html#fig5.3.2","level":"5.3","list_caption":"Figure: Bookinfo 示例与 Istio 组件连接关系图","alt":"Bookinfo 示例与 Istio 组件连接关系图","nro":35,"url":"https://ws4.sinaimg.cn/large/006tNbRwly1fyitp0jsghj31o70u0x6p.jpg","index":2,"caption_template":"图片 - _CAPTION_","label":"Bookinfo 示例与 Istio 组件连接关系图","attributes":{},"skip":false,"key":"5.3.2"},{"backlink":"traffic-management/sidecar-traffic-routing-deep-dive.html#fig5.3.3","level":"5.3","list_caption":"Figure: Envoy sidecar 流量劫持与路由转发示意图","alt":"Envoy sidecar 流量劫持与路由转发示意图","nro":36,"url":"../images/envoy-sidecar-traffic-interception-20190111.png","index":3,"caption_template":"图片 - _CAPTION_","label":"Envoy sidecar 流量劫持与路由转发示意图","attributes":{},"skip":false,"key":"5.3.3"}]},"title":"Istio Handbook - Istio 服务网格进阶实战 by ServiceMesher(服务网格中文社区)","language":"zh-hans","links":{"sidebar":{"ServiceMesher 社区":"http://www.servicemesher.com","Istio 官网（中文）":"https://istio.io/zh/"}},"gitbook":"*","description":"Istio Handbook - Istio 服务网格进阶实战，管理后 Kubernetes 时代的服务"},"file":{"path":"concepts-and-principle/service-mesh-patterns.md","mtime":"2019-03-12T03:55:52.450Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-03-12T03:56:20.786Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-splitter/splitter.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-page-toc-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-editlink/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-back-to-top-button/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-plus/jquery.mark.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search-plus/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github-buttons/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-3-ba/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lightbox/jquery.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lightbox/lightbox.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-ga/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
