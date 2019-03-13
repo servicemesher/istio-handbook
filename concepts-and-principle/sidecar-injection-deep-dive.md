@@ -1,9 +1,9 @@
 ---
 owners: ["rootsongjc"]
-reviewers: [""]
+reviewers: ["haiker2011"]
 description: "本文介绍了 istio service mesh 中的 sidecar 注入及流量劫持的详细过程。"
 publishDate: 2019-03-10
-updateDate: 2019-03-10
+updateDate: 2019-03-12
 tags: ["sidecar","iptables","init-container"]
 category: "original"
 ---
@@ -409,7 +409,7 @@ Chain OUTPUT (policy ACCEPT 18M packets, 1916M bytes)
 
 **target 支持的类型**
 
-`target` 类型包括 ACCEPT`、REJECT`、`DROP`、`LOG` 、`SNAT`、`MASQUERADE`、`DNAT`、`REDIRECT`、`RETURN` 或者跳转到其他规则等。只要执行到某一条链中只有按照顺序有一条规则匹配后就可以确定报文的去向了，除了 `RETURN` 类型，类似编程语言中的 `return` 语句，返回到它的调用点，继续执行下一条规则。`target` 支持的配置详解请参考 [iptables 详解（1）：iptables 概念](http://www.zsythink.net/archives/1199)。
+`target` 类型包括 `ACCEPT`、`REJECT`、`DROP`、`LOG` 、`SNAT`、`MASQUERADE`、`DNAT`、`REDIRECT`、`RETURN` 或者跳转到其他规则等。只要执行到某一条链中只有按照顺序有一条规则匹配后就可以确定报文的去向了，除了 `RETURN` 类型，类似编程语言中的 `return` 语句，返回到它的调用点，继续执行下一条规则。`target` 支持的配置详解请参考 [iptables 详解（1）：iptables 概念](http://www.zsythink.net/archives/1199)。
 
 从输出结果中可以看到 Init 容器没有在 iptables 的默认链路中创建任何规则，而是创建了新的链路。
 
@@ -684,7 +684,7 @@ ENTRYPOINT ["/usr/local/bin/pilot-agent"]
 
 图片来自 [Istio 官方网站](https://istio.io/zh/docs/examples/bookinfo/)
 
-对照 bookinfo 示例的 productpage 的查看建立的连接。在 `productpage-v1-745ffc55b7-2l2lw` Pod 的 `istio-proxy` 容器中使用 root 用户查看打开的端口。
+对照 bookinfo 示例的 productpage 查看建立的连接。在 `productpage-v1-745ffc55b7-2l2lw` Pod 的 `istio-proxy` 容器中使用 root 用户查看打开的端口。
 
 ```bash
 $ lsof -i
@@ -704,7 +704,7 @@ envoy    11 istio-proxy   62u  IPv4 338497      0t0  TCP productpage-v1-745ffc55
 envoy    11 istio-proxy   63u  IPv4 338525      0t0  TCP productpage-v1-745ffc55b7-2l2lw:50592->172.33.71.5:9080 (ESTABLISHED) # reviews-v3 的 http 端口
 ```
 
-从输出级过上可以验证 Sidecar 是如何接管流量和与 istio-pilot 通信，及向 Mixer 做遥测数据汇聚的。感兴趣的读者可以再去看看其他几个服务的 istio-proxy 容器中的 iptables 和端口信息。
+从输出经过上可以验证 Sidecar 是如何接管流量和与 istio-pilot 通信，及向 Mixer 做遥测数据汇聚的。感兴趣的读者可以再去看看其他几个服务的 istio-proxy 容器中的 iptables 和端口信息。
 
 ## 参考
 

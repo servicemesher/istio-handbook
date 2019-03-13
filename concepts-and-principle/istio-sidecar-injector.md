@@ -1,9 +1,9 @@
 ---
 owners: ["rootsongjc"]
-reviewers: [""]
+reviewers: ["haiker2011"]
 description: "本文介绍了 istio service mesh 中的 sidecar 自动注入过程。"
 publishDate: 2019-03-10
-updateDate: 2019-03-10
+updateDate: 2019-03-12
 tags: ["sidecar"]
 category: "original"
 ---
@@ -20,7 +20,7 @@ category: "original"
 
 ### 手动注入 sidecar 与自动注入 sidecar 的区别
 
-不论是手动注入还是自动注入，sidecar 的注入过程有需要遵循如下步骤：
+不论是手动注入还是自动注入，sidecar 的注入过程都需要遵循如下步骤：
 
 1. Kubernetes 需要了解待注入的 sidecar 所连接的 Istio 集群及其配置；
 
