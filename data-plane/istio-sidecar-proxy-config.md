@@ -33,7 +33,7 @@ details-v1-876bf485f-sx7df.default                    SYNCED     SYNCED     SYNC
 ...
 ```
 
-[istioctl](https://istio.io/zh/docs/reference/commands/istioctl/) 这个命令行工具就像 [kubectl](https://jimmysong.io/kubernetes-handbook/guide/kubectl-cheatsheet.html) 一样有很多神器的魔法，通过它可以高效的管理 Istio 和 debug。
+[istioctl](https://istio.io/zh/docs/reference/commands/istioctl/) 这个命令行工具就像 [kubectl](https://jimmysong.io/kubernetes-handbook/guide/kubectl-cheatsheet.html) 一样有很多神奇的魔法，通过它可以高效的管理 Istio 和 debug。
 
 ## 参考
 

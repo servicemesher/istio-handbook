@@ -14,7 +14,7 @@ category: "evolution"
 
 ![服务网格架构示意图](https://ws2.sinaimg.cn/large/0069RVTdly1fuail4d24jj31080rkgr7.jpg)
 
-服务网格中分为**控制平面**和**数据平面**，当前流行的两款开源的服务网格 Istio 和 Linkerd 实际上都是这种构造，只不过 Istio 的划分更清晰，而且部署更零散，很多组件都被拆分，控制平面中包括 Mixer、Pilot、Citadel，数据平面默认是用Envoy；而 Linkerd 中只分为 Linkerd 做数据平面，namerd 作为控制平面。
+服务网格中分为**控制平面**和**数据平面**，当前流行的两款开源的服务网格 Istio 和 Linkerd 实际上都是这种架构，只不过 Istio 的划分更清晰，而且部署更零散，很多组件都被拆分，控制平面中包括 Mixer、Pilot、Citadel，数据平面默认是用 Envoy；而 Linkerd 中只分为 Linkerd 做数据平面，namerd 作为控制平面。
 
 ## 控制平面
 
@@ -23,7 +23,7 @@ category: "evolution"
 - 不直接解析数据包
 - 与控制平面中的代理通信，下发策略和配置
 - 负责网络行为的可视化
-- 通常提供API或者命令行工具可用于配置版本化管理，便于持续集成和部署
+- 通常提供 API 或者命令行工具可用于配置版本化管理，便于持续集成和部署
 
 ## 数据平面
 
