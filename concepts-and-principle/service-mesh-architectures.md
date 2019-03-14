@@ -1,9 +1,9 @@
 ---
 owners: ["rootsongjc"]
-reviewers: [""]
+reviewers: ["tangyong"]
 description: "本文介绍了服务网格架构。"
 publishDate: 2019-03-10
-updateDate: 2019-03-10
+updateDate: 2019-03-14
 tags: ["service mesh"]
 category: "evolution"
 ---
@@ -21,7 +21,7 @@ category: "evolution"
 控制平面的特点：
 
 - 不直接解析数据包
-- 与控制平面中的代理通信，下发策略和配置
+- 与数据平面中的代理通信，下发策略和配置
 - 负责网络行为的可视化
 - 通常提供 API 或者命令行工具可用于配置版本化管理，便于持续集成和部署
 
