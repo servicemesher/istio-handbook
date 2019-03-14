@@ -1,9 +1,9 @@
 ---
 owners: ["rootsongjc"]
-reviewers: ["haiker2011"]
+reviewers: ["haiker2011", "tangyong"]
 description: "本文介绍了服务网格架构中的实现模式。"
 publishDate: 2019-03-10
-updateDate: 2019-03-12
+updateDate: 2019-03-15
 tags: ["service mesh"]
 category: "evolution"
 ---
@@ -58,7 +58,7 @@ Ingress 或者边缘代理可以处理进出集群的流量，为了应对集群
 
 ## 多集群部署和扩展
 
-以上都是单个服务网格集群的架构，所有的服务都位于同一个集群中，服务网格管理进出集群和集群内部的流量，当我们需要管理多个集群或者是引入外部的服务时就需要[网格扩展](https://preliminary.istio.io/zh/docs/setup/kubernetes/mesh-expansion/)和[多集群配置](https://preliminary.istio.io/zh/docs/setup/kubernetes/multicluster-install/)。
+以上都是单个服务网格集群的架构，所有的服务都位于同一个集群中，服务网格管理进出集群和集群内部的流量，当我们需要管理多个集群或者是引入外部的服务时就需要[网格扩展](https://preliminary.istio.io/zh/docs/setup/kubernetes/additional-setup/mesh-expansion/)和[多集群配置](https://istio.io/docs/setup/kubernetes/multicluster-install/)。
 
 ## 参考
 
