@@ -1,6 +1,6 @@
 ---
 owners: ["rootsongjc"]
-reviewers: [""]
+reviewers: ["tangyong"]
 description: "本文介绍了服务网格架构。"
 publishDate: 2019-03-10
 updateDate: 2019-03-14
