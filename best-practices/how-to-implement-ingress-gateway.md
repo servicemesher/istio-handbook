@@ -8,6 +8,8 @@ tags: ["Istio","API Gateway","Ingress","Load Balancer"]
 category: "original"
 ---
 
+# 为服务网格选择入口网关
+
 在启用了Istio服务网格的Kubernetes集群中，缺省情况下只能在集群内部访问网格中的服务，要如何才能从外部网络访问这些服务呢？ Kubernetes和Istio提供了NodePort，LoadBalancer，Kubernetes Ingress，Istio Gateway等多种外部流量入口的方式，面对这么多种方式，我们在产品部署中应该如何选择？
 
 本文将对Kubernetes和Istio对外提供服务的各种方式进行详细介绍和对比分析，并根据分析结果提出一个可用于产品部署的解决方案。
