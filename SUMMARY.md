@@ -54,6 +54,8 @@
 
 ## 最佳实践
 
+- [如何为服务网格选择入口网关？](best-practices/how-to-implement-ingress-gateway.md)
+
 ## 附录
 
 - [服务网格全景图](appendix/service-mesh-landscape.md)
