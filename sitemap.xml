@@ -28,5 +28,6 @@
 <url> <loc>http://www.servicemesher.com/istio-handbook/traffic-management/</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
 <url> <loc>http://www.servicemesher.com/istio-handbook/traffic-management/traffic-management-basic.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
 <url> <loc>http://www.servicemesher.com/istio-handbook/traffic-management/sidecar-traffic-routing-deep-dive.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
+<url> <loc>http://www.servicemesher.com/istio-handbook/best-practices/how-to-implement-ingress-gateway.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
 <url> <loc>http://www.servicemesher.com/istio-handbook/appendix/service-mesh-landscape.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
 </urlset>
