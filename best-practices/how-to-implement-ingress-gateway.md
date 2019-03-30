@@ -58,7 +58,7 @@ Cluster IP解决了服务之间相互访问的问题，但从上面Kube-proxy的
 
 Istio Sidecar Proxy和Kube-proxy的userspace模式的工作机制类似，都是通过在用户空间的一个代理来实现客户端请求的转发和后端多个Pod之间的负载均衡。两者的不同点是：Kube-Proxy工作在四层，而Sidecar Proxy则是一个七层代理，可以针对HTTP，GRPS等应用层的语义进行处理和转发，因此功能更为强大，可以配合控制面实现更为灵活的路由规则和服务管控功能。
 
-![Istio Sidecar Proxy](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/Istio-inter-services-communication.jpg)
+![Istio Sidecar Proxy](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kur74j27j20ho0bujsm.jpg)
 
 # 如何从外部网络访问
 
@@ -144,7 +144,7 @@ NodePort的流量转发机制和Cluster IP的iptables模式类似，唯一不同
 
 从分析得知，在NodePort模式下，集群内外部的通讯如下图所示：
 
-![NodePort](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/NodePort.jpg)
+![NodePort](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kur7ink1j20dx0bcabj.jpg)
 
 ## LoadBalancer
 
@@ -158,7 +158,7 @@ NodePort提供了一种从外部网络访问Kubernetes集群内部Service的方�
 
 下图展示了Kubernetes如何通过LoadBalancer方式对外提供流量入口，图中LoadBalancer后面接入了两个主机节点上的NodePort，后端部署了三个Pod提供服务。根据集群的规模，可以在LoadBalancer后面可以接入更多的主机节点，以进行负荷分担。
 
-![NodeBalancer](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/Load-Balancer.png)
+![NodeBalancer](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kur7aa0qj20qv0hl3zr.jpg)
 
 > 备注：LoadBalancer类型需要云服务提供商的支持，Service中的定义只是在Kubernetes配置文件中提出了一个要求，即为该Service创建Load Balancer，至于如何创建则是由Google Cloud或Amazon Cloud等云服务商提供的，创建的Load Balancer的过程不在Kubernetes Cluster的管理范围中。
 > 
@@ -176,25 +176,25 @@ LoadBalancer类型的Service提供的是四层负载均衡器，当只需要向�
 
 同一个TCP端口进来的流量可以根据URL路由到Cluster中的不同服务，如下图所示：
 
-![Simple fanout](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/Ingress-url-fanout.png)
+![按HTTP请求的ULR进行路由](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kur85xbfj20fz0bp0t4.jpg)
 
 ### 按HTTP请求的Host进行路由
 
 同一个IP进来的流量可以根据HTTP请求的Host路由到Cluster中的不同服务，如下图所示：
 
-![Name based virtual hosting](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/Ingress-name-based-route.png)
+![按HTTP请求的Host进行路由](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kur7zut9j20fw0caaaf.jpg)
 
 Ingress 规则定义了对七层网关的要求，包括URL分发规则，基于不同域名的虚拟主机，SSL证书等。Kubernetes使用Ingress Controller 来监控Ingress规则，并通过一个七层网关来实现这些要求，一般可以使用Nginx，HAProxy，Envoy等。
 
 虽然Ingress Controller通过七层网关为后端的多个Service提供了统一的入口，但由于其部署在集群中，因此并不能直接对外提供服务。实际上Ingress需要配合NodePort和LoadBalancer才能提供对外的流量入口，如下图所示：
 
-![采用Ingress, NodePortal和LoadBalancer提供外部流量入口的拓扑结构](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/Ingress+Nodeport+LoadBalancer-Topo.png)
+![采用Ingress, NodePortal和LoadBalancer提供外部流量入口的拓扑结构](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kur7vshrj20lw0gpaao.jpg)
 
 上图描述了如何采用Ingress配合NodePort和Load Balancer为集群提供外部流量入口，从该拓扑图中可以看到该架构的伸缩性非常好，在NodePort，Ingress，Pod等不同的接入层面都可以对系统进行水平扩展，以应对不同的外部流量要求。
 
 上图只展示了逻辑架构，下面的图展示了具体的实现原理：
 
-![采用Ingress, NodePortal和LoadBalancer提供外部流量入口的实现原理](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/Ingress+NodePort+LoadBalancer-deep-dive.png)
+![采用Ingress, NodePortal和LoadBalancer提供外部流量入口的实现原理](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kur7w5yoj20es0lpwfn.jpg)
 
 流量从外部网络到达Pod的完整路径如下：
 
@@ -217,7 +217,7 @@ Ingress 规则定义了对七层网关的要求，包括URL分发规则，基于
 * K8s Ingress是独立在Istio体系之外的，需要单独采用Ingress rule进行配置，导致系统入口和内部存在两套互相独立的路由规则配置，运维和管理较为复杂。
 * K8s Ingress rule的功能较弱，不能在入口处实现和网格内部类似的路由规则，也不具备网格sidecar的其它能力，导致难以从整体上为应用系统实现灰度发布、分布式跟踪等服务管控功能。
 
-![采用Kubernetes Ingress作为服务网格的流量入口](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/K8s-ingress-and-Istio.png)
+![采用Kubernetes Ingress作为服务网格的流量入口](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kur7amu9j20oy0bdwf0.jpg)
 
 ## Istio Gateway
 
@@ -229,7 +229,7 @@ Gateway和VirtualService用于表示Istio Ingress的配置模型，Istio Ingress
 
 通过该方式，Istio控制面用一致的配置模型同时控制了入口网关和内部的sidecar代理。这些配置包括路由规则，策略检查、Telementry收集以及其他服务管控功能。
 
-![采用 Istio Ingress Gateway作为服务网格的流量入口](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/Istio-Ingress.png)
+![采用 Istio Ingress Gateway作为服务网格的流量入口](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kur6wqsjj20kh0cbaax.jpg)
 
 ## 应用对API Gateway的需求
 
@@ -242,7 +242,7 @@ Gateway和VirtualService用于表示Istio Ingress的配置模型，Istio Ingress
 * 服务访问的SLA、限流及计费
 * ….
 
-![Kubernetes ingress, Istio gateway and API gateway的功能对比](https://zhaohuabing.com/img/2018-12-27-the-obstacles-to-put-istio-into-production/ingress-comparation.png)
+![Kubernetes ingress, Istio gateway and API gateway的功能对比](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kv0ys0ndj20m80azdiw.jpg)
 
 API Gateway需求中很大一部分需要根据不同的应用系统进行定制，目前看来暂时不大可能被纳入K8s Ingress或者Istio Gateway的规范之中。为了满足这些需求，涌现出了各类不同的k8s Ingress Controller以及Istio Ingress Gateway实现，包括Ambassador ，Kong, Traefik,Solo等。
 
@@ -259,7 +259,7 @@ API Gateway需求中很大一部分需要根据不同的应用系统进行定制
 
 由于API Gateway已经具备七层网关的功能，Mesh Ingress中的Sidecar只需要提供VirtualService资源的路由能力，并不需要提供Gateway资源的网关能力，因此采用Sidecar Proxy即可。网络入口处的Sidecar Proxy和网格内部应用Pod中Sidecar Proxy的唯一一点区别是：该Sidecar只接管API Gateway向Mesh内部的流量，并不接管外部流向API Gateway的流量；而应用Pod中的Sidecar需要接管进入应用的所有流量。
 
-![采用API Gateway + Sidecar Proxy为服务网格提供流量入口](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/API-Gateway-and-Sidecar-Proxy-as-Ingress-for-Istio.png)
+![采用API Gateway + Sidecar Proxy为服务网格提供流量入口](https://ws1.sinaimg.cn/large/6ce41a46ly1g1kur7v8ktj20nt0c0ab2.jpg)
 
 > 备注：在实际部署时，API Gateway前端需要采用NodePort和LoadBalancer提供外部流量入口。为了突出主题，对上图进行了简化，没有画出NodePort和LoadBalancer。
 
