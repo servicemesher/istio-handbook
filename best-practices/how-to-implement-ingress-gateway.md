@@ -172,12 +172,14 @@ LoadBalancer类型的Service提供的是四层负载均衡器，当只需要向�
 
 在这种情况下，我们可以通过使用Kubernetes Ingress来统一网络入口。Kubernetes Ingress声明了一个应用层（OSI七层）的负载均衡器，可以根据HTTP请求的内容将来自同一个TCP端口的请求分发到不同的Kubernetes Service，其功能包括：
 
-* **按HTTP请求的URL进行路由** <BR>
+### 按HTTP请求的URL进行路由
+
 同一个TCP端口进来的流量可以根据URL路由到Cluster中的不同服务，如下图所示：
 
 ![Simple fanout](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/Ingress-url-fanout.png)
 
-* **按HTTP请求的Host进行路由** <BR>
+### 按HTTP请求的Host进行路由
+
 同一个IP进来的流量可以根据HTTP请求的Host路由到Cluster中的不同服务，如下图所示：
 
 ![Name based virtual hosting](https://zhaohuabing.com/img/2019-03-29-how-to-choose-ingress-for-service-mesh/Ingress-name-based-route.png)
