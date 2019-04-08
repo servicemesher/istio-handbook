@@ -41,6 +41,7 @@
 - [Istio 中的流量管理](traffic-management/index.md)
 - [流量管理基础概念](traffic-management/traffic-management-basic.md)
 - [Istio 中的 Sidecar 的流量路由详解](traffic-management/sidecar-traffic-routing-deep-dive.md)
+- [熔断与异常检测在 Istio 中的应用](traffic-management/circuit-breaking-and-outlier-detection-in-istio.md)
 
 ## 安全
 
