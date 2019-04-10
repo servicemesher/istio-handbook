@@ -14,6 +14,7 @@
 - [Sidecar 模式](concepts-and-principle/sidecar-pattern.md)
   - [Istio 中的 Sidecar 注入与流量劫持详解](concepts-and-principle/sidecar-injection-deep-dive.md)
   - [Sidecar 的自动注入过程详解](concepts-and-principle/istio-sidecar-injector.md)
+- [Istio CNI Plugin](concepts-and-principle/istio-cni.md)
 
 ## 数据平面
 
