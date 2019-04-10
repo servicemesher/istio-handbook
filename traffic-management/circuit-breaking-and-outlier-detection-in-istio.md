@@ -392,9 +392,9 @@ $ curl -s http://$PILOT_SVC_IP:8080/debug/edsz|grep "outbound|8000||httpbin.defa
 
 ## 参考资料
 
-+ [istio.networking.v1alpha3 OutlierDetection](https://preliminary.istio.io/zh/docs/reference/config/istio.networking.v1alpha3/#outlierdetection)
-+ [Istio 流量管理之熔断](https://preliminary.istio.io/zh/docs/tasks/traffic-management/circuit-breaking/)
-+ [Envoy Proxy和Netflix Hystrix，究竟谁才是熔断王者？](https://zhuanlan.zhihu.com/p/33490531)
-+ [Envoy Outlier detection](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/outlier#arch-overview-outlier-detection)
-+ [Envoy Panic threshold](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/load_balancing/panic_threshold#)
-+ [Microservices Patterns With Envoy Sidecar Proxy, Part I: Circuit Breaking](https://blog.christianposta.com/microservices/01-microservices-patterns-with-envoy-proxy-part-i-circuit-breaking/)
++ [istio.networking.v1alpha3 OutlierDetection - istio.io](https://preliminary.istio.io/zh/docs/reference/config/istio.networking.v1alpha3/#outlierdetection)
++ [Istio 流量管理之熔断 - istio.io](https://preliminary.istio.io/zh/docs/tasks/traffic-management/circuit-breaking/)
++ [Envoy Proxy和Netflix Hystrix，究竟谁才是熔断王者？ - zhuanlan.zhihu.com](https://zhuanlan.zhihu.com/p/33490531)
++ [Envoy Outlier detection - envoyproxy.io](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/outlier#arch-overview-outlier-detection)
++ [Envoy Panic threshold - envoyproxy.io](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/load_balancing/panic_threshold#)
++ [Microservices Patterns With Envoy Sidecar Proxy, Part I: Circuit Breaking - blog.christianposta.com](https://blog.christianposta.com/microservices/01-microservices-patterns-with-envoy-proxy-part-i-circuit-breaking/)
