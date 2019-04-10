@@ -14,6 +14,7 @@
 - [Sidecar 模式](concepts-and-principle/sidecar-pattern.md)
   - [Istio 中的 Sidecar 注入与流量劫持详解](concepts-and-principle/sidecar-injection-deep-dive.md)
   - [Sidecar 的自动注入过程详解](concepts-and-principle/istio-sidecar-injector.md)
+- [Istio CNI Plugin](concepts-and-principle/istio-cni.md)
 
 ## 数据平面
 
@@ -41,6 +42,7 @@
 - [Istio 中的流量管理](traffic-management/index.md)
 - [流量管理基础概念](traffic-management/traffic-management-basic.md)
 - [Istio 中的 Sidecar 的流量路由详解](traffic-management/sidecar-traffic-routing-deep-dive.md)
+- [熔断与异常检测在 Istio 中的应用](traffic-management/circuit-breaking-and-outlier-detection-in-istio.md)
 
 ## 安全
 
@@ -53,6 +55,8 @@
 ## 性能和可伸缩性
 
 ## 最佳实践
+
+- [为服务网格选择入口网关](best-practices/how-to-implement-ingress-gateway.md)
 
 ## 附录
 

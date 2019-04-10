@@ -16,7 +16,6 @@ category: "evolution"
 
 ![来自 Blog @sunny0826](https://ws4.sinaimg.cn/large/ad5fbf65ly1g199o3s4g5j20lw0kijux.jpg)
 
-
 - Istio 是独立于平台的，可以在 Kubernetes 、 Consul 、虚拟机上部署的服务
 - Istio 的组成
   - Envoy：智能代理、流量控制
@@ -44,5 +43,5 @@ Istio 的架构设计中有几个关键目标，这些目标对于使系统能�
 ## 参考
 
 - [Isito 是什么? - istio.io](https://istio.io/zh/docs/concepts/what-is-istio/)
-- [Bookinfo 示例(https://istio.io/zh/docs/examples/bookinfo/)
+- [Bookinfo 示例](https://istio.io/zh/docs/examples/bookinfo/)
 
