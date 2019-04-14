@@ -89,8 +89,8 @@ Service Mesh 将底层那些难以控制的网络通讯统一管理，诸如：�
 
 ## 参考
 
-- [Sidecar pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/sidecar)
+- [Sidecar pattern - docs.microsoft.com](https://docs.microsoft.com/en-us/azure/architecture/patterns/sidecar)
 
-- [What's a service mesh? And why do I need one?](https://buoyant.io/2017/04/25/whats-a-service-mesh-and-why-do-i-need-one/)
+- [What's a service mesh? And why do I need one? - buoyant.io](https://buoyant.io/2017/04/25/whats-a-service-mesh-and-why-do-i-need-one/)
 
-- [Do I Need a Service Mesh?](https://www.nginx.com/blog/do-i-need-a-service-mesh/)
+- [Do I Need a Service Mesh? - www.nginx.com](https://www.nginx.com/blog/do-i-need-a-service-mesh/)
