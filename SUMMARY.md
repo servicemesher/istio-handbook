@@ -11,7 +11,7 @@
 - [服务网格架构](concepts-and-principle/service-mesh-architectures.md)
   - [服务网格的实现模式](concepts-and-principle/service-mesh-patterns.md)
   - [Istio 架构解析](concepts-and-principle/istio-architecture.md)
-  - [从边车模式到 Service Mesh](concepts-and-principle/sidercar-to-servicemesh.md)
+  - [从边车模式到 Service Mesh](concepts-and-principle/from-sidecar-to-servicemesh.md)
 - [Sidecar 模式](concepts-and-principle/sidecar-pattern.md)
   - [Istio 中的 Sidecar 注入与流量劫持详解](concepts-and-principle/sidecar-injection-deep-dive.md)
   - [Sidecar 的自动注入过程详解](concepts-and-principle/istio-sidecar-injector.md)
