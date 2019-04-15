@@ -6,6 +6,7 @@
 <url> <loc>http://www.servicemesher.com/istio-handbook/concepts-and-principle/service-mesh-architectures.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
 <url> <loc>http://www.servicemesher.com/istio-handbook/concepts-and-principle/service-mesh-patterns.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
 <url> <loc>http://www.servicemesher.com/istio-handbook/concepts-and-principle/istio-architecture.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
+<url> <loc>http://www.servicemesher.com/istio-handbook/concepts-and-principle/from-sidecar-to-servicemesh.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
 <url> <loc>http://www.servicemesher.com/istio-handbook/concepts-and-principle/sidecar-pattern.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
 <url> <loc>http://www.servicemesher.com/istio-handbook/concepts-and-principle/sidecar-injection-deep-dive.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
 <url> <loc>http://www.servicemesher.com/istio-handbook/concepts-and-principle/istio-sidecar-injector.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> </url>
