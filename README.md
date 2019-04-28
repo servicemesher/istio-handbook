@@ -39,4 +39,4 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 
 - 微信公众号：ServiceMesher
 
-![ServiceMesher 微信公众号](https://ws2.sinaimg.cn/large/006tNc79ly1fz6cq93dwmj31jt0beq9s.jpg)
+![ServiceMesher 微信公众号](https://jimmysong.io/istio-handbook/images/006tNc79ly1fz6cq93dwmj31jt0beq9s.jpg)

@@ -21,11 +21,11 @@ Istio envoy sidecar proxy 配置中包含以下四个部分。
 
 Enovy 的配置 dump 出来后的结构如下图所示。
 
-![Envoy 配置](https://ws1.sinaimg.cn/large/006tNbRwly1fy2x2zk1hhj30ee0h9jtg.jpg)
+![Envoy 配置](../images/006tNbRwly1fy2x2zk1hhj30ee0h9jtg.jpg)
 
 由于 bootstrap 中的配置是来自 Envoy 启动时加载的静态文件，主要配置了节点信息、tracing、admin 和统计信息收集等信息，这不是本文的重点，大家可以自行研究。
 
-![bootstrap 配置](https://ws4.sinaimg.cn/large/006tNbRwly1fy2xid761zj30c70ai0tj.jpg)
+![bootstrap 配置](../images/006tNbRwly1fy2xid761zj30c70ai0tj.jpg)
 
 上图是 bootstrap 的配置信息。
 

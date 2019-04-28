@@ -44,7 +44,7 @@ Service mesh 又译作 “服务网格”，作为服务间通信的基础设施
 
 服务网格的架构如下图所示：
 
-![Service Mesh 架构图](https://ws1.sinaimg.cn/large/00704eQkly1fswh7dbs1pj30id0bpmxl.jpg)
+![Service Mesh 架构图](../images/00704eQkly1fswh7dbs1pj30id0bpmxl.jpg)
 
 图片来自：[Pattern: Service Mesh](http://philcalcado.com/2017/08/03/pattern_service_mesh.html)
 

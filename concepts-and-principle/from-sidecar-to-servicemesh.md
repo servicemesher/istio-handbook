@@ -14,7 +14,7 @@ category: "evolution"
 
 ## 什么是边车模式
 
-![](http://wx1.sinaimg.cn/large/ad5fbf65ly1g18zhnoh76j20dw0dw752.jpg)
+![Sidecar](../images/ad5fbf65ly1g18zhnoh76j20dw0dw752.jpg)
 
 在 [Azure Architecture Center](https://docs.microsoft.com/en-us/azure/architecture/patterns/) 的云设计模式中是这么介绍边车模式的：
 
@@ -82,7 +82,7 @@ Service Mesh 将底层那些难以控制的网络通讯统一管理，诸如：�
 
 >随着应用程序复杂性的增加，服务网格将成为实现服务到服务的能力的现实选择。
 
-![](https://wx1.sinaimg.cn/large/ad5fbf65gy1g1yqgvxvzrj20sg0fxgnw.jpg)
+![Service Mesh 采用的临界点](../images/ad5fbf65gy1g1yqgvxvzrj20sg0fxgnw.jpg)
 
 图片来自：[Do I Need a Service Mesh?](https://www.nginx.com/blog/do-i-need-a-service-mesh/ )
 

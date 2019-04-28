@@ -38,7 +38,7 @@ Sidecar 是容器应用模式的一种，也是在 Service Mesh 中发扬光大�
 
 例如下图 [SOFAMesh & SOFA MOSN—基于 Istio 构建的用于应对大规模流量的 Service Mesh 解决方案](https://jimmysong.io/posts/sofamesh-and-mosn-proxy-sidecar-service-mesh-by-ant-financial/)的架构图中描述的，MOSN 作为 Sidecar 的方式和应用运行在同一个 Pod 中，拦截所有进出应用容器的流量，[SOFAMesh](https://github.com/alipay/sofa-mesh) 兼容 Istio，其中使用 Go 语言开发的 [SOFAMosn](https://github.com/alipay/sofa-mosn) 替换了 Envoy。
 
-![SOFAMesh 架构图](https://ws4.sinaimg.cn/large/006tNbRwgy1fuyr4vizzwj31kw1biq98.jpg)
+![SOFAMesh 架构图](../images/006tNbRwgy1fuyr4vizzwj31kw1biq98.jpg)
 
 ## 参考
 

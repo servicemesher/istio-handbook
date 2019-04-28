@@ -165,7 +165,7 @@ spec:
 
 上面的例子中 `bookinfo` 这个 `VirtualService` 中绑定到了 `bookinfo-gateway`。`bookinfo-gateway` 使用了标签选择器选择对应的 Kubernetes pod，即下图中的 pod。
 
-![istio ingress gateway pod](https://ws4.sinaimg.cn/large/0069RVTdgy1fv7xh71h8fj31fn0dyq9g.jpg)
+![istio ingress gateway pod](../images/0069RVTdgy1fv7xh71h8fj31fn0dyq9g.jpg)
 
 我们再看下 `istio-ingressgateway` 的 YAML 安装配置。
 

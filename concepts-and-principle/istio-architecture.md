@@ -12,9 +12,9 @@ category: "evolution"
 
 下面是以漫画的形式说明 Istio 是什么。
 
-![来自 Twitter @daniseyu21](https://ws3.sinaimg.cn/large/006tNbRwly1fujrgeesk7j316c0tz10y.jpg)
+![来自 Twitter @daniseyu21](../images/006tNbRwly1fujrgeesk7j316c0tz10y.jpg)
 
-![来自 Blog @sunny0826](https://ws4.sinaimg.cn/large/ad5fbf65ly1g199o3s4g5j20lw0kijux.jpg)
+![来自 Blog @sunny0826](../images/ad5fbf65ly1g199o3s4g5j20lw0kijux.jpg)
 
 - Istio 是独立于平台的，可以在 Kubernetes 、 Consul 、虚拟机上部署的服务
 - Istio 的组成
