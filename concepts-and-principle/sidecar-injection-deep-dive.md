@@ -3,7 +3,7 @@ owners: ["rootsongjc"]
 reviewers: ["haiker2011"]
 description: "本文介绍了 istio service mesh 中的 sidecar 注入及流量劫持的详细过程。"
 publishDate: 2019-03-10
-updateDate: 2019-03-12
+updateDate: 2019-04-29
 tags: ["sidecar","iptables","init-container"]
 category: "original"
 ---
@@ -355,7 +355,7 @@ Init 容器中使用的的 iptables 版本是 `v1.6.0`，共包含 5 张表：
 
 ![iptables 调用链](../images/0069RVTdgy1fv5dq2bptdj31110begnl.jpg)
 
-关于 iptables 的详细介绍请参考[常见 iptables 使用规则场景整理](https://www.aliang.org/Linux/iptables.html)。
+关于 iptables 的详细介绍请参考[常见iptables使用规则场景整理](https://unixso.com/Linux/iptables.html)。
 
 ### iptables 命令
 
@@ -389,7 +389,7 @@ Chain OUTPUT (policy ACCEPT 18M packets, 1916M bytes)
 
 ![iptables结构图](../images/0069RVTdgy1fv5dm4a9ygj30w50czdi3.jpg)
 
-图片来自[常见 iptables 使用规则场景整理](https://www.aliang.org/Linux/iptables.html)
+图片来自[常见iptables使用规则场景整理](https://unixso.com/Linux/iptables.html)
 
 每条链中都可以添加多条规则，规则是按照顺序从前到后执行的。我们来看下规则的表头定义。
 
@@ -405,7 +405,7 @@ Chain OUTPUT (policy ACCEPT 18M packets, 1916M bytes)
 
 还有一列没有表头，显示在最后，表示规则的选项，作为规则的扩展匹配条件，用来补充前面的几列中的配置。`prot`、`opt`、`in`、`out`、`source` 和 `destination` 和显示在 `destination` 后面的没有表头的一列扩展条件共同组成匹配规则。当流量匹配这些规则后就会执行 `target`。
 
-关于 iptables 规则请参考[常见iptables使用规则场景整理](https://www.aliang.org/Linux/iptables.html)。
+关于 iptables 规则请参考[常见iptables使用规则场景整理](https://unixso.com/Linux/iptables.html)。
 
 **target 支持的类型**
 
@@ -714,5 +714,5 @@ envoy    11 istio-proxy   63u  IPv4 338525      0t0  TCP productpage-v1-745ffc55
 - [iptables 命令使用说明 - wangchujiang.com](https://wangchujiang.com/linux-command/c/iptables.html)
 - [How To List and Delete Iptables Firewall Rules - digitalocean.com](https://www.digitalocean.com/community/tutorials/how-to-list-and-delete-iptables-firewall-rules)
 - [一句一句解说 iptables的详细中文手册 - cnblog.com](https://www.cnblogs.com/fhefh/archive/2011/04/04/2005249.html)
-- [常见iptables使用规则场景整理 - aliang.org](https://www.aliang.org/Linux/iptables.html)
+- [常见iptables使用规则场景整理 - unixso.com](https://unixso.com/Linux/iptables.html)
 - [理解 Istio Service Mesh 中 Envoy 代理 Sidecar 注入及流量劫持 - jimmysong.io](https://jimmysong.io/posts/envoy-sidecar-injection-in-istio-service-mesh-deep-dive/)
