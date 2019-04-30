@@ -24,7 +24,7 @@ Envoy 代理和 SDS 服务器之间的连接必须是安全的。可以在同一
 
 ## SDS Server
 
-SDS server 需要实现 [SecretDiscoveryService](https://github.com/envoyproxy/envoy/blob/master/api/envoy/service/discovery/v2/sds.proto) 这个 gRPC 服务。遵循与其他 [xDS](https://github.com/envoyproxy/data-plane-api/blob/master/XDS_PROTOCOL.md) 相同的协议。
+SDS server 需要实现 [SecretDiscoveryService](https://github.com/envoyproxy/envoy/blob/master/api/envoy/service/discovery/v2/sds.proto) 这个 gRPC 服务。遵循与其他 [xDS](https://github.com/envoyproxy/data-plane-api/blob/master/xds_protocol.rst) 相同的协议。
 
 ## SDS 配置
 
