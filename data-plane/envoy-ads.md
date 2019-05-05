@@ -16,7 +16,7 @@ category: "translation"
 
 如果没有 ADS，CDS/EDS/RDS 流可能指向不同的管理服务器，或者位于需要协调的不同 gRPC流连接的同一管理服务器上。EDS 资源请求可以跨两个不同的流分开，一个用于 X，一个用于 Y。ADS 将这些流合并到单个流和单个管理服务器，从而无需分布式同步就可以正确地对更新进行排序。使用 ADS，管理服务器将在单个流上提供 CDS、EDS 和 RDS 更新。
 
-**ADS** 仅适用于 gRPC 流（非REST），[本文档](https://github.com/envoyproxy/data-plane-api/blob/master/XDS_PROTOCOL.md#aggregated-discovery-services-ads)对此进行了更全面的描述。
+**ADS** 仅适用于 gRPC 流（非REST），[本文档](https://github.com/envoyproxy/data-plane-api/blob/master/xds_protocol.rst#aggregated-discovery-service-ads)对此进行了更全面的描述。
 
 ## 参考
 

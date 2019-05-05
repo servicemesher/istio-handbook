@@ -10,7 +10,7 @@ category: "translation"
 
 # xDS 协议解析
 
-> 本文译自 [xDS REST and gRPC protocol](https://github.com/envoyproxy/data-plane-api/blob/master/XDS_PROTOCOL.md)，译者：狄卫华，审校：宋净超
+> 本文译自 [xDS REST and gRPC protocol](https://github.com/envoyproxy/data-plane-api/blob/master/xds_protocol.rst)，译者：狄卫华，审校：宋净超
 
 Envoy 通过查询文件或管理服务器来动态发现资源。概括地讲，对应的发现服务及其相应的 API 被称作 _xDS_。Envoy 通过订阅（_subscription_）方式来获取资源，如监控指定路径下的文件、启动 gRPC 流或轮询 REST-JSON URL。后两种方式会发送 [`DiscoveryRequest`](https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/discovery.proto#discoveryrequest) 请求消息，发现的对应资源则包含在响应消息 [`DiscoveryResponse`](https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/discovery.proto#discoveryresponse) 中。下面，我们将具体讨论每种订阅类型。
 
@@ -229,4 +229,4 @@ xDS 增量会话始终位于 gRPC 双向流的上下文中。这允许 xDS 服�
 
 ## 参考
 
-- [xDS REST and gRPC protocol - github.com](https://github.com/envoyproxy/data-plane-api/blob/master/XDS_PROTOCOL.md)
+- [xDS REST and gRPC protocol - github.com](https://github.com/envoyproxy/data-plane-api/blob/master/xds_protocol.rst)
