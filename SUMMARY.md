@@ -42,6 +42,8 @@
 
 ## 控制平面
 
+- [组件概览](control-plane/index.md)
+
 ## 流量管理
 
 - [Istio 中的流量管理](traffic-management/index.md)
