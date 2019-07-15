@@ -2,7 +2,7 @@
 owners: ["zhongfox"]
 reviewers: ["zhongfox"]
 description: "本文是展示了istio组件进程级别的拓扑图。"
-publishDate: 2019-05-13
+publishDate: 2019-07-15
 updateDate: 2019-05-13
 tags: ["index","control plane"]
 category: "original"
@@ -14,13 +14,13 @@ category: "original"
 
 以下是istio 1.1 官方架构图:
 
-<img src="https://preliminary.istio.io/docs/concepts/what-is-istio/arch.svg" width="80%"/>
+<img src="https://istio.io/docs/concepts/what-is-istio/arch.svg" width="80%"/>
 
-虽然Istio 支持多个平台, 但将其与 Kubernetes 结合使用，其优势会更大, Istio 对Kubernetes 平台支持也是最完善的, 本文将基于Istio + Kubernetes 进行展开。
+虽然 Istio 支持多个平台，但将其与 Kubernetes 结合使用，其优势会更大，Istio 对 Kubernetes 平台支持也是最完善的，本文将基于 Istio + Kubernetes 进行展开。
 
-如果安装了grafana, prometheus, kiali, jaeger等组件的情况下, 一个完整的控制面组件包括以下pod:
+如果安装了grafana, prometheus, kiali, jaeger等组件的情况下, 一个完整的控制面组件包括以下pod：
 
-```
+```bash
 % kubectl -n istio-system get pod
 NAME                                          READY     STATUS
 grafana-5f54556df5-s4xr4                      1/1       Running
@@ -36,7 +36,7 @@ kiali-7c6f4c9874-vzb4t                        1/1       Running
 prometheus-66b7689b97-w9glt                   1/1       Running
 ```
 
-将istio系统组件细化到进程级别, 大概是这个样子:
+将istio系统组件细化到进程级别, 大概是这个样子：
 
 <img src="https://ws3.sinaimg.cn/large/006tKfTcgy1g187gshs79j315m0u0qct.jpg" referrerpolicy="no-referrer"/>
 <a href="https://ws4.sinaimg.cn/large/006tKfTcgy1g187dn7s1tj315m0u0x6t.jpg" referrerpolicy="no-referrer" target="_blank">查看高清原图</a>
