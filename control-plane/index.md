@@ -14,7 +14,7 @@ category: "original"
 
 以下是istio 1.1 官方架构图:
 
-<img src="https://istio.io/docs/concepts/what-is-istio/arch.svg" width="80%"/>
+![Istio 架构图](https://gw.alipayobjects.com/mdn/rms_91f3e6/afts/img/A*_GPdTIDlhD4AAAAAAAAAAABkARQnAQ)
 
 虽然 Istio 支持多个平台，但将其与 Kubernetes 结合使用，其优势会更大，Istio 对 Kubernetes 平台支持也是最完善的，本文将基于 Istio + Kubernetes 进行展开。
 
@@ -38,8 +38,7 @@ prometheus-66b7689b97-w9glt                   1/1       Running
 
 将istio系统组件细化到进程级别, 大概是这个样子：
 
-<img src="https://ws3.sinaimg.cn/large/006tKfTcgy1g187gshs79j315m0u0qct.jpg" referrerpolicy="no-referrer"/>
-<a href="https://ws4.sinaimg.cn/large/006tKfTcgy1g187dn7s1tj315m0u0x6t.jpg" referrerpolicy="no-referrer" target="_blank">查看高清原图</a>
+![Istio 组件图](https://gw.alipayobjects.com/mdn/rms_91f3e6/afts/img/A*cbxAQYM5DrgAAAAAAAAAAABkARQnAQ)
 
 Service Mesh 的Sidecar 模式要求对数据面的用户Pod进行代理的注入, 注入的代理容器会去处理服务治理领域的各种「脏活累活」, 使得用户容器可以专心处理业务逻辑。
 
@@ -96,6 +95,6 @@ https://github.com/istio/api 使用[protobuf](https://github.com/protocolbuffers
 
 该项目会作为依赖包被istio主项目引用。
 
----
+### 更多
 
 后续将对以上各个模块、命令以及它们之间的协作进行分析。
