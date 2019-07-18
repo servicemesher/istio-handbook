@@ -38,7 +38,7 @@ Envoy 对于 Service Mesh 或者说 Cloud Native 最大的贡献就是定义了 
 
 ## 重要观点
 
-如果你没有心里阅读下文的所有内容，那么可以先阅读看下下面列出的本文中的一些主要观点：
+如果你提前阅读下文的所有内容，那么可以先阅读看下下面列出的本文中的一些主要观点：
 
 - Kubernetes 的本质是应用的生命周期管理，具体说是部署和管理（扩缩容、自动恢复、发布）。
 - Kubernetes 为微服务提供了可扩展、高弹性的部署和管理平台。
@@ -71,7 +71,7 @@ Istio Service Mesh 中沿用了 Kubernetes 中的 service 做服务注册，通�
 
 **Service Mesh 的劣势**
 
-因为 Kubernetes 每个节点上都会运行众多的 Pod，将原先 `kube-proxy` 方式的路由转发功能置于每个 pod 中，这将导致大量的配置分发、同步和最终一致性问题。为了细粒度的机型流量管理，必将代理一系列新的抽象，增加了用户的心智负担，但随着技术的普及慢慢将得到缓解。
+因为 Kubernetes 每个节点上都会运行众多的 Pod，将原先 `kube-proxy` 方式的路由转发功能置于每个 pod 中，这将导致大量的配置分发、同步和最终一致性问题。为了细粒度的进行流量管理，必将添加一系列新的抽象，因此会增加用户的学习成本，但随着技术的普及，这样的情况会慢慢的得到缓解。
 
 **Service Mesh 的优势**
 
@@ -93,7 +93,7 @@ Kube-proxy 实现了流量在 Kubernetes service 多个 pod 实例间的负载�
 
 Kubernetes 中的 Ingress 资源对象跟 Istio Service Mesh 中的 Gateway 的功能类似，都是负责集群南北流量（从集群外部进入集群内部的流量）。
 
-`kube-proxy` 只能路由 Kubernetes 集群内部的流量，而我们知道 Kubernetes 集群的 Pod 位于 [CNI](https://jimmysong.io/kubernetes-handbook/concepts/cni.html) 创建的外网络中，集群外部是无法直接与其通信的，因此 Kubernetes 中创建了 [ingress](https://jimmysong.io/kubernetes-handbook/concepts/ingress.html) 这个资源对象，它由位于 Kubernetes [边缘节点](https://jimmysong.io/kubernetes-handbook/practice/edge-node-configuration.html)（这样的节点可以是很多个也可以是一组）的 Ingress controller 驱动，负责管理**南北向流量**（从集群外部进入 Kubernetes 集群的流量），Ingress 必须对接各种个 Ingress Controller 才能使用，比如 [nginx ingress controller](https://github.com/kubernetes/ingress-nginx)、[traefik](https://traefik.io/)。Ingress 只适用于 HTTP 流量，使用方式也很简单，只能对 service、port、HTTP 路径等有限字段匹配来路由流量，这导致它无法路由如 MySQL、redis 和各种私有 RPC 等 TCP 流量。要想直接路由南北向的流量，只能使用 Service 的 LoadBalancer 或 NodePort，前者需要云厂商支持而且可能需要付费，后者需要进行额外的端口管理。有些 Ingress controller 支持暴露 TCP 和 UDP 服务，但是只能使用 Service 来暴露，Ingress 本身是不支持的，例如 [nginx ingress controller](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/)，服务的暴露的端口是通过创建 ConfigMap 的方式来配置的。
+`kube-proxy` 只能路由 Kubernetes 集群内部的流量，而我们知道 Kubernetes 集群的 Pod 位于 [CNI](https://jimmysong.io/kubernetes-handbook/concepts/cni.html) 创建的外网络中，集群外部是无法直接与其通信的，因此 Kubernetes 中创建了 [ingress](https://jimmysong.io/kubernetes-handbook/concepts/ingress.html) 这个资源对象，它由位于 Kubernetes [边缘节点](https://jimmysong.io/kubernetes-handbook/practice/edge-node-configuration.html)（这样的节点可以是很多个也可以是一组）的 Ingress controller 驱动，负责管理**南北向流量**（从集群外部进入 Kubernetes 集群的流量），Ingress 必须对接各种 Ingress Controller 才能使用，比如 [nginx ingress controller](https://github.com/kubernetes/ingress-nginx)、[traefik](https://traefik.io/)。Ingress 只适用于 HTTP 流量，使用方式也很简单，只能对 service、port、HTTP 路径等有限字段匹配来路由流量，这导致它无法路由如 MySQL、redis 和各种私有 RPC 等 TCP 流量。要想直接路由南北向的流量，只能使用 Service 的 LoadBalancer 或 NodePort，前者需要云厂商支持而且可能需要付费，后者需要进行额外的端口管理。有些 Ingress controller 支持暴露 TCP 和 UDP 服务，但是只能使用 Service 来暴露，Ingress 本身是不支持的，例如 [nginx ingress controller](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/)，服务的暴露的端口是通过创建 ConfigMap 的方式来配置的。
 
 Istio `Gateway` 描述的负载均衡器用于承载进出网格边缘的连接。该规范中描述了一系列开放端口和这些端口所使用的协议、负载均衡的 SNI 配置等内容。Gateway 是一种 [CRD 扩展](https://jimmysong.io/kubernetes-handbook/concepts/crd.html)，它同时复用了 Envoy proxy 的能力，详细配置请参考 [Istio 官网](https://istio.io/zh/docs/reference/config/istio.networking.v1alpha3/#gateway)。
 
@@ -203,7 +203,7 @@ Istio 中定义了如下的 [CRD](https://jimmysong.io/kubernetes-handbook/conce
 
 ## 总结
 
-如果说 Kubernetes 管理的对象是 Pod，那么 Service Mesh 中管理的对象就是一个个 Service，所以说使用 Kubernetes 管理微服务后再应用 Service Mesh 就是水到渠成了，如果连 Service 你也不像管了，那就用如 [knative](https://github.com/knative/) 这样的 serverless 平台，这就是后话了。
+如果说 Kubernetes 管理的对象是 Pod，那么 Service Mesh 中管理的对象就是一个个 Service，所以说使用 Kubernetes 管理微服务后再应用 Service Mesh 就是水到渠成了，如果连 Service 你也不想管了，那就用如 [knative](https://github.com/knative/) 这样的 serverless 平台，但这就是后话了。
 
 Envoy 的功能也不只是做流量转发，以上概念只不过是 Istio 在 Kubernetes 之上新增一层抽象层中的冰山一角，但因为流量管理是服务网格最基础也是最重要的功能，所以这将成为本书的开始。
 
