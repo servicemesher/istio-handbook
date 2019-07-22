@@ -43,6 +43,7 @@
 ## 控制平面
 
 - [组件概览](control-plane/index.md)
+- [Sidecar Injector](control-plane/sidecar-injector.md)
 
 ## 流量管理
 
