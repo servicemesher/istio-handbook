@@ -107,7 +107,7 @@ istio 使用了 MutatingAdmissionWebhook 来实现对用户 Pod 的注入,  首�
 
 高级用户可以按需修改这个模板内容。
 
-```plain
+```bash
 kubectl -n istio-system get configmap istio-sidecar-injector -o=jsonpath='{.data.config}'
 ```
 
@@ -190,7 +190,7 @@ template: |-    # 使用go template 定义的pod patch
 
 - 名为`istio-certs`的 secret volume, 默认 secret 名为`istio.default`,  挂载到容器目录`/etc/certs/`, 存放相关的证书, 包括服务端证书, 和可能的 mtls 客户端证书
 
-  ```plain
+  ```bash
   % kubectl exec productpage-v1-6597cb5df9-xlndw -c istio-proxy -- ls /etc/certs/
   cert-chain.pem
   key.pem
