@@ -20,7 +20,7 @@ category: "original"
 
 本文试图带您梳理清楚 Kubernetes、Envoy（xDS 协议）以及 Istio Service Mesh 之间的关系及内在联系。此外，本文还介绍了 Kubernetes 中的负载均衡方式，Envoy 的 xDS 协议对于 Service Mesh 的意义以及为什么说有了 Kubernetes 还需要 Istio。
 
-使用 Service Mesh 并不是说与 Kubernetes 决裂，而是水到渠成的事情。Kubernetes 的本质是通过声明式配置对应用进行生命周期管理，而 Service Mesh 的本质是提供应用间的流量和安全性管理以及提供可观察性。假如你已经使用 Kubernetes 构建了稳定的微服务平台，那么如何设置服务间调用的负载均衡和流量控制？
+使用 Service Mesh 并不是说与 Kubernetes 决裂，而是水到渠成的事情。Kubernetes 的本质是通过声明式配置对应用进行生命周期管理，而 Service Mesh 的本质是提供应用间的流量和安全性管理以及可观察性。假如你已经使用 Kubernetes 构建了稳定的微服务平台，那么如何设置服务间调用的负载均衡和流量控制？
 
 Envoy 对于 Service Mesh 或者说 Cloud Native 最大的贡献就是定义了 xDS，Envoy 虽然本质上是一个 proxy，但是它的配置协议被众多开源软件所支持，如 [Istio](https://github.com/istio/istio)、[Linkerd](https://linkerd.io/)、[AWS App Mesh](https://aws.amazon.com/app-mesh/)、[SOFAMesh](https://github.com/alipay/sofa-mesh) 等。
 
@@ -49,7 +49,7 @@ Envoy 对于 Service Mesh 或者说 Cloud Native 最大的贡献就是定义了 
 
 ## 阅读本文之前
 
-推荐大家在阅读本文之前希望您对微服务、容器和 Kubernetes 有一定认识，如果您已经阅读过以下几篇文章将对您理解本文更有帮助，本文中也引用过了下面文章中的部分观点。
+推荐大家在阅读本文之前对微服务、容器和 Kubernetes 有一定的认识，阅读过以下几篇文章将对您理解本文更有帮助，本文中也引用了下面文章中的部分观点。
 
 - [深入解读 Service Mesh 背后的技术细节 by 刘超](https://www.cnblogs.com/163yun/p/8962278.html)
 - [Istio流量管理实现机制深度解析 by 赵化冰](https://zhaohuabing.com/post/2018-09-25-istio-traffic-management-impl-intro/)
@@ -71,7 +71,7 @@ Istio Service Mesh 中沿用了 Kubernetes 中的 service 做服务注册，通�
 
 **Service Mesh 的劣势**
 
-因为 Kubernetes 每个节点上都会运行众多的 Pod，将原先 `kube-proxy` 方式的路由转发功能置于每个 pod 中，这将导致大量的配置分发、同步和最终一致性问题。为了细粒度的进行流量管理，必将添加一系列新的抽象，因此会增加用户的学习成本，但随着技术的普及，这样的情况会慢慢的得到缓解。
+因为 Kubernetes 每个节点上都会运行众多的 Pod，将原先 `kube-proxy` 方式的路由转发功能置于每个 pod 中，将导致大量的配置分发、同步和最终一致性问题。为了细粒度地进行流量管理，必将添加一系列新的抽象，从而会进一步增加用户的学习成本，但随着技术的普及，这样的情况会慢慢地得到缓解。
 
 **Service Mesh 的优势**
 
