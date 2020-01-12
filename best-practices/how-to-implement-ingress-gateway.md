@@ -229,7 +229,7 @@ Istio Gateway资源本身只能配置L4-L6的功能，例如暴露的端口，TL
 
 Gateway和VirtualService用于表示Istio Ingress的配置模型，Istio Ingress的缺省实现则采用了和Sidecar相同的Envoy proxy。
 
-通过该方式，Istio控制面用一致的配置模型同时控制了入口网关和内部的sidecar代理。这些配置包括路由规则，策略检查、Telementry收集以及其他服务管控功能。
+通过该方式，Istio控制面用一致的配置模型同时控制了入口网关和内部的sidecar代理。这些配置包括路由规则，策略检查、Telemetry收集以及其他服务管控功能。
 
 ![采用 Istio Ingress Gateway作为服务网格的流量入口](../images/6ce41a46ly1g1kur6wqsjj20kh0cbaax.jpg)
 
@@ -257,7 +257,7 @@ API Gateway需求中很大一部分需要根据不同的应用系统进行定制
 
 ## 采用API Gateway + Sidecar Proxy作为服务网格的流量入口
 
-在目前难以找到一个同时具备API Gateway和Isito Ingress能力的网关的情况下，一个可行的方案是使用API Gateway和Sidecar Proxy一起为服务网格提供外部流量入口。
+在目前难以找到一个同时具备API Gateway和Istio Ingress能力的网关的情况下，一个可行的方案是使用API Gateway和Sidecar Proxy一起为服务网格提供外部流量入口。
 
 由于API Gateway已经具备七层网关的功能，Mesh Ingress中的Sidecar只需要提供VirtualService资源的路由能力，并不需要提供Gateway资源的网关能力，因此采用Sidecar Proxy即可。网络入口处的Sidecar Proxy和网格内部应用Pod中Sidecar Proxy的唯一一点区别是：该Sidecar只接管API Gateway向Mesh内部的流量，并不接管外部流向API Gateway的流量；而应用Pod中的Sidecar需要接管进入应用的所有流量。
 

@@ -42,6 +42,6 @@ Istio 的架构设计中有几个关键目标，这些目标对于使系统能�
 
 ## 参考
 
-- [Isito 是什么? - istio.io](https://istio.io/zh/docs/concepts/what-is-istio/)
+- [Istio 是什么? - istio.io](https://istio.io/zh/docs/concepts/what-is-istio/)
 - [Bookinfo 示例](https://istio.io/zh/docs/examples/bookinfo/)
 
