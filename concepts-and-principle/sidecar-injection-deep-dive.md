@@ -698,7 +698,7 @@ envoy    11 istio-proxy   54u  IPv4 338551      0t0  TCP productpage-v1-745ffc55
 envoy    11 istio-proxy   55u  IPv4 338364      0t0  TCP productpage-v1-745ffc55b7-2l2lw:44046->172.33.78.9:9091 (ESTABLISHED) # 9091：istio-telemetry 服务的 grpc-mixer 端口
 envoy    11 istio-proxy   56u  IPv4 338473      0t0  TCP productpage-v1-745ffc55b7-2l2lw:47210->zipkin.istio-system.svc.cluster.local:9411 (ESTABLISHED) # 9411: zipkin 端口
 envoy    11 istio-proxy   58u  IPv4 338383      0t0  TCP productpage-v1-745ffc55b7-2l2lw:41564->172.33.84.8:9080 (ESTABLISHED) # 9080：details-v1 的 http 端口
-envoy    11 istio-proxy   59u  IPv4 338390      0t0  TCP productpage-v1-745ffc55b7-2l2lw:54410->172.33.78.5:9080 (ESTABLISHED) # 9080：reivews-v2 的 http 端口
+envoy    11 istio-proxy   59u  IPv4 338390      0t0  TCP productpage-v1-745ffc55b7-2l2lw:54410->172.33.78.5:9080 (ESTABLISHED) # 9080：reviews-v2 的 http 端口
 envoy    11 istio-proxy   60u  IPv4 338411      0t0  TCP productpage-v1-745ffc55b7-2l2lw:35200->172.33.84.5:9091 (ESTABLISHED) # 9091:istio-telemetry 服务的 grpc-mixer 端口
 envoy    11 istio-proxy   62u  IPv4 338497      0t0  TCP productpage-v1-745ffc55b7-2l2lw:34402->172.33.84.9:9080 (ESTABLISHED) # reviews-v1 的 http 端口
 envoy    11 istio-proxy   63u  IPv4 338525      0t0  TCP productpage-v1-745ffc55b7-2l2lw:50592->172.33.71.5:9080 (ESTABLISHED) # reviews-v3 的 http 端口
