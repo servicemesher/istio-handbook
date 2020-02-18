@@ -6,7 +6,7 @@
     "links": {
         "sidebar": {
             "ServiceMesher 社区": "https://www.servicemesher.com",
-            "Istio 官网（中文）": "https://istio.io/zh/"
+            "Istio 官网（中文）": "https://preliminary.istio.io/zh/"
         }
     },
     "plugins": [
@@ -65,7 +65,7 @@
             ]
         },
         "sitemap-general": {
-            "prefix": "http://www.servicemesher.com/istio-handbook/"
+            "prefix": "https://www.servicemesher.com/istio-handbook/"
         },
         "ga": {
             "token": "UA-93485976-2"
