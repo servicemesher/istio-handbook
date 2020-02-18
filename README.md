@@ -31,14 +31,16 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 
 请参阅[本书写作规范](CODE_OF_CONDUCT.md)，扫描下面的二维码加入钉钉协作群。
 
-![istio-handbook-team](images/istio-handbook-team.jpg)
+<p align="center">
+    <img src="images/istio-handbook-team.jpg" alt="钉钉群二维码" />
+  </a>
+</p>
 
 ## ServiceMesher 社区
 
 参与本书创作、讨论，获取关于服务网格的资讯、技术干货请加入我们的社区。
 
 - 社区网站：https://www.servicemesher.com
-
 - 微信公众号：ServiceMesher
 
 ![ServiceMesher 微信公众号](https://jimmysong.io/istio-handbook/images/006tNc79ly1fz6cq93dwmj31jt0beq9s.jpg)
