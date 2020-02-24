@@ -35,6 +35,7 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
     <img src="images/istio-handbook-team.jpg" alt="钉钉群二维码" />
   </a>
 </p>
+
 ## 编委会
 
 本书由 ServiceMesher 社区组织编写，编委会负责本书的统筹，如 GitHub 管理、目录规划、内容审核等。

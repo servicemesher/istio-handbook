@@ -12,12 +12,11 @@
 
 ## 流程
 
-1. 首先加入到 [ServiceMesher](https://github.com/servicemesher) 组织中，请联系 [Jimmy Song](https://jimmysong.io/about) 加入；
-2. 在 [Issues](https://github.com/servicemesher/getting-started-with-knative/issues) 中创建你想要参与的章节（issue 标题为文章路径，内容填写标题和摘要）；
-3. 一次最多同时认领或提交 3 个 PR；
+1. 首先加入到本书的[协作群](https://github.com/servicemesher/istio-handbook/issues/42)
+2. 在 [Issues](https://github.com/servicemesher/getting-started-with-knative/issues) 中认领你想要参与的章节（issue 标题为文章路径，内容填写标题和摘要）；
+3. 一次最多同时认领 3 个 issue；
 4. 由 owner 审核后 merge 进 master 分支；
-5. 每篇文章头部的 header 请注意填写；
-6. 每周将使用 GitHub pages 发布一次；
+6. 合并后会立即发布到 <https://www.servicemesher.com/istio-handbook> 上；
 
 ## Header
 
