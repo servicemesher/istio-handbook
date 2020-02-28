@@ -46,9 +46,11 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 | ----------------------------------------------- | ------ | --------- |
 | [GuangmingLuo](https://github.com/GuangmingLuo) | 罗广明 | 百度      |
 | [gorda](https://github.com/gorda)               | 官余棚 | 中天智慧  |
+|  [ikingye ](https://github.com/ikingye ) | 叶王 | 百度 |
 | [malphi](https://github.com/malphi)             | 马若飞 | FreeWheel |
 | [rootsongjc](https://github.com/rootsongjc)     | 宋净超 | 蚂蚁金服  |
-|  [sunny0826](https://github.com/sunny0826)      |郭旭东 | 凯京科技 |
+|  [stormgbs](https://github.com/stormgbs) | 高步双 | 阿里云 |
+| [sunny0826](https://github.com/sunny0826)      |郭旭东 | 凯京科技 |
 | [wangfakang](https://github.com/wangfakang)     | 王发康 | 蚂蚁金服  |
 | [zhaohuabing](https://github.com/zhaohuabing)   | 赵化冰 | 中兴通讯  |
 
