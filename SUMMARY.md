@@ -2,7 +2,9 @@
 
 ## 说明
 
-- [序](README.md)
+- [序言](README.md)
+- [编委会](wg/editorial-board.md)
+- [写作规范](wg/specification.md)
 
 ## 序篇
 

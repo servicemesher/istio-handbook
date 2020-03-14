@@ -27,36 +27,18 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 
 本书发行版权归属于电子工业出版社博文视点，未经授权请勿私自印刷发行。
 
-## 参与本书
+## 参与贡献
 
-请参阅[本书写作规范](CODE_OF_CONDUCT.md)和[加入方式](https://github.com/servicemesher/istio-handbook/issues/42)，扫描下面的二维码加入钉钉协作群。
+请参阅[本书写作规范](wg/specification.md)和[加入方式](https://github.com/servicemesher/istio-handbook/issues/42)，扫描下面的二维码加入钉钉协作群。有任何问题请与本书[编委会](wg/editorial-board.md)联系。
 
 <p align="center">
     <img src="images/istio-handbook-team.jpg" alt="钉钉群二维码" />
   </a>
 </p>
 
-## 编委会
-
-本书由 ServiceMesher 社区组织编写，编委会负责本书的统筹，如 GitHub 管理、目录规划、内容审核等。
-
-以下是编委会成员（按 GitHub 首字母排序）：
-
-| GitHub                                          | 姓名   | 公司      |
-| ----------------------------------------------- | ------ | --------- |
-| [GuangmingLuo](https://github.com/GuangmingLuo) | 罗广明 | 百度      |
-| [gorda](https://github.com/gorda)               | 官余棚 | 中天智慧  |
-|  [ikingye ](https://github.com/ikingye ) | 叶王 | 百度 |
-| [malphi](https://github.com/malphi)             | 马若飞 | FreeWheel |
-| [rootsongjc](https://github.com/rootsongjc)     | 宋净超 | 蚂蚁金服  |
-|  [stormgbs](https://github.com/stormgbs) | 高步双 | 阿里云 |
-| [sunny0826](https://github.com/sunny0826)      |郭旭东 | 凯京科技 |
-| [wangfakang](https://github.com/wangfakang)     | 王发康 | 蚂蚁金服  |
-| [zhaohuabing](https://github.com/zhaohuabing)   | 赵化冰 | 中兴通讯  |
-
 ## ServiceMesher 社区
 
-参与本书创作、讨论，获取关于服务网格的资讯、技术干货请加入我们的社区。
+获取更多关于服务网格的资讯、技术干货请加入我们的社区。
 
 - 社区网站：https://www.servicemesher.com
 - 微信公众号：ServiceMesher
