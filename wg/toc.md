@@ -1,7 +1,7 @@
 # 目录
 
-> Draft: v0.2
-> Date: 2020-03-14
+> Draft: v0.3
+> Date: 2020-03-16
 > MindNode 脑图：[mind-map.mindnode](mind-map.mindnode)
 
 ![mind map](mind-map.png)
@@ -190,6 +190,8 @@
 
 #### 部署模型
 
+##### 多集群部署与管理
+
 ## 故障排查
 
 ### 常见问题（根据情况动态添加）
@@ -199,6 +201,8 @@
 ## 生态扩展
 
 ### 标准
+
+#### xDS
 
 #### SMI
 
