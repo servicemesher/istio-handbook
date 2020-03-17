@@ -2,7 +2,7 @@
 
 Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes Era
 
-[Istio](https://istio.io/zh) 是由 Google、IBM、Lyft 等共同开源的 Service Mesh（服务网格）框架，于2017年初开始进入大众视野，作为云原生时代下承 Kubernetes、上接 Serverless 架构的重要基础设施层，地位至关重要。[ServiceMesher 社区](https://www.servicemesher.com)作为中国最早的一批在研究和推广 Service Mesh 技术的开源社区决定整合社区资源，合作撰写一本开源电子书作为服务网格智库。
+[Istio](https://istio.io/zh) 是由 Google、IBM、Lyft 等共同开源的 Service Mesh（服务网格）框架，于2017 年初开始进入大众视野，作为云原生时代下承 Kubernetes、上接 Serverless 架构的重要基础设施层，地位至关重要。[ServiceMesher 社区](https://www.servicemesher.com)作为中国最早的一批在研究和推广 Service Mesh 技术的开源社区决定整合社区资源，合作撰写一本开源电子书作为服务网格智库。
 
 您可以通过以下地址阅读或参与本书：
 
@@ -13,7 +13,7 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 
 本书起源于 [rootsongjc/istio-handbook](https://github.com/rootsongjc/istio-handbook) 及 ServiceMesher 社区创作的 [Istio 知识图谱](https://github.com/servicemesher/istio-knowledge-map)，集结社区力量合作创作而成。
 
-本书内容包含但不限于 [Istio 知识图谱](https://github.com/servicemesher/istio-knowledge-map)中的主题。
+本书内容包含但不限于 [Istio 知识图谱](https://github.com/servicemesher/istio-knowledge-map)中的主题，基于 Istio 1.5 版本编写。
 
 ## 版权
 
