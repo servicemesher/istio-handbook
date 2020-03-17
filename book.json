@@ -6,7 +6,7 @@
     "links": {
         "sidebar": {
             "ServiceMesher 社区": "https://www.servicemesher.com",
-            "Istio 官网（中文）": "https://preliminary.istio.io/zh/"
+            "Istio 官网（中文）": "https://istio.io/zh/"
         }
     },
     "plugins": [
@@ -48,7 +48,7 @@
             "size": "small"
         },
         "tbfed-pagefooter": {
-            "copyright": "<p><a href=https://ws1.sinaimg.cn/large/006tNbRwly1fw3l1sxoijj304g0563z7.jpg data-lightbox=2fd927ee-fa64-4eca-8ed5-6bd72b573a3c>点击关注【ServiceMesher】 微信公众号回复【加群】加入社区</a></p>Copyright © <a href=https://www.servicemesher.com>servicemesher.com</a> 2018-2019",
+            "copyright": "Copyright © <a href=https://www.servicemesher.com>servicemesher.com</a> 2018-2020",
             "modify_label": " Updated at ",
             "modify_format": "YYYY-MM-DD HH:mm:ss"
         },

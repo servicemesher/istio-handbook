@@ -1,73 +1,126 @@
 # 目录
 
-## 说明
+## 前言
 
 - [序言](README.md)
 - [编委会](wg/editorial-board.md)
 - [写作规范](wg/specification.md)
 
-## 序篇
+## 概念篇
 
-- [服务网格——后 Kubernetes 时代的微服务](intro/service-mesh-the-microservices-in-post-kubernetes-era.md)
+- [Service Mesh 概述](concepts/overview.md)
+  - [Service Mesh 基本概念](concepts/basic.md)
+  - [Service Mesh 在云原生中的应用](concepts/within-cloud-native.md)
+  - [Istio 功能介绍](concepts/features.md)
+- [架构解析](concepts/architecture-overview.md)
+  - [控制平面](concepts/control-plane.md)
+    - [Pilot](concepts/pilot.md)
+    - [Citadel](concepts/citadel.md)
+    - [Galley](concepts/galley.md)
+  - [数据平面](concepts/data-plane.md)
+    - [Envoy](concepts/envoy.md)
+    - [MOSN](concepts/mosn.md)
+- [核心功能](concepts/core-features.md)
+  - [流量控制](concepts/traffic-control.md)
+    - [路由](concepts/route.md)
+      - [VirtualService](concepts/virtualservice.md)
+      - [DestinationRule](concepts/destinationrule.md)
+      - [ServiceEntry](concepts/serviceentry.md)
+      - [Gateway](concepts/gateway.md)
+    - [弹性能力与测试](concepts/resilience-test.md)
+      - [超时](concepts/timeout.md)
+      - [重试](concepts/retry.md)
+      - [熔断](concepts/circuit-breaking.md)
+      - [故障注入](concepts/fault-injection.md)
+      - [流量镜像](concepts/traffic-shadow.md)
+  - [安全](concepts/security.md)
+    - [授权](concepts/authorization.md)
+      - [架构](concepts/authorization-arch.md)
+      - [策略](concepts/authorization-policy.md)
+    - [认证](concepts/authentication.md)
+      - [架构](concepts/authentication-arch.md)
+      - [策略](concepts/authentication-policy.md)
+  - [可观察性](concepts/observability.md)
+    - [指标](concepts/metrics.md)
+    - [日志](concepts/log.md)
+    - [分布式追踪](concepts/distributed-tracing.md)
 
-## 概念原理
+## 实践篇
 
-- [Istio 概念原理](concepts-and-principle/index.md)
-- [什么是服务网格？](concepts-and-principle/what-is-service-mesh.md)
-- [服务网格架构](concepts-and-principle/service-mesh-architectures.md)
-  - [服务网格的实现模式](concepts-and-principle/service-mesh-patterns.md)
-  - [Istio 架构解析](concepts-and-principle/istio-architecture.md)
-  - [从边车模式到 Service Mesh](concepts-and-principle/from-sidecar-to-servicemesh.md)
-- [Sidecar 模式](concepts-and-principle/sidecar-pattern.md)
-  - [Istio 中的 Sidecar 注入与流量劫持详解](concepts-and-principle/sidecar-injection-deep-dive.md)
-  - [Sidecar 的自动注入过程详解](concepts-and-principle/istio-sidecar-injector.md)
-- [Istio CNI Plugin](concepts-and-principle/istio-cni.md)
+- [安装与部署](practice/setup.md)
+  - [安装 Istio](practice/setup-istio.md)
+  - [升级](practice/upgrade.md)
+  - [各环境部署](practice/multiple-environments.md)
+    - [Kubernetes](practice/setup-in-kubernetes.md)
+    - [虚拟机](practice/setup-in-vm.md)
+  - [Bookinfo 示例](practice/bookinfo.md)
+  - [Katacoda 实验环境](practice/katacoda.md)
+- [入门实践](practice/primer.md)
+  - [流量控制](practice/traffic-control.md)
+    - [路由](practice/route.md)
+    - [熔断](practice/circuit-breaking.md)
+    - [故障注入](practice/fault-injection.md)
+    - [Ingress/Egress](practice/ingress-egress.md)
+    - [超时](practice/timeout.md)
+    - [重试](practice/retry.md)
+    - [流量镜像](practice/traffic-shadow.md)
+- [可观察性](practice/observability.md)
+  - [监控与可视化](practice/monitoring-visualization.md)
+    - [Prometheus](practice/prometheus.md)
+    - [Grafana](practice/grafana.md)
+    - [Kiali](practice/kiali.md)
+  - [日志](practice/logging.md)
+    - [ELK](practice/elk.md)
+  - [分布式追踪](practice/distributed-tracing.md)
+    - [Jeager](practice/jeager.md)
+    - [Zipkin](practice/zipkin.md)
+    - [Skywalking](practice/skywalking.md)
+- [安全](practice/security.md)
+  - [认证](practice/authentication.md)
+    - [认证策略](practice/authentication-policy.md)
+    - [网格间服务认证](practice/mesh-to-mesh-authentication.md)
+    - [终端用户认证](practice/end-users-authentication.md)
+    - [双向 TLS](practice/matual-tls.md)
+  - [授权](practice/authorization.md)
+    - [HTTP 流量授权](practice/http-traffic-authorization.md)
+    - [TCP 流量授权](practice/tcp-traffic-authorization.md)
+    - [JWT 授权](practice/jwt-authorization.md)
+    - [Ingress 授权](practice/ingress-authorization.md)
+    - [拒绝授权](practice/deny-authorization.md)
+  - [Istio DNS 证书管理](practice/istio-dns-certificates.md)
+- [进阶实践](practice/advance.md)
+  - [集成传统微服务框架](practice/integration-traditional-microservices.md)
+    - [Spring Cloud](practice/spring-cloud.md)
+    - [Dubbo](practice/dubbo.md)
+  - [集成注册中心配置中心](practice/integration-registry.md)
+    - [Consul](practice/consul.md)
+    - [Nacos](practice/nacos.md)
+    - [Apollo](practice/apollo.md)
+  - [对接 API 网关](practice/integration-api-gateway.md)
+    - [Envoy](practice/envoy.md)
+    - [Kong](practice/kong.md)
+    - [Nginx](practice/nginx.md)
+    - [MOSN](practice/mosn.md)
+- [部署模型](practice/deployments.md)
+  - [多集群部署与管理](practice/multiple-cluster.md)
+- [故障排查](practice/troubleshooting.md)
+  - [常见问题](practice/faq.md)
+  - [诊断工具](practice/diagnostic-tools.md)
 
-## 数据平面
+## 生态扩展
 
-- [数据平面介绍](data-plane/index.md)
-- [Envoy 中的基本术语](data-plane/envoy-terminology.md)
-- [Istio sidecar proxy 配置](data-plane/istio-sidecar-proxy-config.md)
-- [Envoy proxy 配置详解](data-plane/envoy-proxy-config-deep-dive.md)
-- [Envoy API](data-plane/envoy-api.md)
-- [xDS 协议解析](data-plane/envoy-xds-protocol.md)
-  - [LDS（监听器发现服务）](data-plane/envoy-lds.md)
-  - [RDS（路由发现服务）](data-plane/envoy-rds.md)
-  - [CDS（集群发现服务）](data-plane/envoy-cds.md)
-  - [EDS（端点发现服务）](data-plane/envoy-eds.md)
-  - [SDS（秘钥发现服务）](data-plane/envoy-sds.md)
-  - [ADS（聚合发现服务）](data-plane/envoy-ads.md)
-  - [HDS（健康发现服务）](data-plane/envoy-hds.md)
-- [Envoy 高级 API](data-plane/envoy-advance-api.md)
-  - [MS（Metric 服务）](data-plane/envoy-ms.md)
-  - [RLS（速率限制服务）](data-plane/envoy-rls.md)
-
-## 控制平面
-
-- [组件概览](control-plane/index.md)
-- [Sidecar Injector](control-plane/sidecar-injector.md)
-
-## 流量管理
-
-- [Istio 中的流量管理](traffic-management/index.md)
-- [流量管理基础概念](traffic-management/traffic-management-basic.md)
-- [Istio 中的 Sidecar 的流量路由详解](traffic-management/sidecar-traffic-routing-deep-dive.md)
-- [熔断与异常检测在 Istio 中的应用](traffic-management/circuit-breaking-and-outlier-detection-in-istio.md)
-
-## 安全
-
-## 多集群部署
-
-## 日志监控和追踪
-
-## 策略和遥测
-
-## 性能和可伸缩性
-
-## 最佳实践
-
-- [为服务网格选择入口网关](best-practices/how-to-implement-ingress-gateway.md)
+- [Service Mesh 生态](ecosystem/overview.md)
+  - [标准](ecosystem/standard.md)
+    - [xDS](ecosystem/xds.md)
+    - [SMI](ecosystem/smi.md)
+    - [UDPA](ecosystem/udpa.md)
+  - [扩展](ecosystem/extension.md)
+    - [WebAssembly](ecosystem/webassembly.md)
+    - [Solo](ecosystem/solo.md)
+    - [Ambassador](ecosystem/ambassador.md)
+    - [Contour](ecosystem/contour.md)
 
 ## 附录
 
+- [术语表](GLOSSARY.md)
 - [服务网格全景图](appendix/service-mesh-landscape.md)

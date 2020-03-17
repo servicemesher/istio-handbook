@@ -5,9 +5,9 @@
 ## 文档组织规则
 
 - 所有文档使用 markdown 格式撰写；
-- 文中的图片直接使用**新浪图床**保存，不用保存在GitHub 上；
+- 文中的图片请保存在本书的 GitHub 上；
 - 图片必须给出标题；
-- 所有引用的文章必须在文章底部的参考中给出链接，格式如 [title - domain.com]()；
+- 所有引用的文章必须在文章底部的参考中给出链接，格式如 `title - domain.com`；
 - 所有代码需要指明语言；
 
 ## 流程
@@ -15,7 +15,7 @@
 1. 首先加入到本书的[协作群](https://github.com/servicemesher/istio-handbook/issues/42)
 2. 在 [Issues](https://github.com/servicemesher/getting-started-with-knative/issues) 中认领你想要参与的章节（issue 标题为文章路径，内容填写标题和摘要）；
 3. 一次最多同时认领 3 个 issue；
-4. 由 owner 审核后 merge 进 master 分支；
+4. 由[编委会](editorial-board.md)成员审核后 merge 进 master 分支；
 6. 合并后会立即发布到 <https://www.servicemesher.com/istio-handbook> 上；
 
 ## Header
@@ -23,24 +23,14 @@
 每篇文章的头部都有一个使用 YAML 格式的 header，请在每次提交 PR 的时候填写，示例：
 
 ```yaml
-owners: ["rootsongjc","loverto"]
-reviewers: ["fleeto","mathlsj"...]
-description: "文章摘要。"
-publishDate: 2019-03-02
-updateDate: 2019-03-10
-tags: ["tagA","tagB"...]
-category: "translation|original|evolution"
+authors: ["rootsongjc","malphi"]
+reviewers: ["gorda","mathlsj"...]
 ```
 
 **说明**
 
-- owners：原则上不超过2人；
-- reviewers：只要修改过文章的人都是 reviewer；
-- description：本文章的摘要，不要超过200字；
-- publishDate：文章第一次合并的日期；
-- updateDate：最新一次修改的日期；
-- tags：文章中出现的关键词；
-- category：translation（翻译的文章），original（原创文章），evolution（在翻译文章的基础上重新演绎，对原文有大量更新）；
+- authors：GitHub 账号，本文的主要作者，可以为一到两人；
+- reviewers：GitHub 账号，只要修改过文章的人都是 reviewer；
 
 ## 排版规范
 
