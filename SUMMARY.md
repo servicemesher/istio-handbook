@@ -5,6 +5,7 @@
 - [序言](README.md)
 - [编委会](wg/editorial-board.md)
 - [写作规范](wg/specification.md)
+- [参与流程](wg/process.md)
 
 ## 概念篇
 
@@ -110,15 +111,15 @@
 ## 生态扩展
 
 - [Service Mesh 生态](ecosystem/overview.md)
-  - [标准](ecosystem/standard.md)
-    - [xDS](ecosystem/xds.md)
-    - [SMI](ecosystem/smi.md)
-    - [UDPA](ecosystem/udpa.md)
-  - [扩展](ecosystem/extension.md)
-    - [WebAssembly](ecosystem/webassembly.md)
-    - [Solo](ecosystem/solo.md)
-    - [Ambassador](ecosystem/ambassador.md)
-    - [Contour](ecosystem/contour.md)
+- [标准](ecosystem/standard.md)
+  - [xDS](ecosystem/xds.md)
+  - [SMI](ecosystem/smi.md)
+  - [UDPA](ecosystem/udpa.md)
+- [扩展](ecosystem/extension.md)
+  - [WebAssembly](ecosystem/webassembly.md)
+  - [Solo](ecosystem/solo.md)
+  - [Ambassador](ecosystem/ambassador.md)
+  - [Contour](ecosystem/contour.md)
 
 ## 附录
 
