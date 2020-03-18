@@ -10,7 +10,7 @@ Istio Handbook 参与流程如下图所示。
 
 参与本书写作的基本流程如下：
 
-- 任务领取：在本仓库的 [Issue 页面](https://github.com/servicemesher/istio-handbook/issues)领取 `status/pending` 状态任务；
+- 任务领取：在本仓库的 [issue 页面](https://github.com/servicemesher/istio-handbook/issues)领取 `status/pending` 状态任务；
 - 提交：参与人员提交 PR 等待 review；
 - 审阅：所有参与人员都可以审阅 PR；
 - 终审：[编委会](editorial-board.md)对 review 后的内容进行最后确认；
@@ -25,8 +25,13 @@ Istio Handbook 参与流程如下图所示。
 ### 准备工作
 
 - 账号：您需要先准备一个钉钉号和 GitHub 账号。钉钉用来协作和沟通，Github 进行任务认领和 PR 提交。
-- 申请加入：请扫描下面的二维码加入钉钉协作群，通过审批后您需要登记一下基本信息（具体见群公告），之后管理员会将您添加到 ServiceMesher 的 GitHub 组织，即可正式参与翻译。
-  ![钉钉群二维码](../images/istio-handbook-team.jpg)
+- 申请加入：请使用钉钉扫描下面的二维码协作群，通过审批后您需要登记一下基本信息（具体见群公告），之后管理员会将您添加到 ServiceMesher 的 GitHub 组织，即可正式参与翻译。
+
+<p align="center">
+    <img src="../images/istio-handbook-team.jpg" alt="钉钉群二维码" />
+   </a>
+</p>
+
 - 为保证本书内容的一致性和准确性，请在参与前仔细阅读[协作规范](specification.md)；
 - 仓库和分支管理
   - fork [istio-handbook](https://github.com/servicemesher/istio-handbook) 的仓库，并作为自己仓库的上游： `git remote add upstream` ；

@@ -1,0 +1,43 @@
+{
+  "name": "istio-handbook",
+  "version": "1.0.0",
+  "description": "Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes Era",
+  "main": "index.js",
+  "dependencies": {
+    "gitbook-plugin-ad": "^0.0.4",
+    "gitbook-plugin-editlink": "^1.0.2",
+    "gitbook-plugin-codesnippet": "^1.2.0",
+    "gitbook-plugin-3-ba": "^0.9.0",
+    "gitbook-plugin-back-to-top-button": "^0.1.4",
+    "gitbook-plugin-ga": "^1.0.1",
+    "gitbook-plugin-image-captions": "^3.1.0",
+    "gitbook-plugin-adsense": "^1.0.3",
+    "gitbook-plugin-favicon": "^0.0.2",
+    "gitbook-plugin-prism": "^2.4.0",
+    "gitbook-plugin-github-buttons": "^2.1.0",
+    "gitbook-plugin-github": "^2.0.0",
+    "gitbook-plugin-search-plus": "^1.0.3",
+    "gitbook-plugin-page-toc-button": "^0.1.1",
+    "gitbook-plugin-related-links": "^1.0.0",
+    "gitbook-plugin-prism-themes": "^0.0.2",
+    "gitbook-plugin-splitter": "^0.0.8",
+    "gitbook-plugin-lightbox": "^1.1.0",
+    "gitbook-plugin-sitemap-general": "^0.1.1",
+    "gitbook-plugin-tbfed-pagefooter": "^0.0.1",
+    "gitbook-plugin-theme-default": "^1.0.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/servicemesher/istio-handbook.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/servicemesher/istio-handbook/issues"
+  },
+  "homepage": "https://github.com/servicemesher/istio-handbook#readme"
+}
