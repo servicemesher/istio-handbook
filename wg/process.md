@@ -83,6 +83,8 @@ gitbook serve
 ref: https://github.com/servicemesher/istio-handbook/issues/<issueID>
 ```
 
+提交 PR 后在该 PR 对应的 issue 中回复 `/pushed`，GitHub bot 会自动去掉 `status/waiting-for-pr` 标签，并增加 `status/reviewing` 标签。
+
 #### Step5：审阅
 
 所有参与人员都可以参与审阅。为保证质量，我们设置了两轮 review：
