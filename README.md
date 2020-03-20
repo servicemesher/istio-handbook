@@ -37,6 +37,13 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
   </a>
 </p>
 
+## 目录预览图
+
+<p align="center">
+    <img src="images/istio-handbook-catalog.jpg" alt="目录预览图" />
+  </a>
+</p>
+
 ## ServiceMesher 社区
 
 获取更多关于服务网格的资讯、技术干货请加入 [ServiceMesher 社区](https://www.servicemesher.com)。
