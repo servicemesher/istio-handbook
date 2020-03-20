@@ -40,7 +40,7 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 ## 目录预览图
 
 <p align="center">
-    <img src="images/istio-handbook-catalog.jpg" alt="目录预览图" />
+    <img src="wg/mind-map.png" alt="目录预览图" />
   </a>
 </p>
 
