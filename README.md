@@ -54,4 +54,7 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 
 获取更多关于服务网格的资讯、技术干货请加入 [ServiceMesher 社区](https://www.servicemesher.com)。
 
-![ServiceMesher 微信公众号](images/servicemesher-qr-code.jpg)
+<p align="center">
+    <img src="images/servicemesher-qr-code.jpg" alt="微信公众号" />
+  </a>
+</p>
