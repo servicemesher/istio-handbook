@@ -72,6 +72,7 @@
     - [Kiali](practice/kiali.md)
   - [日志](practice/logging.md)
     - [ELK](practice/elk.md)
+    - [EFK](practice/efk.md)
   - [分布式追踪](practice/distributed-tracing.md)
     - [Jeager](practice/jeager.md)
     - [Zipkin](practice/zipkin.md)
