@@ -29,7 +29,7 @@ Katacoda 需要注册账号登录，这里直接使用 GitHub 账号登录即可
 
 这里推荐在页面新建仓库，访问 https://www.katacoda.com/teach/git-hosted-scenarios ，点击 `Automatically Create and Configure Github Repository` 按钮，Katacoda 会自动在您的 Github 中创建一个名为 `katacoda-scenarios` 的仓库，并自动为您配置 Webhook，每次更新该仓库时，都会自动更新您 Katacoda 中课程的内容。
 
-![katacoda-configuration](../images/katacoda-configuration.jpg)
+![katacoda 新建仓库页面](../images/katacoda-configuration.jpg)
 
 创建完成后，就可以在您的 Github 上找到名为 `katacoda-scenarios` 的代码仓库。
 
@@ -64,7 +64,7 @@ Katacoda 官方提供了 CLI 工具，帮助您创建 Scenarios。
 ### 编辑 Scenarios
 
 Scenarios 目录创建好之后，可以看到目录的结构：
-```
+```bash
 .
 ├── finish.md
 ├── index.json
@@ -96,7 +96,7 @@ CLI 将会提示您如下问题：
 - **Friendly-url:** 此处可输入 `test-course`，该属性将确定课程文件夹的名称，以及用来访问他的 URL。因此，该属性不能包括空格，需要是小写字母等。例如，如果您的用户名是 test-username 并且您的方案称为 test-course，用于在平台中指向该课程的URL将为 https://katacoda.com/test-username/courses/test-course/
 
 在生成的 `test-course-pathway.json`文件中可以看到刚才生成的课程定义：
-```
+```json
 {
   "title": "test-course",
   "description": "Example course",
@@ -116,7 +116,7 @@ CLI 将提示您以下问题：
 然后选择是否要将 scenario 复制或移动到课程文件夹。
 
 现在，就可以看到 scenario 已添加到 `test-course` 中了：
-```
+```json
 {
   "title": "test-course",
   "description": "Example course",
@@ -133,7 +133,7 @@ CLI 将提示您以下问题：
 
 将创建的 Scenarios 或 Course 移动到之前[新建仓库](##新建仓库)时创建的 git 项目中。例如，下面这个项目包含1个 Course，且这个 Course 中又有2个 Scenario，将其上传到 Github。
 
-```
+```bash
 $ tree
 .
 ├── README.md
@@ -166,20 +166,20 @@ $ git push origin master
 
 **Your Profile 页面**
 
-![katacoda-profile](../images/katacoda-profile.jpg)
+![Your Profile 页面](../images/katacoda-profile.jpg)
 
 **Course 内容**
 
 可以显示 Scenario 的学习进度
 
-![katacoda-course](../images/katacoda-course.jpg)
+![Course 内容](../images/katacoda-course.jpg)
 
 
 **Scenario 详情**
 
 最终用户可以根据左侧的步骤说明来操作右侧的终端，同时如果有需要预览的文件，可以通过终端上面的窗口进行浏览。
 
-![katacoda-detail](../images/katacoda-detail.jpg)
+![Scenario 详情](../images/katacoda-detail.jpg)
 
 ## 总结
 
