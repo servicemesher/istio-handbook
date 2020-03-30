@@ -17,11 +17,7 @@ Katacoda 可以快速的提供一套完整的临时环境，并在使用后将�
 
 在 Katacoda 每个用户都可以免费的学习和创建课程，其中：
 - Course：课程，可包含一系列的 scenarios。
-    - 官方教程入口：https://katacoda.com/scenario-examples/scenarios/create-course
-    - 汉化教程入口：https://www.katacoda.com/guoxudong/courses/katacoda-example/create-course
 - Scenarios：场景、方案。
-    - 官方教程入口：https://www.katacoda.com/scenario-examples/scenarios/create-scenario-101
-    - 汉化教程入口：https://www.katacoda.com/guoxudong/courses/katacoda-example/katacoda-create-scenarios
 
 ## 新建仓库
 
@@ -86,7 +82,7 @@ Course 课程，其包含一系列的 scenarios。其可以对相关方案进行
 
 ### 创建 Course
 
-同样需要使用 CLI 工具，安装方法见：[安装 CLI](###安装&nbsp;CLI)。
+同样需要使用 CLI 工具，安装方法见：[安装 CLI](###安装-CLI)。
 
 使用命令 `katacoda courses:create` 创建 Course。
 
