@@ -19,7 +19,26 @@ Katacoda 可以快速的提供一套完整的临时环境，并在使用后将�
 - Course：课程，可包含一系列的 scenarios。
 - Scenarios：场景、方案。
 
-## 新建仓库
+## 使用 Katacoda 学习
+
+Katacoda 提供了非常便利的学习方式，用户可以在首页搜索自己感兴趣的课程，打开相应课程，就可以跟着课程设计者的说明，按照设计好的步骤一步步完成学习。
+
+- 介绍会标明课程的难度和需要的时间，帮助用户了解该课程的基本信息：
+![欢迎介绍页](https://tvax1.sinaimg.cn/large/ad5fbf65gy1gd8k9b4jwoj21ha0q7wha.jpg)
+
+- 进入课程，左侧是该步骤说明，右侧是一个准备好的终端，直接可以使用：
+![步骤介绍](https://tvax2.sinaimg.cn/large/ad5fbf65gy1gd8kdmfr3ej21h90qeq8s.jpg)
+
+- 之后就是跟着步骤说明，一步步的完成学习即可：
+![学习页](https://tva3.sinaimg.cn/large/ad5fbf65gy1gd8kh1jcs1j21hb0q5do7.jpg)
+
+## 创建 Katacoda 课程
+
+既然可以学习别人设计好的课程，那么也可以自己设计课程，以供用户学习。
+
+本书资源仓库：https://github.com/servicemesher/istio-handbook-resources
+
+### 新建仓库
 
 Katacoda 需要注册账号登录，这里直接使用 GitHub 账号登录即可，毕竟之后创建的方案都是存放在 GitHub 上的。
 
@@ -29,13 +48,13 @@ Katacoda 需要注册账号登录，这里直接使用 GitHub 账号登录即可
 
 创建完成后，就可以在您的 Github 上找到名为 `katacoda-scenarios` 的代码仓库。
 
-## Scenarios
+### Scenarios
 
 Scenarios 即为方案、场景，由一组 Markdown、bash 脚本和一个 JSON 文件组成，这些文件保存了该 Scenarios 的所有配置。
 
 Katacoda 官方提供了 CLI 工具，帮助您创建 Scenarios。
 
-### 安装 CLI
+#### 安装 CLI
 
 通过 npm 命令安装 `npm i katacoda-cli --global`。
 
@@ -43,7 +62,7 @@ Katacoda 官方提供了 CLI 工具，帮助您创建 Scenarios。
 
 安装完成后，可以通过运行命令 `katacoda --help` 查看帮助信息。
 
-### 创建 Scenarios 目录
+#### 创建 Scenarios 目录
 
 例如，要创建新的方案，可以通过运行命令 `katacoda scenarios:create`，CLI 将会提示一些信息，帮助您创建方案：
 - **Friendly URL:** 此处可输入 `test-scenario`，该属性将确定 scenarios 文件夹的名称，以及用来访问他的 URL。因此，该属性不能包括空格，需要是小写字母等。例如，如果您的用户名是 test-username 并且您的方案称为 test-scenario（如建议的那样），用于在平台中指向该方案的URL将为 https://katacoda.com/test-username/scenarios/test-scenario/
@@ -57,7 +76,7 @@ Katacoda 官方提供了 CLI 工具，帮助您创建 Scenarios。
 
 输入这些信息，CLI 将帮您创建一个文件夹，其中引入了 ***friendly URL*** 的名称，并将在该文件夹内创建方案所需的文件。
 
-### 编辑 Scenarios
+#### 编辑 Scenarios
 
 Scenarios 目录创建好之后，可以看到目录的结构：
 ```bash
@@ -76,13 +95,13 @@ Scenarios 目录创建好之后，可以看到目录的结构：
 - `finish.md` ：结束页
 - `step1-setpN.md`：步骤介绍，数目与您使用 CLI 工具创建 Scenarios 时输入的数目相同
 
-## Course
+### Course
 
 Course 课程，其包含一系列的 scenarios。其可以对相关方案进行分组，以便为​​用户提供清晰解释和学习的顺序。
 
-### 创建 Course
+#### 创建 Course
 
-同样需要使用 CLI 工具，安装方法见：[安装 CLI](###安装-CLI)。
+同样需要使用 CLI 工具，安装方法见：[安装 CLI](#安装-CLI)。
 
 使用命令 `katacoda courses:create` 创建 Course。
 
@@ -100,7 +119,7 @@ CLI 将会提示您如下问题：
 }
 ```
 
-### 将现有的 Scenarios 添加到课程中
+#### 将现有的 Scenarios 添加到课程中
 
 运行以下命令将现有的 scenarios 添加到课程中：
 `katacoda courses:add:scenarios`
@@ -125,9 +144,9 @@ CLI 将提示您以下问题：
   ]
 ```
 
-## 上传
+### 上传
 
-将创建的 Scenarios 或 Course 移动到之前[新建仓库](##新建仓库)时创建的 git 项目中。例如，下面这个项目包含1个 Course，且这个 Course 中又有2个 Scenario，将其上传到 Github。
+将创建的 Scenarios 或 Course 移动到之前[新建仓库](#新建仓库)时创建的 git 项目中。例如，下面这个项目包含1个 Course，且这个 Course 中又有2个 Scenario，将其上传到 Github。
 
 ```bash
 $ tree
@@ -158,7 +177,7 @@ $ git push origin master
 ```
 上传成功后，在 **Your Profile** 页面就可以看到您上传的课程。
 
-## 效果
+### 效果
 
 **Your Profile 页面**
 
