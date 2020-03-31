@@ -1,6 +1,6 @@
 ```
 ---
-authors: ["罗广明"]
+authors: ["GuangmingLuo"]
 reviewers: [""]
 ---
 ```
@@ -24,7 +24,7 @@ reviewers: [""]
 
 2019年，在众多热门技术趋势中，**云原生**的关注度居高不下，很多开发者都对由此兴起的一众技术十分追捧，众多企业又开始探索云原生架构的转型与落地。这一年，中国的开发者们经历了从关注“云原生概念”到关注“云原生落地实践”的转变。而 Service Mesh 技术也因此越来越火热，受到越来越多开发者的关注，并拥有了大批拥趸。那么 Service Mesh 是什么呢？它为什么会受到开发者的关注？它和传统微服务应用有什么区别？
 
-Service Mesh 一词最早由开发 Linkerd 的 Buoyant 公司提出，并于 2016 年 9 月29 日第一次公开使用了这一术语。William Morgan，Buoyant CEO，对 Service Mesh 这一定义如下：
+Service Mesh 一词最早由开发 Linkerd 的 Buoyant 公司提出，并于 2016 年 9 月29 日第一次公开使用了这一术语。William Morgan，Buoyant CEO，对 Service Mesh 这一概念定义如下：
 
 > A service mesh is a dedicated infrastructure layer for handling service-to-service communication. It’s responsible for the reliable delivery of requests through the complex topology of services that comprise a modern, cloud native application. In practice, the service mesh is typically implemented as an array of lightweight network proxies that are deployed alongside application code, without the application needing to be aware.
 
