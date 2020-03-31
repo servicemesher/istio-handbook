@@ -1,6 +1,6 @@
 ---
 authors: ["rootsongjc"]
-reviewers: [""]
+reviewers: ["Guangmingluo"]
 ---
 
 # Service Mesh 在云原生中的应用
@@ -19,7 +19,7 @@ reviewers: [""]
 
 使用 Service Mesh 并不是说与 Kubernetes 决裂，而是水到渠成的事情。Kubernetes 的本质是通过声明式配置对应用进行生命周期管理，而 Service Mesh 的本质是提供应用间的流量和安全性管理以及可观察性。假如你已经使用 Kubernetes 构建了稳定的微服务平台，那么如何设置服务间调用的负载均衡和流量控制？
 
-Envoy 创造的 xDS 协议被众多开源软件所支持，如 [Istio](https://github.com/istio/istio)、[Linkerd](https://linkerd.io/)、[MOSN](https:/github.com/mosn/mosn) 等。Envoy 对于 Service Mesh 或云原生来说最大的贡献就是定义了 xDS，虽然 Envoy 本质上是一个 proxy，但它是可通过 API 配置的现代版 proxy，基于它衍生出来很多不同的使用场景，如 API Gateway、Service Mesh 中的 Sidecar prxoy 和边缘代理。
+Envoy 创造的 xDS 协议被众多开源软件所支持，如 [Istio](https://github.com/istio/istio)、[Linkerd](https://linkerd.io/)、[MOSN](https:/github.com/mosn/mosn) 等。Envoy 对于 Service Mesh 或云原生来说最大的贡献就是定义了 xDS，Envoy 本质上是一个 proxy，是可通过 API 配置的现代版 proxy，基于它衍生出来很多不同的使用场景，如 API Gateway、Service Mesh 中的 Sidecar proxy 和边缘代理。
 
 **本节包含以下内容**
 
@@ -27,7 +27,7 @@ Envoy 创造的 xDS 协议被众多开源软件所支持，如 [Istio](https://g
 - Kubernetes 在微服务管理上的局限性。
 - 介绍 Istio Service Mesh 的功能。
 - 介绍 xDS 包含哪些内容。
-- 比较了 Kubernetes、Envoy 和 Istio Service Mesh 中的一些概念。
+- 比较 Kubernetes、Envoy 和 Istio Service Mesh 中的一些概念。
 
 ## 重要观点
 
@@ -42,11 +42,11 @@ Envoy 创造的 xDS 协议被众多开源软件所支持，如 [Istio](https://g
 
 ## Kubernetes vs Service Mesh
 
-下图展示的是 Kubernetes 与 Service Mesh 中的的服务访问关系（每个 pod 一个 sidecat 的模式）。![kubernetes vs service mesh](../images/kubernetes-vs-service-mesh.png)
+下图展示的是 Kubernetes 与 Service Mesh 中的的服务访问关系（每个 pod 一个 sidecar 的模式）。![kubernetes vs service mesh](../images/kubernetes-vs-service-mesh.png)
 
 Kubernetes 集群的每个节点都部署了一个 `kube-proxy` 组件，该组件会与 Kubernetes API Server 通信，获取集群中的 [service](https://jimmysong.io/kubernetes-handbook/concepts/service.html) 信息，然后设置 iptables 规则，直接将对某个 service 的请求发送到对应的 Endpoint（属于同一组 service 的 pod）上。
 
-Istio Service Mesh 中沿用了 Kubernetes 中的 service 做服务注册，通过 Control Plane 来生成数据平面的配置（使用 CRD 声明，保存在 etcd 中），数据平面的**透明代理**（transparent proxy）以 sidecar 容器的形式部署在每个应用服务的 pod 中，这些 proxy 都需要请求 Control Plane 来同步代理配置，之所以说是透明代理，是因为应用程序容器完全无感知代理的存在，该过程 kube-proxy 组件一样需要拦截流量，只不过 `kube-proxy` 拦截的是进出 Kubernetes 节点的流量，而 sidecar proxy 拦截的是进出该 Pod 的流量，详见[理解 Istio Service Mesh 中 Envoy Sidecar 代理的路由转发](https://jimmysong.io/posts/envoy-sidecar-routing-of-istio-service-mesh-deep-dive/)。
+Istio Service Mesh 中沿用了 Kubernetes 中的 service 做服务注册，通过控制平面（Control Plane）来生成数据平面的配置（使用 CRD 声明，保存在 etcd 中），数据平面的**透明代理**（transparent proxy）以 sidecar 容器的形式部署在每个应用服务的 pod 中，这些 proxy 都需要请求控制平面来同步代理配置，之所以说是透明代理，是因为应用程序容器完全无感知代理的存在，该过程 kube-proxy 组件一样需要拦截流量，只不过 `kube-proxy` 拦截的是进出 Kubernetes 节点的流量，而 sidecar proxy 拦截的是进出该 Pod 的流量，详见[理解 Istio Service Mesh 中 Envoy Sidecar 代理的路由转发](https://jimmysong.io/posts/envoy-sidecar-routing-of-istio-service-mesh-deep-dive/)。
 
 **Service Mesh 的劣势**
 
@@ -104,7 +104,7 @@ Envoy 获取其他支持 xDS 协议的代理通过查询文件或管理服务器
 
 最后总结下关于 xDS 协议的要点：
 
-- CDS、EDS、LDS、RDS 是最基础的 xDS 协议，它们可以分别独立更新的。
+- CDS、EDS、LDS、RDS 是最基础的 xDS 协议，它们可以分别独立更新。
 - 所有的发现服务（Discovery Service）可以连接不同的 Management Server，也就是说管理 xDS 的服务器可以是多个。
 - Envoy 在原始 xDS 协议的基础上进行了一些列扩充，增加了 SDS（秘钥发现服务）、ADS（聚合发现服务）、HDS（健康发现服务）、MS（Metric 服务）、RLS（速率限制服务）等 API。
 - 为了保证数据一致性，若直接使用 xDS 原始 API 的话，需要保证这样的顺序更新：CDS --> EDS --> LDS --> RDS，这是遵循电子工程中的**先合后断**（Make-Before-Break）原则，即在断开原来的连接之前先建立好新的连接，应用在路由里就是为了防止设置了新的路由规则的时候却无法发现上游集群而导致流量被丢弃的情况，类似于电路里的断路。
