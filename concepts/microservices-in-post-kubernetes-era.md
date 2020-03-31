@@ -3,19 +3,17 @@ authors: ["rootsongjc"]
 reviewers: ["Guangmingluo"]
 ---
 
-# Service Mesh 在云原生中的应用
+# 后 Kubernetes 时代的微服务
 
 刚听说 Service Mesh 并试用过 [Istio](https://istio.io) 的人可能都会有下面几个疑问：
 
-1. 为什么 Istio 一定要绑定 Kubernetes 呢？
+1. 为什么 Istio 要绑定 Kubernetes 呢？
 1. Kubernetes 和 Service Mesh 分别在云原生中扮演什么角色？
 1. Istio 扩展了 Kubernetes 的哪些方面？解决了哪些问题？
 1. Kubernetes、xDS 协议（[Envoy](https://github.com/envoyproxy/envoy)、[MOSN](https://github.com/mosn/mosn) 等）与 Istio 之间又是什么关系？
 1. 到底该不该上 Service Mesh？
 
 这一节我们将试图带您梳理清楚 Kubernetes、xDS 协议以及 Istio Service Mesh 之间的内在联系。此外，本节还将介绍 Kubernetes 中的负载均衡方式，xDS 协议对于 Service Mesh 的意义以及为什么说及时有了 Kubernetes 还需要 Istio。
-
-## Service Mesh 是后 Kubernetes 时代的微服务
 
 使用 Service Mesh 并不是说与 Kubernetes 决裂，而是水到渠成的事情。Kubernetes 的本质是通过声明式配置对应用进行生命周期管理，而 Service Mesh 的本质是提供应用间的流量和安全性管理以及可观察性。假如你已经使用 Kubernetes 构建了稳定的微服务平台，那么如何设置服务间调用的负载均衡和流量控制？
 
@@ -84,7 +82,7 @@ Istio Gateway 的功能与 Kubernetes Ingress 类似，都是负责集群的南�
 
 ## xDS 协议
 
-下面这张图大家在了解 Service Mesh 的时候可能都看到过，每个方块代表一个服务的示例，例如 Kubernetes 中的一个 Pod（其中包含了 sidecar proxy），xDS 协议控制了 Istio Service Mesh 中所有流量的具体行为，即将下图中的方块链接到了一起。
+下面这张图大家在了解 Service Mesh 的时候可能都看到过，每个方块代表一个服务的实例，例如 Kubernetes 中的一个 Pod（其中包含了 sidecar proxy），xDS 协议控制了 Istio Service Mesh 中所有流量的具体行为，即将下图中的方块链接到了一起。
 
 ![Service Mesh 示意图](../images/service-mesh-schematic-diagram.png)
 
