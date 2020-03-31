@@ -42,7 +42,9 @@ Envoy 创造的 xDS 协议被众多开源软件所支持，如 [Istio](https://g
 
 ## Kubernetes vs Service Mesh
 
-下图展示的是 Kubernetes 与 Service Mesh 中的的服务访问关系（每个 pod 一个 sidecar 的模式）。![kubernetes vs service mesh](../images/kubernetes-vs-service-mesh.png)
+下图展示的是 Kubernetes 与 Service Mesh 中的的服务访问关系（每个 pod 一个 sidecar 的模式）。
+
+![kubernetes 对比 service mesh](../images/kubernetes-vs-service-mesh.png)
 
 **流量转发**
 
@@ -78,9 +80,7 @@ Kube-proxy 实现了流量在 Kubernetes service 多个 pod 实例间的负载�
 
 上文说到 `kube-proxy` 只能路由 Kubernetes 集群内部的流量，而我们知道 Kubernetes 集群的 Pod 位于 [CNI](https://jimmysong.io/kubernetes-handbook/concepts/cni.html) 创建的外网络中，集群外部是无法直接与其通信的，因此 Kubernetes 中创建了 [ingress](https://jimmysong.io/kubernetes-handbook/concepts/ingress.html) 这个资源对象，它由位于 Kubernetes [边缘节点](https://jimmysong.io/kubernetes-handbook/practice/edge-node-configuration.html)（这样的节点可以是很多个也可以是一组）的 Ingress controller 驱动，负责管理**南北向流量**，Ingress 必须对接各种 Ingress Controller 才能使用，比如 [nginx ingress controller](https://github.com/kubernetes/ingress-nginx)、[traefik](https://traefik.io/)。Ingress 只适用于 HTTP 流量，使用方式也很简单，只能对 service、port、HTTP 路径等有限字段匹配来路由流量，这导致它无法路由如 MySQL、Redis 和各种私有 RPC 等 TCP 流量。要想直接路由南北向的流量，只能使用 Service 的 LoadBalancer 或 NodePort，前者需要云厂商支持，后者需要进行额外的端口管理。有些 Ingress controller 支持暴露 TCP 和 UDP 服务，但是只能使用 Service 来暴露，Ingress 本身是不支持的，例如 [nginx ingress controller](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/)，服务暴露的端口是通过创建 ConfigMap 的方式来配置的。
 
-Kubernetes 中的 Ingress 资源对象跟 Istio 中的 Gateway 的功能类似，都是负责集群的南北向流量（从集群外部进入集群内部的流量）。
-
-Istio `Gateway` 描述的负载均衡器用于承载进出网格边缘的连接。该规范中描述了一系列开放端口和这些端口所使用的协议、负载均衡的 SNI 配置等内容。Gateway 是一种 [CRD 扩展](https://jimmysong.io/kubernetes-handbook/concepts/crd.html)，它同时复用了 sidecar proxy 的能力，详细配置请参考 [Istio 官网](https://istio.io/docs/reference/config/networking/gateway/)。
+Istio Gateway 的功能与 Kubernetes Ingress 类似，都是负责集群的南北向流量。Istio `Gateway` 描述的负载均衡器用于承载进出网格边缘的连接。该规范中描述了一系列开放端口和这些端口所使用的协议、负载均衡的 SNI 配置等内容。Gateway 是一种 [CRD 扩展](https://jimmysong.io/kubernetes-handbook/concepts/crd.html)，它同时复用了 sidecar proxy 的能力，详细配置请参考 [Istio 官网](https://istio.io/docs/reference/config/networking/gateway/)。
 
 ## xDS 协议
 
@@ -184,5 +184,4 @@ Envoy/MOSN 的功能也不只是做流量转发，以上概念只不过是 Istio
 - [理解 Istio Service Mesh 中 Envoy 代理 Sidecar 注入及流量劫持 - jimmysong.io](https://jimmysong.io/blog/envoy-sidecar-injection-in-istio-service-mesh-deep-dive/)
 - [kubernetes 简介：service 和 kube-proxy 原理 - cizixs.com](https://cizixs.com/2017/03/30/kubernetes-introduction-service-and-kube-proxy/)
 - [使用 IPVS 实现 Kubernetes 入口流量负载均衡 - jishu.io](https://jishu.io/kubernetes/ipvs-loadbalancer-for-kubernetes/)
-
 - [xDS REST and gRPC protocol](https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol)
