@@ -1,4 +1,8 @@
-# <svg class="icon"><use xlink:href="https://preliminary.istio.io/img/icons.svg#glossary"></use></svg>术语表
+---
+authors: ["dangpf"]
+reviewers: []
+---
+# 术语表
 # [A](#a) | [B](#b) | [C](#c) | [D](#d) | [E](#e) | [F](#f) | [G](#g) | [H](#h) | [I](#i) | [J](#j) | [K](#k) | [L](#l) | [M](#n) | [N](#n) | [O](#o) | [P](#p) | [Q](#q) | [R](#r) | [S](#s) | [T](#t) | [U](#u) | [V](#v) | [W](#w) | [X](#x) | [Y](#y) | [Z](#z)  
 ## A
 ##### ADAPTERS
