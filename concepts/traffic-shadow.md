@@ -21,7 +21,7 @@ reviewers: [""]
 
 实际上在 Istio 中，服务间的通讯都是被 Envoy 代理并处理的，所以 Istio 对于流量镜像的设计是基于 Envoy 的特性上实现的。它的流量转发如下图所示。可以看到，当流量进入到`Service A`时，因为在`Service A`的 Envoy 代理上配置了流量镜像规则，那么它首先会将原始流量转发到`v1`版本的 `Service B`实例中去 。同时也会将相同的流量复制一份，异步的发送给`v2`版本的`Service B` 服务子集中去，可以明显的看到，`Service A` 发送完镜像流量之后并不关心它的响应情况。
 
-![](..\images\concepts-traffic-shadow-01.png)
+![concepts-traffic-shadow-01](../images/concepts-traffic-shadow-01.png)
 
 在很多情况下，我们是需要将真实的流量数据与镜像流量数据进行收集并分析，那么我们应该怎样去区分收集后哪些是真实流量，哪些是镜像流量呢？ 实际上，Envoy 团队早就想到了这样的场景，他们为了区分流量镜像与真实流量，在镜像部分的流量中修改了请求标头中 `host` 值来标识，它的修改规则是：在原始流量请求标头中的 `host` 属性值拼接上`“-shadow”` 字样作为镜像流量的 `host` 请求标头。
 
@@ -29,11 +29,11 @@ reviewers: [""]
 
 如下图所示，我们发起一个`http://istio.gateway.xxxx.tech/serviceB/request/info`的请求，请求首先进入了`istio-ingressgateway` ，它是一个 Istio 的 Gateway 资源类型的服务，它本身就是一个Envoy代理。在这个例子里，就是它对流量进行了镜像处理。可以看到，它将流量转发给`v1`版本`Service B`服务子集的同时也复制了一份流量发送到了`v2`版本的`Service B`服务子集中去。
 
-![](..\images\concepts-traffic-shadow-request.png)
+![concepts-traffic-shadow-request](../images/concepts-traffic-shadow-request.png)
 
 在上面的请求链中，请求标头数据有什么变化呢？下图可以明显的对比出正式流量与镜像流量请求标头中`host`属性的区别（部分相同的属性值过长，这里只截取了前半段）。从图中我们可以看出，首先就是host属性值的不同，而镜像流量与原始流量的`host`标头区别就是多了一个`“-shadow”`的后缀。再者发现`x-forwarded-for`属性也不相同，`x-forwarded-for`协议头的格式是：`x-forwarded-for: client1, proxy1, proxy2` ， 当流量经过代理时这个协议头将会把代理服务的 IP 添加进去。实例中`10.10.2.151`是我们云主机的 IP，而`10.10.2.121`是`isito-ingressgateway`所对应Pod的 IP 。从这里也能看到，镜像流量是由`istio-ingressgatway`发起的。除了这两个请求标头的不同，其他配置项是完全一样的。
 
-![](..\images\concepts-traffic-shadow-header.png)
+![concepts-traffic-shadow-header](../images/concepts-traffic-shadow-header.png)
 
 ### 流量镜像的配置
 
