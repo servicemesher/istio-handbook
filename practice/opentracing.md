@@ -17,7 +17,7 @@ reviewers: [""]
 
 实现分布式调用跟踪的方式一般是在程序代码中进行埋点，采集调用的相关信息后发送到后端的一个调用跟踪服务器进行分析处理。在这种实现方式中，应用代码需要依赖于调用跟踪服务器的 API，导致业务逻辑和调用跟踪的逻辑耦合。为了解决该问题，[CNCF](https://www.cncf.io/) （云原生计算基金会）下的 [OpenTracing](http://https://opentracing.io/) 项目定义了一套分布式调用跟踪的标准，以统一各种分布式调用跟踪实现的实现。OpenTracing 中包含了一套分布式调用跟踪的标准规范，各种语言的 API，以及实现了该标准的编程框架和函数库。
 
-目前已有大量支持 [OpenTracing 规范的 Tracer 实现](https://opentracing.io/docs/supported-tracers/)，包括 Jager,Skywalking,LightStep 等。在微服务应用中采用 OpenTracing API 实现分布式调用跟踪，可以避免厂商锁定，能够以较小的代价和任意一个兼容 OpenTracing 的分布式调用跟踪后端 （Tracer） 进行对接。
+目前已有大量支持 [OpenTracing 规范的 Tracer 实现](https://opentracing.io/docs/supported-tracers/)，包括 Jager、Skywalking、LightStep 等。在微服务应用中采用 OpenTracing API 实现分布式调用跟踪，可以避免厂商锁定，能够以较小的代价和任意一个兼容 OpenTracing 的分布式调用跟踪后端 （Tracer） 进行对接。
 
 ## OpenTracing 概念模型
 
