@@ -5,7 +5,7 @@ reviewers: [""]
 
 # JWT 授权
 
-前面介绍了`HTTP`、`TCP`、`gRPC`等不同协议的流量授权，而 JWT 授权则是对**最终用户**的访问控制，试想某个内部服务需要管理员才能够使用，这时候就需要验证**最终用户**的角色是否为管理员，可以在 JWT claims 中带有用户管理角色信息，然后在授权策略中对该角色授权。不同协议的流量授权在**操作**`to`方面有比较多的示范，本节则主要在**来源**`from`和**自定义条件**`when`做示范。
+前面介绍了`HTTP`、`TCP`、`gRPC`等不同协议的流量授权，而 JWT 授权则是对**最终用户**的访问控制，试想某个内部服务需要管理员才能够使用，这时候就需要验证**最终用户**的角色是否为管理员，可以在 JWT claims 中带有管理员角色信息，然后在授权策略中对该角色授权。不同协议的流量授权在**操作**`to`方面有比较多的示范，本节则主要在**来源**`from`和**自定义条件**`when`做示范。
 
 本节使用 Istio 示例中的 httpbin 服务做演示，涉及不同场景下 JWT 授权的应用，主要包括：
 
@@ -19,10 +19,9 @@ reviewers: [""]
 
 - Kubernetes 环境
     - minikube
-- 安装`istioctl`
 - Istio 环境
-    - manifest default 安装，带有 IngressGateway
-- 下载 Istio Release 1.5.0
+    - `istioctl manifest apply` 默认安装，带有 IngressGateway
+- 示例下载 Istio Release 1.5.0
     - httpbin 示例
 
 ## httpbin 服务部署
@@ -177,7 +176,7 @@ HTTP/1.1 401 Unauthorized
 3.测试有效 token 前要先获取 demo token 并设置为环境变量，以便后续演示中使用
 
 ```bash
-$ TOKEN=$(curl https://raw.githubusercontent.com/istio/istio/release-1.5/security/tools/jwt/samples/demo.jwt -s)
+$ export TOKEN=$(curl https://raw.githubusercontent.com/istio/istio/release-1.5/security/tools/jwt/samples/demo.jwt -s)
 ```
 
 4.携带有效 token 的请求正常，响应`200`
@@ -340,7 +339,7 @@ spec:
 1.获取 groups-scope token，并解码 JWT claims，其中包括两个自定义的 claims : `scope`和`groups`
 
 ```bash
-$ TOKEN_GROUP=$(curl https://raw.githubusercontent.com/istio/istio/release-1.5/security/tools/jwt/samples/groups-scope.jwt -s) && echo $TOKEN_GROUP | cut -d '.' -f2 - | base64 -d -
+$ export TOKEN_GROUP=$(curl https://raw.githubusercontent.com/istio/istio/release-1.5/security/tools/jwt/samples/groups-scope.jwt -s) && echo $TOKEN_GROUP | cut -d '.' -f2 - | base64 -d -
 {
   "exp" : 3537391104,
   "scope" : [
