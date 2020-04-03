@@ -29,7 +29,7 @@ Pilot 主要功能就是管理和配置部署在特定 Istio 服务网格中的�
 
 ## Pilot 架构
 
-![Polot 架构](../image/pilot/pilot-arch.svg)
+![Polot 架构](../images/pilot/pilot-arch.svg)
 
 根据上图, Pilot 几个关键的模块如下：
 
@@ -70,7 +70,7 @@ Pilot 还定义了一套 UserAPI ， UserAPI 提供了面向业务的高层抽�
 
 ## Pilot 实现
 
-![Pilot 实现](../image/pilot/pilot.svg)
+![Pilot 实现](../images/pilot/pilot.svg)
 
 图中红色的线表示控制流，黑色的线表示数据流。蓝色部分为和 Pilot 相关的组件。关键的组件如下：
 
@@ -92,7 +92,7 @@ pilot-agent 负责的主要工作如下：
 
 Envoy 的配置主要在 pilot-agent 的 init 方法与 proxy 命令处理流程的前半部分生成。其中 init 方法为 pilot-agent 二进制的命令行配置大量的 flag 与默认值，而 proxy 命令处理流程则负责将这些 flag 组装成为 ProxyConfig 对象以启动 Envoy。下面分析几个相对重要的配置。
 
-![Proxy定义，这个Proxy是启动角色 role ](../image/pilot/agent-proxy.png)
+![Proxy定义，这个Proxy是启动角色 role ](../images/pilot/agent-proxy.png)
 
 role 默认的对象为 proxy，关键参数如下：
 
@@ -100,7 +100,7 @@ role 默认的对象为 proxy，关键参数如下：
 * IPAddress, ID, Domain：可以接受参数，依据注册中心的类型，给予默认值。默认处理方式是 Kubernetes。在 Kubernetes 默认值下，IPAddress 默认为 INSTANCE_IP，ID 默认为 POD_NAME。
 * istio 可以对接的第三方注册中心有 Kubernetes、Consul、MCP、Mock。
 
-![pilot-agent 启动流程](../image/pilot/agent-run.jpg)
+![pilot-agent 启动流程](../images/pilot/agent-run.jpg)
 
 Envoy 配置文件及命令行参数主要有2个:
 
@@ -149,7 +149,7 @@ pilot-discovery关键实现逻辑如下：
 
 #### 初始化及启动
 
-![pilot-discovery 初始化](../image/pilot/pilot-discovery-init.jpg)
+![pilot-discovery 初始化](../images/pilot/pilot-discovery-init.jpg)
 
 pilot-discovery 的初始化主要在 pilot-discovery 的 init 方法和在 discovery 命令处理流程中调用的 bootstrap.NewServer 完成，关键步骤如下：
 
@@ -234,7 +234,7 @@ Pilot 中，目前实现了ConfigStoreCache 的 controller 主要有以下五种
 
 其中比较关键的是 crd controller。CRD 是 CustomResourceDefinition 的缩写 ，CRD Contriller 利用 SharedIndexInformer 实现对 CRD 资源的 list/watch 。将Add、Update、Delete 事件涉及到的 CRD 资源对象封装为一个 Task ，并 push 到 ConfigController 的 queue 里，关键代码的实现如下：
 
-![pilot onEvent回调](../image/pilot/onEvent.jpg)
+![pilot onEvent回调](../images/pilot/onEvent.jpg)
 
 mcp controller，是istio为了为了解决 istio 与 Kubernetes 的耦合问题提出的概念及实现方式。MCP 的全写是 Mesh Configuration Protocol，他定义了一个向 Istio 控制面下发配置数据的标准协议，Pilot 作为 MCP Client，任何实现了 MCP 协议的 Server 都可以通过 MCP 协议向Pilot 下发配置，从而解除了和Kubernetes的耦合，默认不会走到此逻辑。
 
