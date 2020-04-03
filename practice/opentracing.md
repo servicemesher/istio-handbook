@@ -11,7 +11,7 @@ reviewers: [""]
 
 ![分布式调用跟踪示意图](images/enhance-tracing-monolith-microserivce.jpg)
 
-如上图右边微服务系统中的虚线所示，一个来自客户端的请求在其业务处理过程中经过了多个微服务进程。我们如果想要对该请求的端到端调用过程进行完整的分析，则必须将该请求经过的所有进程的相关信息都收集起来并关联在一起，这就是“分布式调用跟踪”。
+如上图右边所示，微服务架构中系统中各个微服务之间存在复杂的调用关系。一个来自客户端的请求在其业务处理过程中经过了多个微服务进程。我们如果想要对该请求的端到端调用过程进行完整的分析，则必须将该请求经过的所有进程的相关信息都收集起来并关联在一起，这就是“分布式调用跟踪”。
 
 ## OpenTracing 项目
 
@@ -23,7 +23,7 @@ reviewers: [""]
 
 下面我们来介绍 OpenTracing 的工作原理，首先我们需要先了解 OpenTracing 中下列这些重要的概念。
 
-![OpenTracing 概念模型](images/enhance-tracing-tracing_mental_model.png)
+![OpenTracing 概念模型(图片取自OpenTracing官方网站)](images/enhance-tracing-tracing_mental_model.png)
 
 如图所示，OpenTracing 中主要包含下述几个概念：
 
