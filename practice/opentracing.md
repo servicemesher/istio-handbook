@@ -1,6 +1,6 @@
 ---
 authors: ["zhaohuabing"]
-reviewers: [""]
+reviewers: ["rootsongjc", "GuangmingLuo"]
 ---
 
 # 分布式调用跟踪和OpenTracing
@@ -29,9 +29,9 @@ reviewers: [""]
 
 * Trace： 描述一个分布式系统中的端到端事务，例如来自客户端的一个请求从接收到处理完成的过程。
 * Span：一个具有名称和时间长度的操作，例如一个 REST 调用或者数据库操作等。Span 是分布式调用跟踪的最小跟踪单位，一个 Trace 由多段 Span 组成。
-* Span context：分布式调用跟踪的上下文信息，包括 Trace id，Span id 以及其它需要传递到下游服务的内容。一个 OpenTracing 的实现需要将 Span context 通过某种序列化协议 (Wire Protocol) 在进程边界上进行传递，以将不同进程中的 Span 关联到同一个 Trace 上。对于 HTTP 请求来说，Span context 一般是采用 HTTP header 进行传递的。
+* SpanContext：分布式调用跟踪的上下文信息，包括 Trace id，Span id 以及其它需要传递到下游服务的内容。一个 OpenTracing 的实现需要将 SpanContext 通过某种序列化协议 (Wire Protocol) 在进程边界上进行传递，以将不同进程中的 Span 关联到同一个 Trace 上。对于 HTTP 请求来说，SpanContext 一般是采用 HTTP header 进行传递的。
 
-从上面的介绍，我们可以看到在 OpenTracing 的概念中，Trace 和 Span 组成了一个调用链：Trace 代表了一个端到端的分布式调用，Span 是该调用中间的一段。Span context 则用于将一个 Span 的上下文传递到其下游的 Span 中，以将这些 Span 关联起来。
+从上面的介绍，我们可以看到在 OpenTracing 的概念中，Trace 和 Span 组成了一个调用链：Trace 代表了一个端到端的分布式调用，Span 是该调用中间的一段。SpanContext 则用于将一个 Span 的上下文传递到其下游的 Span 中，以将这些 Span 关联起来。
 
 ## OpenTracing 数据模型
 
@@ -82,13 +82,13 @@ reviewers: [""]
 
 ## 跨进程调用信息传播
 
-Span context 是 OpenTracing 中一个让人比较迷惑的概念。在 OpenTracing 的概念模型中我们讲到 Span context 用于跨进程边界传递分布式调用的上下文，但实际上 OpenTracing 只定义一个 SpanContext 的抽象接口，该接口封装了分布式调用中一个 Span 的相关上下文内容，包括该 Span 所属的 Trace id，Span id 以及其它需要传递到下游服务的信息。SpanContext 自身并不能实现跨进程的上下文传递，而是需要由 Tracer（Tracer 是一个遵循 OpenTracing 协议的实现，如 Jaeger，Skywalking 的 Tracer） 将 SpanContext 序列化后通过 Wire Protocol 传递到下一个进程中，然后在下一个进程将 SpanContext 反序列化，得到相关的上下文信息，以用于生成 Child Span。
+SpanContext 是 OpenTracing 中一个让人比较迷惑的概念。在 OpenTracing 的概念模型中我们讲到 SpanContext 用于跨进程边界传递分布式调用的上下文，但实际上 OpenTracing 只定义一个 SpanContext 的抽象接口，该接口封装了分布式调用中一个 Span 的相关上下文内容，包括该 Span 所属的 Trace id，Span id 以及其它需要传递到下游服务的信息。SpanContext 自身并不能实现跨进程的上下文传递，而是需要由 Tracer（Tracer 是一个遵循 OpenTracing 协议的实现，如 Jaeger，Skywalking 的 Tracer） 将 SpanContext 序列化后通过 Wire Protocol 传递到下一个进程中，然后在下一个进程将 SpanContext 反序列化，得到相关的上下文信息，以用于生成 Child Span。
 
 为了为各种具体实现提供最大的灵活性，OpenTracing 只是提出了跨进程传递 SpanContext 的要求，并未规定将 SpanContext 进行序列化并在网络中传递的具体实现方式。各个不同的 Tracer 可以根据自己的情况使用不同的 Wire Protocol 来传递 SpanContext。
 
-在基于 HTTP 协议的分布式调用中，通常会使用 HTTP Header 来传递 SpanContext 的内容。常见的 Wire Protocol 包含 Zipkin 使用的 [b3 HTTP header](https://github.com/openzipkin/b3-propagation)，Jaeger 使用的 [uber-trace-id HTTP Header](https://www.jaegertracing.io/docs/1.7/client-libraries/#trace-span-identity),LightStep 使用的 "x-ot-span-context" HTTP Header 等。
+在基于 HTTP 协议的分布式调用中，通常会使用 HTTP Header 来传递 SpanContext 的内容。常见的 Wire Protocol 包含 Zipkin 使用的 [b3 HTTP header](https://github.com/openzipkin/b3-propagation)，Jaeger 使用的 [uber-trace-id HTTP Header](https://www.jaegertracing.io/docs/1.7/client-libraries/#trace-span-identity)，LightStep 使用的 "x-ot-span-context" HTTP Header 等。
 
-Istio/Envoy 支持 b3 header 和 x-ot-span-context header,可以和 Zipkin,Jaeger 及 LightStep 对接。其中 b3 HTTP header 的示例如下：
+Istio/Envoy 支持 b3 header 和 x-ot-span-context header，可以和 Zipkin、Jaeger 及 LightStep 对接。其中 b3 HTTP header 的示例如下：
 
 ```text
 X-B3-TraceId: 80f198ee56343ba864fe8b2a57d3eff7
@@ -97,21 +97,21 @@ X-B3-SpanId: e457b5a2e4d86bd1
 X-B3-Sampled: 1
 ```
 
-假如使用 HTTP header 传递 Span context，在向下游服务发起 HTTP 请求时，我们需要在 JAVA 代码中调用 Tracer.inject 方法将 Span context 注入到 HTTP header 中。
+假如使用 HTTP header 传递 SpanContext，在向下游服务发起 HTTP 请求时，我们需要在 JAVA 代码中调用 Tracer.inject 方法将 SpanContext 注入到 HTTP header 中。
 ```JAVA
 tracer.inject(tracer.activeSpan().context(), Format.Builtin.HTTP_HEADERS, new RequestBuilderCarrier(requestBuilder));
 ```
 
-在下游服务中收到该 HTTP 调用后，需要采用 Tracer.extract 方法将 Span context 从 HTTP header 中取出来。
+在下游服务中收到该 HTTP 调用后，需要采用 Tracer.extract 方法将 SpanContext 从 HTTP header 中取出来。
 ```JAVA
 SpanContext parentSpan = tracer.extract(Format.Builtin.HTTP_HEADERS, new TextMapExtractAdapter(headers));
 ```
 
-OpenTracing 中的 Tracer API 只定义了 inject 和 extract 两个方式接口，其实现由不同 Tracer 提供。除此之外，我们一般不需要在代码中直接调用这两个方法，因为 OpenTracing 项目已经提供了一些和 Tracer 集成的代码库，可以自动完成该工作，例如为 Spring 提供 Jaeger Trace r集成的 [opentracing-spring-jaeger-starter](https://github.com/opentracing-contrib/java-spring-jaeger)。
+OpenTracing 中的 Tracer API 只定义了 inject 和 extract 两个方法接口，其实现由不同 Tracer 提供。除此之外，我们一般不需要在代码中直接调用这两个方法，因为 OpenTracing 项目已经提供了一些和 Tracer 集成的代码库，可以自动完成该工作，例如为 Spring 提供 Jaeger Tracer 集成的 [opentracing-spring-jaeger-starter](https://github.com/opentracing-contrib/java-spring-jaeger)。
 
 ## 小结
 
-在本节中，我们介绍了分布式调用跟踪和 OpenTracing 的一些基本概念，在下面的章节中，我们将继续介绍如何使用 OpenTracing 来增强 Istio 的分布式调用跟踪，包括实现Span context传递，提供方法级别的调用跟踪以及异步消息的调用跟踪。
+在本节中，我们介绍了分布式调用跟踪和 OpenTracing 的一些基本概念，在下面的章节中，我们将继续介绍如何使用 OpenTracing 来增强 Istio 的分布式调用跟踪，包括实现 SpanContext 传递，提供方法级别的调用跟踪以及异步消息的调用跟踪。
 
 ## 参考资料
 
