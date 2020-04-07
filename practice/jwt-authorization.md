@@ -5,11 +5,11 @@ reviewers: [""]
 
 # JWT 授权
 
-前面介绍了`HTTP`、`TCP`、`gRPC`等不同协议的流量授权，而 JWT 授权则是对**最终用户**的访问控制，试想某个内部服务需要管理员才能够使用，这时候就需要验证**最终用户**的角色是否为管理员，可以在 JWT claims 中带有管理员角色信息，然后在授权策略中对该角色授权。不同协议的流量授权在**操作**`to`方面有比较多的示范，本节则主要在**来源**`from`和**自定义条件**`when`做示范。
+前面介绍了`HTTP`、`TCP`、`gRPC`等不同协议的流量授权，而 JWT 授权则是对**最终用户**的访问控制，试想某个内部服务需要管理员才能够访问，这时候就需要验证**最终用户**的角色是否为管理员，可以在 JWT claims 中带有管理员角色信息，然后在授权策略中对该角色授权。不同协议的流量授权在**操作**`to`方面有比较多的示范，本节则主要在**来源**`from`和**自定义条件**`when`做示范。
 
 本节使用 Istio 示例中的 httpbin 服务做演示，涉及不同场景下 JWT 授权的应用，主要包括：
 
-- 无授权情况下的 JWT 认证
+- 无授权策略情况下的 JWT 认证
 - 任意非空的 JWT 授权
 - Principal 条件匹配授权
 - Claims 条件匹配授权
@@ -18,15 +18,17 @@ reviewers: [""]
 ## 准备工作
 
 - Kubernetes 环境
-    - minikube
+    - Minikube
+    - Kubernetes version v1.16.7
 - Istio 环境
-    - `istioctl manifest apply` 默认安装，带有 IngressGateway
+    - Istio version 1.5.0
+    - 默认安装`istioctl manifest apply`
 - 示例下载 Istio Release 1.5.0
     - httpbin 示例
 
-## httpbin 服务部署
+### httpbin 服务部署
 
-### 创建命名空间
+#### 创建命名空间
 
 为了后续演示方便，设置命名空间环境变量`NS=authz-jwt`，然后创建命名空间
 
@@ -35,7 +37,7 @@ $ export NS=authz-jwt
 $ kubectl create namespace $NS
 ```
 
-### Sidecar 自动注入
+#### Sidecar 自动注入
 
 为命名空间开启 Sidecar 自动注入
 
@@ -43,7 +45,7 @@ $ kubectl create namespace $NS
 $ kubectl label namespace $NS istio-injection=enabled
 ```
 
-### 部署 httpbin 服务
+#### 部署 httpbin 服务
 
 在下载的 Istio 目录下部署 httpbin 服务，并检查`pod`、`service`的创建情况
 
@@ -60,11 +62,11 @@ NAME      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
 httpbin   ClusterIP   10.111.151.12   <none>        8000/TCP   6h9m
 ```
 
-## httpbin 网关
+### httpbin 网关
 
-### 添加 httpbin 服务的 gateway
+#### 添加 httpbin 服务的 gateway
 
-为了避免与其他网关产生冲突，为网关指定 HOST 为 `authz-jwt.local`，这样在测试时通过指定 HOST 确定是路由到 httpbin 服务。
+为了避免与其他网关产生冲突，网关指定 HOST 为 `authz-jwt.local`，这样在测试时通过指定 HOST 确定是路由到 httpbin 服务。
 
 ```bash
 $ kubectl apply -f - <<EOF
@@ -103,7 +105,7 @@ spec:
 EOF
 ```
 
-### 获取 Ingress 网关的 IP 和 PORT
+#### 获取 Ingress 网关的 IP 和 PORT
 
 > 根据环境不同获取 ingress IP 和 Port 参考[determining-the-ingress-ip-and-ports](https://istio.io/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports)
 
@@ -113,22 +115,24 @@ $ export INGRESS_IP=$(minikube ip)
 $ export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
 ```
 
-### 验证网关
+#### 验证网关
+
+请求正常，相应`200`
 
 ```bash
 $ curl -I -H "Host: authz-jwt.local" http://$INGRESS_IP:$INGRESS_PORT/headers
 HTTP/1.1 200 OK
 ```
 
-## 无授权情况下的 JWT 认证
+现在我们完成准备工作，部署了一个可以通过 ingress 网关访问的 httpbin 服务，接下来开始 JWT 授权相关的内容。
 
-要使用 JWT 授权需要有效的 JWT 身份认证，所以在使用 JWT 授权前首先要为服务添加**最终身份认证**即 RequestAuthentication ，更多参考认证[章节3.4.1](/istio-handbook/practice/authentication.html)。
+## 无授策略权情况下的 JWT 认证
 
-添加 RequestAuthentication 后，并不是要求所有请求都要带有 JWT token，因为 RequestAuthentication 只负责验证 token 的有效性，token 的有无以及是否授权访问由 AuthorizationPolicy 策略决定，所以在只有 RequestAuthentication 时，可以同时支持无 token 请求和带有有效 token 的请求，而带有无效 token 的请求将被拒绝，此时 JWT 认证是一个**非必要条件**。
+要使用 JWT 授权的前提是有有效的 JWT 最终身份认证，所以在使用 JWT 授权前首先要为服务添加**最终身份认证**即 RequestAuthentication ，更多参考认证[章节3.4.1](/istio-handbook/practice/authentication.html)。
 
 ### 添加 RequestAuthentication
 
-> 使用 Istio 代码库中的 JWKS 端点，并使用此示例的 demo 和 groups-scope 这两个 token，其中 demo 是一个普通 token 有 JWT 的基础属性，groups-scope 是一个带有自定义属性的 token，属性包括 group 和 scope，相关连接:
+本节使用 Istio 代码库中提供的用于 JWT 演示的配置，包括 JWKS 端点配置，以及两个测试用的 token ： demo 和 groups-scope 。其中 demo 是一个普通 token ，claims 有 JWT 的基础属性；groups-scope 是一个带有自定义属性的 token，claims 除了基础属性还包括 group 和 scope，这两个 token 详细的 claims 结构在后续应用中会有介绍，相关连接：
 - [JWKS](https://raw.githubusercontent.com/istio/istio/release-1.5/security/tools/jwt/samples/jwks.json)
 - [demo token](https://raw.githubusercontent.com/istio/istio/release-1.5/security/tools/jwt/samples/demo.jwt)
 - [groups-scope token](https://raw.githubusercontent.com/istio/istio/release-1.5/security/tools/jwt/samples/groups-scope.jwt)
@@ -154,7 +158,7 @@ EOF
 
 默认 JWT 认证的 token 是以 `Bearer ` 为前缀放在 Authorization header 中，如：`Authorization: Bearer token`
 
-使用3种方式测试服务:
+使用以下3种方式测试服务，看请求的响应情况:
 - 不带 Authorization header
 - Authorization header 携带一个无效的 token
 - Authorization header 携带一个有效的 token
@@ -186,11 +190,13 @@ $ curl -I -H "Authorization: Bearer $TOKEN" -H "Host: authz-jwt.local" http://$I
 HTTP/1.1 200 OK
 ```
 
+添加 RequestAuthentication 后，并不是要求所有请求都要带有 JWT token，因为 RequestAuthentication 只负责验证 token 的有效性，token 的有无以及是否授权访问由 AuthorizationPolicy 的 JWT 授权策略决定。所以在只有 RequestAuthentication 时，可以同时支持无 token 请求和带有有效 token 的请求，而带有无效 token 的请求将被拒绝，此时 JWT 认证是一个**非必要条件**。
+
 ## 任意非空的 JWT 授权
 
-在只有 RequestAuthentication 时不带 token 的请求是可以正常访问的，而需求可能会要求全部请求必须经过认证才能访问，这就需要使用 JWT 授权策略: AuthorizationPolicy， 在 AuthorizationPolicy 中带有 JWT 相关条件字段后不带 token 的请求将被拒绝，此时 JWT 认证变为了**必要条件**。
+在只有 RequestAuthentication 时不带 token 的请求是可以正常访问的，而需求可能会要求全部请求必须经过认证才能访问，这就需要使用 JWT 授权策略。
 
-在 AuthorizationPolicy rule 规则中与 JWT 相关的字段包括：
+AuthorizationPolicy rule 规则中与 JWT 相关的字段包括：
 
 field | sub field | JWT claims
 ------|------|------
@@ -201,10 +207,9 @@ when.key | request.auth.audiences | aud
 when.key | request.auth.presenter | azp
 when.key | request.auth.claims[key] | JWT 全部属性
 
-其中`from.source`的`requestPrincipals` 、`notRequestPrincipals`和`when.key`的`request.auth.principal`都是对 Principal 条件的策略，Principal 由 JWT claims 的`iss`和`sub`用`/`拼接组成`{iss}/{sub}`，`request.auth.claims[key]`则可以通过`key`值获取 JWT
- claims 中的任意值作为条件。
+其中`from.source`的`requestPrincipals` 、`notRequestPrincipals`和`when.key`的`request.auth.principal`都是对 Principal 条件的策略，Principal 由 JWT claims 的`iss`和`sub`用`/`拼接组成`{iss}/{sub}`，`request.auth.audiences`和`request.auth.presenter`分别对应 claims 的`aud`和`azp`属性，`request.auth.claims[key]`则可以通过`key`值获取 JWT claims 中的任意值作为条件。
 
-这些字段的匹配都遵循授权的4中匹配规则:完全匹配、前缀匹配、后缀匹配和存在匹配，详见[章节2.3.2.1.2](https://www.servicemesher.com/istio-handbook/concepts/authorization-policy.html)，其中存在匹配(`*`)表示该字段可以匹配任意内容，但是不能为空，与不指定字段不同，不指定指定是包括空在内的任意内容，所以使用存在匹配可以满足对**任意非空的 JWT 授权**的需求。
+这些字段的匹配都遵循授权的4种匹配规则:完全匹配、前缀匹配、后缀匹配和存在匹配，详见[章节2.3.2.1.2](https://www.servicemesher.com/istio-handbook/concepts/authorization-policy.html)，其中存在匹配（`*`）表示该字段可以匹配任意内容，但是不能为空，和不指定字段是不一样的，不指定是包括空在内的任意内容，所以使用存在匹配可以满足对**任意非空的 JWT 授权**的需求。
 
 ### 添加 AuthorizationPolicy
 
@@ -245,11 +250,13 @@ $ curl -I -H "Authorization: Bearer $TOKEN" -H "Host: authz-jwt.local" http://$I
 HTTP/1.1 200 OK
 ```
 
+在添加的 AuthorizationPolicy 中带有 JWT 相关条件字段后，不带 token 的请求将被拒绝，此时 JWT 认证变为了**必要条件**
+
 ## Principal 条件
 
 前面已经介绍`from.source`和`when.key`中与 Principal 相关的三个字段，这里使用`source.requestPrincipals`做为示例，来看下 Principal 条件的应用。
 
-要设置具体条件首先要了解 JWT 的结构，JWT token 是由`.`分隔的三部分组成，其中第一部分: Base64 编码的 JSON 结构的 Header，包含令牌类型、签名算法等信息；第二部分: Base64 编码的 JSON 结构的 JWT claims；第三部分: 前两部分的签名，结合 JWKS 配置秘钥验证 token 的有效性。通过`echo $TOKEN | cut -d '.' -f2 - | base64 -d -`管道操作解码 token 的第二部分，查看 JWT claims 结构如下:
+要设置具体条件首先要了解 JWT 的结构，JWT token 是由`.`分隔的三部分组成，其中第一部分: Base64 编码的 JSON 结构的 Header，包含令牌类型、签名算法等信息；第二部分: Base64 编码的 JSON 结构的 JWT claims；第三部分: 前两部分的签名，结合 JWKS 配置的秘钥信息验证 token 的有效性。通过`echo $TOKEN | cut -d '.' -f2 - | base64 -d -`管道操作解码 token 的第二部分，查看 JWT claims 结构如下:
 
 ```bash
 $ echo $TOKEN | cut -d '.' -f2 - | base64 -d -
@@ -330,13 +337,13 @@ spec:
 ## Claims 条件
 
 更多的有关 JWT 属性的规则可以通过自定义条件`when`补充，其中`request.auth.principal`与`source.requestPrincipals`一致已经演示，
-`request.auth.audiences`和`request.auth.presenter`分别对应 JWT claims 的 `aud`和`azp`属性，`request.auth.claims`则包含JWT 全部属性，使用时通过`request.auth.claims[key]`获取具体属性，接下来在 Principal 条件基础上增加 claims 条件
+`request.auth.audiences`和`request.auth.presenter`的使用不再赘述，接下来在 Principal 条件基础上增加 claims 条件，看下自定义条件`request.auth.claims[]`的应用。
 
 ### groups-scope token 测试 claims 条件
 
-为了丰富 JWT claims 信息，增加另一个 JWT token: groups-scope
+为了丰富 JWT claims 信息，增加另一个 JWT token： groups-scope
 
-1.获取 groups-scope token，并解码 JWT claims，其中包括两个自定义的 claims : `scope`和`groups`
+1.获取 groups-scope token，并解码 JWT claims，其中包括两个自定义的 claims ：`scope`和`groups`
 
 ```bash
 $ export TOKEN_GROUP=$(curl https://raw.githubusercontent.com/istio/istio/release-1.5/security/tools/jwt/samples/groups-scope.jwt -s) && echo $TOKEN_GROUP | cut -d '.' -f2 - | base64 -d -
@@ -356,7 +363,7 @@ $ export TOKEN_GROUP=$(curl https://raw.githubusercontent.com/istio/istio/releas
 }
 ```
 
-2.结合 JWT claims 结构这里使用 groups 作为自定义条件，如仅允许: group1
+2.结合 JWT claims 结构这里使用 groups 作为自定义条件，如：仅允许 group1
 
 ```bash
 $ kubectl patch AuthorizationPolicy require-jwt -n $NS --type merge -p '
@@ -371,14 +378,14 @@ spec:
 '
 ```
 
-3.测试`$TOKEN`请求被拒绝，响应`403`
+3.测试 $TOKEN 请求被拒绝，响应`403`
 
 ```bash
 curl -I -H "Authorization: Bearer $TOKEN" -H "Host: authz-jwt.local" http://$INGRESS_IP:$INGRESS_PORT/headers
 HTTP/1.1 403 Forbidden
 ```
 
-4.测试`$TOKEN_GROUP`请求正常，响应`200`
+4.测试 $TOKEN_GROUP 请求正常，响应`200`
 
 ```bash
 $ curl -I -H "Authorization: Bearer $TOKEN_GROUP" -H "Host: authz-jwt.local" http://$INGRESS_IP:$INGRESS_PORT/headers
@@ -387,7 +394,7 @@ HTTP/1.1 200 OK
 
 ### 拒绝授权示范
 
-1.尝试一个不在 groups-scope token 内的 group 值，如`values: ["group3"]`
+1.尝试一个不在 groups-scope token 内的 group 值，如：`values: ["group3"]`
 
 ```bash
 $ kubectl patch AuthorizationPolicy require-jwt -n $NS --type merge -p '
@@ -402,7 +409,7 @@ spec:
 '
 ```
 
-2.测试`$TOKEN_GROUP`请求被拒绝，响应`403`
+2.测试 $TOKEN_GROUP 请求被拒绝，响应`403`
 
 ```bash
 curl -I -H "Authorization: Bearer $TOKEN_GROUP" -H "Host: authz-jwt.local" http://$INGRESS_IP:$INGRESS_PORT/headers
@@ -426,9 +433,8 @@ spec:
 
 ## 分阶段认证和授权
 
-现在每次请求对 JWT 的认证和授权都是在 httpbin 服务上，而对于真实场景的请求到达内部服务，往往要经过 n 个服务，如果恰巧这个验证是最后一个服务，当因为 token 无效或者没有 token 导致失败时，服务的响应时间大大延长，并造成资源的浪费，所以可以将 token 的验证前置到 Ingress 网关。
-通过前面的实践可以知道添加 RequestAuthentication 仅对带有 Authorization header 请求做认证，不影响无 Authorization header 的请求。具体是否需要分阶段验证，以及在什么位置验证，需要根据业务场景考虑，一般越是顶层条件越靠前如`from.source.requestPrincipals`、`to.operation.hosts`，
-而`to.operation.methods/paths`、`when.request.auth.claims[group/scope]`适合在相关服务做详细的授权策略。
+现在每次请求对 JWT 的认证和授权都是在 httpbin 服务上，而对于真实场景的请求到达内部服务，往往要经过 n 个服务，如果恰巧这个验证是最后一个服务，当因为 token 无效或者没有 token 导致请求失败时，服务的响应时间大大延长，并造成资源的浪费，所以可以将 token 的验证前置到 Ingress 网关。
+通过前面的实践可以知道添加 RequestAuthentication 仅对带有 Authorization header 请求做认证，不影响无 Authorization header 的请求。具体是否需要分阶段验证，以及在什么位置验证，需要根据业务场景考虑，一般越是顶层条件越靠前如：`from.source.requestPrincipals`、`to.operation.hosts`，而`when.request.auth.claims[group/scope]`和`to.operation.methods/paths`组合可以在相关服务做详细的访问控制。
 
 另外需要注意的是如果调用链路有多次使用同一个 token，则必须在 RequestAuthentication 的`jwtRules`中开启`forwardOriginalToken: true`以将 Authorization header 向下传递，也可以通过 fromHeaders / fromParams 携带多个不同场景的 token，具体参考 [JWTRule](https://istio.io/docs/reference/config/security/jwt/#JWTRule) 。说到 token 的传递，Authorization header 也可以在服务与服务间调用时添加，所以**最终用户**的定义并不限定为客户端，任何一个发起调用的服务都是一个**最终用户**。 
 
@@ -472,16 +478,9 @@ HTTP/1.1 401 Unauthorized
 
 ### Ingress JWT 授权
 
-接下来看下在 Ingress 和 httpbin 服务使用不同策略时的响应情况
+接下来看下在 Ingress 和 httpbin 服务使用不同策略时的响应情况。
 
-Ingress 状态 | httpbin 策略 | Token | Ingress 状态 | httpbin 状态
------- | ------ | ------ | ------ | ------
-scpoe=scope1 | group=group1 | $TOKEN | 拒绝 | -
-scpoe=scope1 | group=group1 | $GROUP_TOKEN | √ | √
-scpoe=scope1 | group=group3 | $TOKEN | 拒绝 | -
-scpoe=scope1 | group=group3 | $GROUP_TOKEN | √ | 拒绝
-
-1.前面只是 Ingress 的 JWT 认证，结合网关的入口特点可以添加根据 HOST 的不同限定`scope`的授权，如: 访问`host=authz-jwt.local`要求`scpoe=scope1`
+1.前面只是 Ingress 的 JWT 认证，结合网关的入口特点可以添加根据 HOST 的不同限定`scope`的授权，如：访问`host=authz-jwt.local`要求`scpoe=scope1`
 
 ```bash
 $ kubectl apply -f - <<EOF
@@ -506,14 +505,14 @@ spec:
 EOF
 ```
 
-2.Authorization 使用 TOKEN_GROUP 请求正常，响应 `200`
+2.token 使用 $TOKEN_GROUP 请求正常，响应 `200`
  
 ```bash
 $ curl -I -H "Authorization: Bearer $TOKEN_GROUP" -H "Host: authz-jwt.local" http://$INGRESS_IP:$INGRESS_PORT/headers
 HTTP/1.1 200 OK
 ```
 
-3.Authorization 使用 TOKEN 请求被**网关**拒绝，响应 `403`
+3.token 使用 $TOKEN 请求被**网关**拒绝，响应 `403`
 ```bash
 $ curl -I -H "Authorization: Bearer $TOKEN" -H "Host: authz-jwt.local" http://$INGRESS_IP:$INGRESS_PORT/headers
 HTTP/1.1 403 Forbidden
@@ -534,7 +533,7 @@ spec:
 '
 ```
 
-5.请求被** httpbin 服务**拒绝，响应`403`
+5.token 使用 $TOKEN_GROUP 请求被** httpbin 服务**拒绝，响应`403`
 
 ```bash
 $ curl -I -H "Authorization: Bearer $TOKEN_GROUP" -H "Host: authz-jwt.local" http://$INGRESS_IP:$INGRESS_PORT/headers
@@ -558,9 +557,17 @@ spec:
 '
 ```
 
+总结如下表，通过 ingress 和 httpbin 分阶段授权策略的搭配，可以将不同授权的 token 在不同阶段进行验证拦截。
+
+ingress 状态 | httpbin 策略 | Token | Ingress 状态 | httpbin 状态
+------ | ------ | ------ | ------ | ------
+scpoe=scope1 | group=group1 | $GROUP_TOKEN | √ | √
+scpoe=scope1 | group=group1 | $TOKEN | 拒绝 | -
+scpoe=scope1 | group=group3 | $GROUP_TOKEN | √ | 拒绝
+
 # 小结
 
-本节我们主要实践了在**来源**`from`和**自定义条件**`when`中与**最终用户**相关的属性条件，通过 JWT 标准的 `iss`、`sub`、`aud` 以及合理的 claims 设计可以满足大部分访问控制场景的需求，既可以做签发者这样基础的授权，也可以做**最终用户**到服务**接口/方法**级的访问控制。
+本节我们主要实践了在**来源**`from`和**自定义条件**`when`中与**最终用户**相关的属性条件，通过 JWT 标准的 `iss`、`sub`、`aud`和`azp` 以及合理的自定义 claims 设计可以满足大部分访问控制场景的需求，既可以做签发者这样基础的授权，也可以做**最终用户**到服务**接口/方法**级的访问控制。
 
 # 参考
 
