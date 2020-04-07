@@ -7,7 +7,7 @@ reviewers: [""]
 
 前文中讲述了 Service Mesh 的基本概念以及 Service Mesh 与 Kubernetes 的关联关系，并且对其进行了对比，同时也提到了 Istio 是一个功能丰富的 Service Mesh 的解决方案。
 
-本节重点说明一下内容：
+本节重点说明以下内容：
 
 1.介绍 Istio 跟 Service Mesh 的关系
 
@@ -33,10 +33,10 @@ Istio 是由 Google，IBM 和 Lyft 联合开发的。其中它的数据面直接
 
 - 1.4版本之前的Istio控制面组件架构图如下所示：
 
-![Istio控制面组件架构图1.4前](..\images\istiofeatures2-1.4.png)
+![](..\images\istiofeatures2-1.4.png)
 
 - 1.5版本回归单体后的组件架构图：
-![Istio控制面组件架构图1.5](..\images\istiofeatures3-istio1.5.png)
+![](..\images\istiofeatures3-istio1.5.png)
 
 由于回归单体后功能全部都集中于 istiod 组件，对于初次接触 istio 的开发人员反而不利于了解内部的设计演进和开发思维，因此下面的核心功能和组件介绍还是以1.4版本之前的组件架构来介绍。
 
@@ -49,16 +49,16 @@ Istio 是由 Google，IBM 和 Lyft 联合开发的。其中它的数据面直接
 
 上述2个模块联合运作，可以完成从用户提交配置到校验、下发的一系列流程，例如可见以下流程图：
 
-![配置下发流程图](..\images\istiofeatures4-istio-pilotgalley.png)
-- 当用户向 K8S 提交一份新的配置，首先会触发 galley 注册在 K8S 中的 webhook，webhook 会检查配置是否合法，如图中的步骤1。
+![](..\images\istiofeatures4-istio-pilotgalley.png)
+>   当用户向 K8S 提交一份新的配置，首先会触发 galley 注册在 K8S 中的 webhook，webhook 会检查配置是否合法，如图中的步骤1。
 
-- 若配置无法通过校验，则 K8S 将拒绝用户提交的配置，并给出相应的错误信息。如图步骤2。
+> 若配置无法通过校验，则 K8S 将拒绝用户提交的配置，并给出相应的错误信息。如图步骤2。
 
-- 当配置通过校验后，通过 K8S 的通知机制，galley 得到配置变更信息，如图中的步骤3。
+>  当配置通过校验后，通过 K8S 的通知机制，galley 得到配置变更信息，如图中的步骤3。
 
-- galley 将变更的配置/服务信息转换为 MCP 的格式通过 MCP 协议推送给 pilot，如图步骤4。
+>  galley 将变更的配置/服务信息转换为 MCP 的格式通过 MCP 协议推送给 pilot，如图步骤4。
 
-- 最后一步，pilot 通过 xDS 协议向数据面推送变更的配置。 
+>  最后一步，pilot 通过 xDS 协议向数据面推送变更的配置。 
 
 -  **3.Citadel **：可选开启或关闭，负责安全相关的证书和密钥管理。
 
@@ -70,30 +70,33 @@ Istio 是由 Google，IBM 和 Lyft 联合开发的。其中它的数据面直接
 
 Istio 1.5 版本后的一体化设计虽然说是 Istio 社区的一个全新形态，并不是完全推翻之前的设计，简单地说，只是将原有的多进程设计模式优化成了单进程的形态，之前各个组件被设计成了 istiod 的内部子模块而已，因此下面的职责，都将由 istiod 来承担：
 
-1. 监听配置，接手了原来 galley 的工作，负责监听来自多种支持配置源的数据，比如 K8S api server，本地文件或者基于 MCP 协议的配置，包括原来 galley 需要处理的 API 校验和配置的转发也需要设计在内；
+- 监听配置，接手了原来 galley 的工作，负责监听来自多种支持配置源的数据，比如 K8S api server，本地文件或者基于 MCP 协议的配置，包括原来 galley 需要处理的 API 校验和配置的转发也需要设计在内；
 
-2. 监听 Endpoint，监听来自本地或者远程集群的 endpoint 信息，在将来还会计划允许 endpoint 复制在各个集群内，包括非 K8S 的注册中心例如 consul；
+- 监听 Endpoint，监听来自本地或者远程集群的 endpoint 信息，在将来还会计划允许 endpoint 复制在各个集群内，包括非 K8S 的注册中心例如 consul；
 
-3. CA 根的生成，生成私钥和证书，目前 Citadel 的职责之一；
+- CA 根的生成，生成私钥和证书，目前 Citadel 的职责之一；
 
-4. 控制面身份标识，目前在内部控制面之间是通过 CA 根来生成一个 SPIFFE ID 用于识别身份，也同时用于 injector 组件的证书生成；
+- 控制面身份标识，目前在内部控制面之间是通过 CA 根来生成一个 SPIFFE ID 用于识别身份，也同时用于 injector 组件的证书生成；
 
-5. 证书生成，主要是为各个控制面之间的通讯生成私钥和证书来保证安全通讯；
+- 证书生成，主要是为各个控制面之间的通讯生成私钥和证书来保证安全通讯；
 
-6. 自动注入，在 K8S 里需要为 Mutating Admission Controller 提供接口支持，从而可以在 pod 创建阶段修改资源文件来实现 sidecar 的自动注入；
+- 自动注入，在 K8S 里需要为 Mutating Admission Controller 提供接口支持，从而可以在 pod 创建阶段修改资源文件来实现 sidecar 的自动注入；
 
-7. CNII/CRI  注入，通过 CNI/CRI 作为 hook 来实现自动注入的另一种方式，目前还没使用；
+- CNII/CRI  注入，通过 CNI/CRI 作为 hook 来实现自动注入的另一种方式，目前还没使用；
 
-8. Envoy 启动配置生成，上文目标中提到的，Envoy 的启动配置将由 istiod 来提供；
+- Envoy 启动配置生成，上文目标中提到的，Envoy 的启动配置将由 istiod 来提供；
 
-9. 本地的 SDS Server，提供密钥发现服务的本地服务端；
+- 本地的 SDS Server，提供密钥发现服务的本地服务端；
 
-10. 中央 SDS Server，同上，是一个中央化的密钥发现服务端，一般用以对接第三方的密钥系统；
+- 中央 SDS Server，同上，是一个中央化的密钥发现服务端，一般用以对接第三方的密钥系统；
 
-11. xDS 服务提供，之前 pilot 的核心能力，为所有的 Envoy 提供 xDS 下发的服务端；
+- xDS 服务提供，之前 pilot 的核心能力，为所有的 Envoy 提供 xDS 下发的服务端；
+
+##  小结
+
+以上分别介绍了 Istio 跟 Service Mesh 的关系、介绍了 Istio 的发展历程以及介绍 了 Istio 核心功能以及包含的组件。并且结合版本演进说明了 Istio 组件的变化。后续会通过对 Istio 内部核心组件分别进行分析，以便让读者们对 Service Mesh 以及 Istio社区有深入的认识。
 
 **参考资料：**
-
 
 [Service Mesh 化繁为简 —— 基于 Istiod 回归单体设计](https://xw.qq.com/cmsid/20200322A06WDH00)
 
