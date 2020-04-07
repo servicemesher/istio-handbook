@@ -1,9 +1,11 @@
 ---
 authors: ["hb-chen"]
-reviewers: [""]
+reviewers: ["rootsongjc"]
 ---
 
 # JWT 授权
+
+首先了解一下 JWT（ JSON Web Token ），是一种多方传递可信 JSON 数据的方案，一个 JWT token 由`.`分隔的三部分组成：`{Header}.{Payload}.{Signature}`，其中 Header 是 Base64 编码的 JSON 数据，包含令牌类型`typ`、签名算法`alg`以及秘钥 ID `kid`等信息；Payload 是需要传递的 claims 数据，也是 Base64 编码的 JSON 数据，其中有些字段是 JWT 标准已有的字段如：`exp`、`iat`、`iss`、`sub`和`aud`等，也可以根据需求添加自定义字段；Signature 是对前两部分的签名，防止数据被篡改，以此确保 token 信息是可信的，更多参考[Introduction to JSON Web Tokens](https://jwt.io/introduction/)。Istio 中验签所需公钥由 RequestAuthentication 资源的 JWKS 配置提供，详见[章节3.4.1.3. 终端用户认证](/practice/end-users-authentication.html)。
 
 前面介绍了`HTTP`、`TCP`、`gRPC`等不同协议的流量授权，而 JWT 授权则是对**最终用户**的访问控制，试想某个内部服务需要管理员才能够访问，这时候就需要验证**最终用户**的角色是否为管理员，可以在 JWT claims 中带有管理员角色信息，然后在授权策略中对该角色授权。不同协议的流量授权在**操作**`to`方面有比较多的示范，本节则主要在**来源**`from`和**自定义条件**`when`做示范。
 
@@ -128,7 +130,7 @@ HTTP/1.1 200 OK
 
 ## 无授策略权情况下的 JWT 认证
 
-要使用 JWT 授权的前提是有有效的 JWT 最终身份认证，所以在使用 JWT 授权前首先要为服务添加**最终身份认证**即 RequestAuthentication ，更多参考认证[章节3.4.1](/istio-handbook/practice/authentication.html)。
+要使用 JWT 授权的前提是有有效的 JWT 最终身份认证，所以在使用 JWT 授权前首先要为服务添加**最终身份认证**即 RequestAuthentication ，更多参考[章节3.4.1. 认证](/istio-handbook/practice/authentication.html)。
 
 ### 添加 RequestAuthentication
 
@@ -209,7 +211,7 @@ when.key | request.auth.claims[key] | JWT 全部属性
 
 其中`from.source`的`requestPrincipals` 、`notRequestPrincipals`和`when.key`的`request.auth.principal`都是对 Principal 条件的策略，Principal 由 JWT claims 的`iss`和`sub`用`/`拼接组成`{iss}/{sub}`，`request.auth.audiences`和`request.auth.presenter`分别对应 claims 的`aud`和`azp`属性，`request.auth.claims[key]`则可以通过`key`值获取 JWT claims 中的任意值作为条件。
 
-这些字段的匹配都遵循授权的4种匹配规则:完全匹配、前缀匹配、后缀匹配和存在匹配，详见[章节2.3.2.1.2](https://www.servicemesher.com/istio-handbook/concepts/authorization-policy.html)，其中存在匹配（`*`）表示该字段可以匹配任意内容，但是不能为空，和不指定字段是不一样的，不指定是包括空在内的任意内容，所以使用存在匹配可以满足对**任意非空的 JWT 授权**的需求。
+这些字段的匹配都遵循授权的4种匹配规则:完全匹配、前缀匹配、后缀匹配和存在匹配，详见[章节2.3.2.1.2. 认证策略](/concepts/authentication-policy.html)，其中存在匹配（`*`）表示该字段可以匹配任意内容，但是不能为空，和不指定字段是不一样的，不指定是包括空在内的任意内容，所以使用存在匹配可以满足对**任意非空的 JWT 授权**的需求。
 
 ### 添加 AuthorizationPolicy
 
@@ -256,7 +258,7 @@ HTTP/1.1 200 OK
 
 前面已经介绍`from.source`和`when.key`中与 Principal 相关的三个字段，这里使用`source.requestPrincipals`做为示例，来看下 Principal 条件的应用。
 
-要设置具体条件首先要了解 JWT 的结构，JWT token 是由`.`分隔的三部分组成，其中第一部分: Base64 编码的 JSON 结构的 Header，包含令牌类型、签名算法等信息；第二部分: Base64 编码的 JSON 结构的 JWT claims；第三部分: 前两部分的签名，结合 JWKS 配置的秘钥信息验证 token 的有效性。通过`echo $TOKEN | cut -d '.' -f2 - | base64 -d -`管道操作解码 token 的第二部分，查看 JWT claims 结构如下:
+要设置具体条件首先要看下 JWT 的 claims 信息，通过`echo $TOKEN | cut -d '.' -f2 - | base64 -d -`管道操作解码 token 的 Payload 部分，查看 JWT claims 结构如下:
 
 ```bash
 $ echo $TOKEN | cut -d '.' -f2 - | base64 -d -
@@ -571,7 +573,9 @@ scpoe=scope1 | group=group3 | $GROUP_TOKEN | √ | 拒绝
 
 # 参考
 
+- [Introduction to JSON Web Tokens](https://jwt.io/introduction/)
 - [RFC 7519 - JSON Web Token (JWT)](https://tools.ietf.org/html/rfc7519#section-4)
+- [JSON Web Key Set](https://auth0.com/docs/tokens/concepts/jwks)
 - [Istio Concepts / Security#Request authentication](https://istio.io/docs/concepts/security/#request-authentication)
 - [Istio Tasks / Authorization with JWT](https://istio.io/docs/tasks/security/authorization/authz-jwt/)
 - [Istio Reference / Authorization Policy](https://istio.io/docs/reference/config/security/authorization-policy/)
