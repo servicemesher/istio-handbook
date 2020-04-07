@@ -571,9 +571,9 @@ scpoe=scope1 | group=group3 | $GROUP_TOKEN | √ | 拒绝
 
 # 参考
 
-[RFC 7519 - JSON Web Token (JWT)](https://tools.ietf.org/html/rfc7519#section-4)
-[Istio Concepts / Security#Request authentication](https://istio.io/docs/concepts/security/#request-authentication)
-[Istio Tasks / Authorization with JWT](https://istio.io/docs/tasks/security/authorization/authz-jwt/)
-[Istio Reference / Authorization Policy](https://istio.io/docs/reference/config/security/authorization-policy/)
-[Istio Reference / Authorization Policy Conditions](https://istio.io/docs/reference/config/security/conditions/)
-[OpenID Connect | Google Identity Platform | Google Developers](https://developers.google.com/identity/protocols/oauth2/openid-connect#an-id-tokens-payload)
+- [RFC 7519 - JSON Web Token (JWT)](https://tools.ietf.org/html/rfc7519#section-4)
+- [Istio Concepts / Security#Request authentication](https://istio.io/docs/concepts/security/#request-authentication)
+- [Istio Tasks / Authorization with JWT](https://istio.io/docs/tasks/security/authorization/authz-jwt/)
+- [Istio Reference / Authorization Policy](https://istio.io/docs/reference/config/security/authorization-policy/)
+- [Istio Reference / Authorization Policy Conditions](https://istio.io/docs/reference/config/security/conditions/)
+- [OpenID Connect | Google Identity Platform | Google Developers](https://developers.google.com/identity/protocols/oauth2/openid-connect#an-id-tokens-payload)
