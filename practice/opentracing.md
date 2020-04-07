@@ -103,9 +103,9 @@ OpenTracing 中的 Tracer API 只定义了 inject 和 extract 两个方法接口
 
 在本节中，我们介绍了分布式追踪和 OpenTracing 的一些基本概念，在下面的章节中，我们将继续介绍如何使用 OpenTracing 来增强 Istio 的分布式追踪，包括实现 SpanContext 传递，提供方法级别的追踪以及异步消息的追踪。
 
-## 参考资料
+## 参考
 
-1. [OpenTracing docs](https://opentracing.io/docs/)
-1. [OpenTracing specification](https://github.com/opentracing/specification/blob/master/specification.md)
-1. [OpenTracing wire protocols](https://github.com/opentracing/specification/blob/master/rfc/trace_identifiers.md)
-1. [Istio Trace context propagation](https://istio.io/docs/tasks/telemetry/distributed-tracing/overview/#trace-context-propagation)
+- [OpenTracing docs](https://opentracing.io/docs/)
+- [OpenTracing specification](https://github.com/opentracing/specification/blob/master/specification.md)
+- [OpenTracing wire protocols](https://github.com/opentracing/specification/blob/master/rfc/trace_identifiers.md)
+- [Istio Trace context propagation](https://istio.io/docs/tasks/telemetry/distributed-tracing/overview/#trace-context-propagation)
