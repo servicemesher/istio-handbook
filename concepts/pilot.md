@@ -31,7 +31,7 @@ Pilot 主要功能就是管理和配置部署在特定 Istio 服务网格中的�
 
 ![Polot 架构](../images/pilot/pilot-arch.svg)
 
-根据上图, Pilot 几个关键的模块如下：
+根据上图， Pilot 几个关键的模块如下：
 
 ### Abstract Model
 
@@ -97,12 +97,12 @@ Envoy 的配置主要在 pilot-agent 的 init 方法与 proxy 命令处理流程
 role 默认的对象为 proxy，关键参数如下：
 
 * Type：pilot-agent 的 role 有两种运行模式。根据 role.Type 变量定义，最新版本有2个类型， sidecar、router 。默认是 sidecar。
-* IPAddress, ID, Domain：可以接受参数，依据注册中心的类型，给予默认值。默认处理方式是 Kubernetes。在 Kubernetes 默认值下，IPAddress 默认为 INSTANCE_IP，ID 默认为 POD_NAME。
+* IPAddress， ID， Domain：可以接受参数，依据注册中心的类型，给予默认值。默认处理方式是 Kubernetes。在 Kubernetes 默认值下，IPAddress 默认为 INSTANCE_IP，ID 默认为 POD_NAME。
 * istio 可以对接的第三方注册中心有 Kubernetes、Consul、MCP、Mock。
 
 ![pilot-agent 启动流程](../images/pilot/agent-run.jpg)
 
-Envoy 配置文件及命令行参数主要有2个:
+Envoy 配置文件及命令行参数主要有2个：
 
 * Envoy 的启动目录默认为`/usr/local/bin/envoy`
 * Envoy 的启动参数相关代码在`func (e *envoy) args`中。
@@ -126,7 +126,7 @@ Envoy 启动参数关键释义：
 * –drain-time-s：在 pilot-agent init 函数中指定默认值为2秒，可通过 pilot-agent proxy 命令的 drainDuration flag 指定
 * –parent-shutdown-time-s：在 pilot-agent init 函数中指定默认值为3秒，可通过 pilot-agent proxy 命令的 parentShutdownDuration flag 指定
 * –service-cluster：在 pilot-agent init 函数中指定默认值为 "istio-proxy" ，可通 pilot-agent proxy 命令的 serviceCluster flag 指定
-* –service-node：将 agent.role 的 Type,IPAddress,ID 和 Domain 用”~”连接起来。
+* –service-node：将 agent.role 的 Type，IPAddress，ID 和 Domain 用”~”连接起来。
 
 #### Envoy 的启动与监控
 
@@ -202,7 +202,7 @@ type Instance interface {
 }
 
 //kubernets 下的 ConfigConntroller，由 makeKubeConfigController 创建
-func NewController(client *Client, options controller2.Options) model.ConfigStoreCache {
+func NewController(client *Client， options controller2.Options) model.ConfigStoreCache {
 	out := &controller{
 		client: client,
 		queue:  queue.NewQueue(1 * time.Second),
@@ -222,9 +222,9 @@ func NewController(client *Client, options controller2.Options) model.ConfigStor
 ConfigController 用于处理 istio 流控 CRD, 如 VirtualService、DestinationRule 等
 
 * ConfigStore 对象利用 client-go 库从 Kubernetes 获取 route rule、virtual service 等 CRD 形式存在控制面信息，转换为 model 包下的 Config 对象，对外提供 Get、List、Create、Update、Delete 等 CRUD 服务。
-* ConfigStoreCache 则主要扩展了: 注册 Config 变更事件处理函数 RegisterEventHandler 、开始处理流程的 Run 方法。
+* ConfigStoreCache 则主要扩展了： 注册 Config 变更事件处理函数 RegisterEventHandler 、开始处理流程的 Run 方法。
 
-Pilot 中，目前实现了 ConfigStoreCache 的 controller 主要有以下五种:
+Pilot 中，目前实现了 ConfigStoreCache 的 controller 主要有以下五种：
 
 * crd/controller/controller.go
 * serviceregistry/mcp/controller.go
