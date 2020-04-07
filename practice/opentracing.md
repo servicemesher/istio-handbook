@@ -3,33 +3,23 @@ authors: ["zhaohuabing"]
 reviewers: ["rootsongjc", "GuangmingLuo"]
 ---
 
-# 分布式调用跟踪和OpenTracing
+# OpenTracing
 
-## 什么是分布式调用跟踪？
+实现分布式追踪（Distributed Tracing）的方式一般是在程序代码中进行埋点，采集调用的相关信息后发送到后端的一个追踪服务器进行分析处理。在这种实现方式中，应用代码需要依赖于追踪服务器的 API，导致业务逻辑和追踪的逻辑耦合。为了解决该问题，[CNCF](https://www.cncf.io/) （云原生计算基金会）下的 [OpenTracing](http://https://opentracing.io/) 项目定义了一套分布式追踪的标准，以统一各种分布式追踪实现的实现。OpenTracing 中包含了一套分布式追踪的标准规范，各种语言的 API，以及实现了该标准的编程框架和函数库。
 
-相比传统的“巨石”应用，微服务的一个主要变化是将应用中的不同模块拆分为了独立的进程。在微服务架构下，原来进程内的方法调用成为了跨进程的远程方法调用。相对于单一进程内的方法调用而言，跨进程调用的调试和故障分析是非常困难的，难以使用传统的代码调试程序或者日志打印来对分布式的调用过程进行查看和分析。
-
-![分布式调用跟踪示意图](images/enhance-tracing-monolith-microserivce.jpg)
-
-如上图右边所示，微服务架构中系统中各个微服务之间存在复杂的调用关系。一个来自客户端的请求在其业务处理过程中经过了多个微服务进程。我们如果想要对该请求的端到端调用过程进行完整的分析，则必须将该请求经过的所有进程的相关信息都收集起来并关联在一起，这就是“分布式调用跟踪”。
-
-## OpenTracing 项目
-
-实现分布式调用跟踪的方式一般是在程序代码中进行埋点，采集调用的相关信息后发送到后端的一个调用跟踪服务器进行分析处理。在这种实现方式中，应用代码需要依赖于调用跟踪服务器的 API，导致业务逻辑和调用跟踪的逻辑耦合。为了解决该问题，[CNCF](https://www.cncf.io/) （云原生计算基金会）下的 [OpenTracing](http://https://opentracing.io/) 项目定义了一套分布式调用跟踪的标准，以统一各种分布式调用跟踪实现的实现。OpenTracing 中包含了一套分布式调用跟踪的标准规范，各种语言的 API，以及实现了该标准的编程框架和函数库。
-
-目前已有大量支持 [OpenTracing 规范的 Tracer 实现](https://opentracing.io/docs/supported-tracers/)，包括 Jager、Skywalking、LightStep 等。在微服务应用中采用 OpenTracing API 实现分布式调用跟踪，可以避免厂商锁定，能够以较小的代价和任意一个兼容 OpenTracing 的分布式调用跟踪后端 （Tracer） 进行对接。
+目前已有大量支持 [OpenTracing 规范的 Tracer 实现](https://opentracing.io/docs/supported-tracers/)，包括 Jager、Skywalking、LightStep 等。在微服务应用中采用 OpenTracing API 实现分布式追踪，可以避免厂商锁定，能够以较小的代价和任意一个兼容 OpenTracing 的分布式追踪后端 （Tracer） 进行对接。
 
 ## OpenTracing 概念模型
 
 下面我们来介绍 OpenTracing 的工作原理，首先我们需要先了解 OpenTracing 中下列这些重要的概念。
 
-![OpenTracing 概念模型(图片取自OpenTracing官方网站)](images/enhance-tracing-tracing_mental_model.png)
+![OpenTracing 概念模型（图片来自OpenTracing官方网站）](../images/enhance-tracing-tracing_mental_model.png)
 
 如图所示，OpenTracing 中主要包含下述几个概念：
 
 * Trace： 描述一个分布式系统中的端到端事务，例如来自客户端的一个请求从接收到处理完成的过程。
-* Span：一个具有名称和时间长度的操作，例如一个 REST 调用或者数据库操作等。Span 是分布式调用跟踪的最小跟踪单位，一个 Trace 由多段 Span 组成。
-* SpanContext：分布式调用跟踪的上下文信息，包括 Trace id，Span id 以及其它需要传递到下游服务的内容。一个 OpenTracing 的实现需要将 SpanContext 通过某种序列化协议 (Wire Protocol) 在进程边界上进行传递，以将不同进程中的 Span 关联到同一个 Trace 上。对于 HTTP 请求来说，SpanContext 一般是采用 HTTP header 进行传递的。
+* Span：一个具有名称和时间长度的操作，例如一个 REST 调用或者数据库操作等。Span 是分布式追踪的最小跟踪单位，一个 Trace 由多段 Span 组成。
+* SpanContext：分布式追踪的上下文信息，包括 Trace id，Span id 以及其它需要传递到下游服务的内容。一个 OpenTracing 的实现需要将 SpanContext 通过某种序列化协议 (Wire Protocol) 在进程边界上进行传递，以将不同进程中的 Span 关联到同一个 Trace 上。对于 HTTP 请求来说，SpanContext 一般是采用 HTTP header 进行传递的。
 
 从上面的介绍，我们可以看到在 OpenTracing 的概念中，Trace 和 Span 组成了一个调用链：Trace 代表了一个端到端的分布式调用，Span 是该调用中间的一段。SpanContext 则用于将一个 Span 的上下文传递到其下游的 Span 中，以将这些 Span 关联起来。
 
@@ -37,7 +27,7 @@ reviewers: ["rootsongjc", "GuangmingLuo"]
 
 一个 Trace 可以看成由多个相互关联的 Span 组成的有向无环图 （DAG 图）。例如下图是一个由8个 Span 组成的 Trace：
 
-```text
+```
 
         [Span A]  ←←←(Root Span)
             |
@@ -58,7 +48,7 @@ reviewers: ["rootsongjc", "GuangmingLuo"]
 
 上图中的 Span 也可以按照时间按照时间先后顺序进行排列，如下图所示：
 
-```text
+```
 ––|–––––––|–––––––|–––––––|–––––––|–––––––|–––––––|–––––––|–> time
 
  [Span A···················································]
@@ -90,7 +80,7 @@ SpanContext 是 OpenTracing 中一个让人比较迷惑的概念。在 OpenTraci
 
 Istio/Envoy 支持 b3 header 和 x-ot-span-context header，可以和 Zipkin、Jaeger 及 LightStep 对接。其中 b3 HTTP header 的示例如下：
 
-```text
+```
 X-B3-TraceId: 80f198ee56343ba864fe8b2a57d3eff7
 X-B3-ParentSpanId: 05e3ac9a4f6e3b90
 X-B3-SpanId: e457b5a2e4d86bd1
@@ -98,12 +88,12 @@ X-B3-Sampled: 1
 ```
 
 假如使用 HTTP header 传递 SpanContext，在向下游服务发起 HTTP 请求时，我们需要在 JAVA 代码中调用 Tracer.inject 方法将 SpanContext 注入到 HTTP header 中。
-```JAVA
+```java
 tracer.inject(tracer.activeSpan().context(), Format.Builtin.HTTP_HEADERS, new RequestBuilderCarrier(requestBuilder));
 ```
 
 在下游服务中收到该 HTTP 调用后，需要采用 Tracer.extract 方法将 SpanContext 从 HTTP header 中取出来。
-```JAVA
+```java
 SpanContext parentSpan = tracer.extract(Format.Builtin.HTTP_HEADERS, new TextMapExtractAdapter(headers));
 ```
 
@@ -111,7 +101,7 @@ OpenTracing 中的 Tracer API 只定义了 inject 和 extract 两个方法接口
 
 ## 小结
 
-在本节中，我们介绍了分布式调用跟踪和 OpenTracing 的一些基本概念，在下面的章节中，我们将继续介绍如何使用 OpenTracing 来增强 Istio 的分布式调用跟踪，包括实现 SpanContext 传递，提供方法级别的调用跟踪以及异步消息的调用跟踪。
+在本节中，我们介绍了分布式追踪和 OpenTracing 的一些基本概念，在下面的章节中，我们将继续介绍如何使用 OpenTracing 来增强 Istio 的分布式追踪，包括实现 SpanContext 传递，提供方法级别的追踪以及异步消息的追踪。
 
 ## 参考资料
 
