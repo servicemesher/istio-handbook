@@ -19,12 +19,8 @@ reviewers: ["rootsongjc"]
 
 ## 准备工作
 
-- Kubernetes 环境
-    - Minikube
-    - Kubernetes version v1.16.7
 - Istio 环境
-    - Istio version 1.5.0
-    - 默认安装`istioctl manifest apply`
+    - `istioctl manifest apply`默认安装
 - 示例下载 Istio Release 1.5.0
     - httpbin 示例
 
