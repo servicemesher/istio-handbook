@@ -199,6 +199,6 @@ $ git push origin master
 
 ![Scenario 详情](../images/katacoda-detail.jpg)
 
-## 总结
+## 小结
 
 Katacoda 是一个面向软件工程师的交互式学习和培训平台，开发人员根据产品特色设计学习流程，方便用户的学习；学习者则无需关心环境的搭建与依赖的安装，通过开发人员设计的最佳实践来进行学习，快速又高效。
