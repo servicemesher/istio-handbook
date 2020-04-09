@@ -7,7 +7,7 @@ reviewers: ["rootsongjc"]
 
 首先了解一下 JWT（ JSON Web Token ），是一种多方传递可信 JSON 数据的方案，一个 JWT token 由`.`分隔的三部分组成：`{Header}.{Payload}.{Signature}`，其中 Header 是 Base64 编码的 JSON 数据，包含令牌类型`typ`、签名算法`alg`以及秘钥 ID `kid`等信息；Payload 是需要传递的 claims 数据，也是 Base64 编码的 JSON 数据，其中有些字段是 JWT 标准已有的字段如：`exp`、`iat`、`iss`、`sub`和`aud`等，也可以根据需求添加自定义字段；Signature 是对前两部分的签名，防止数据被篡改，以此确保 token 信息是可信的，更多参考[Introduction to JSON Web Tokens](https://jwt.io/introduction/)。Istio 中验签所需公钥由 RequestAuthentication 资源的 JWKS 配置提供，详见[终端用户认证](./end-users-authentication.html)。
 
-前面介绍了`HTTP`、`TCP`、`gRPC`等不同协议的流量授权，而 JWT 授权则是对**最终用户**的访问控制，试想某个内部服务需要管理员才能够访问，这时候就需要验证**最终用户**的角色是否为管理员，可以在 JWT claims 中带有管理员角色信息，然后在授权策略中对该角色授权。不同协议的流量授权在**操作**`to`方面有比较多的示范，本节则主要在**来源**`from`和**自定义条件**`when`做示范。
+前面介绍了`HTTP`、`TCP`、`gRPC`等不同协议的流量授权，而 JWT 授权则是对**终端用户**的访问控制，试想某个内部服务需要管理员才能够访问，这时候就需要验证**终端用户**的角色是否为管理员，可以在 JWT claims 中带有管理员角色信息，然后在授权策略中对该角色授权。不同协议的流量授权在**操作**`to`方面有比较多的示范，本节则主要在**来源**`from`和**自定义条件**`when`做示范。
 
 本节使用 Istio 示例中的 httpbin 服务做演示，涉及不同场景下 JWT 授权的应用，主要包括：
 
@@ -126,7 +126,7 @@ HTTP/1.1 200 OK
 
 ## 无授策略权情况下的 JWT 认证
 
-要使用 JWT 授权的前提是有有效的 JWT 最终身份认证，所以在使用 JWT 授权前首先要为服务添加**最终身份认证**即 RequestAuthentication ，更多参考[认证](./authentication.html)。
+要使用 JWT 授权的前提是有有效的 JWT 终端身份认证，所以在使用 JWT 授权前首先要为服务添加**终端身份认证**即 RequestAuthentication ，更多参考[认证](./authentication.html)。
 
 ### 添加 RequestAuthentication
 
@@ -434,7 +434,7 @@ spec:
 现在每次请求对 JWT 的认证和授权都是在 httpbin 服务上，而对于真实场景的请求到达内部服务，往往要经过 n 个服务，如果恰巧这个验证是最后一个服务，当因为 token 无效或者没有 token 导致请求失败时，服务的响应时间大大延长，并造成资源的浪费，所以可以将 token 的验证前置到 Ingress 网关。
 通过前面的实践可以知道添加 RequestAuthentication 仅对带有 Authorization header 请求做认证，不影响无 Authorization header 的请求。具体是否需要分阶段验证，以及在什么位置验证，需要根据业务场景考虑，一般越是顶层条件越靠前如：`from.source.requestPrincipals`、`to.operation.hosts`，而`when.request.auth.claims[group/scope]`和`to.operation.methods/paths`组合可以在相关服务做详细的访问控制。
 
-另外需要注意的是如果调用链路有多次使用同一个 token，则必须在 RequestAuthentication 的`jwtRules`中开启`forwardOriginalToken: true`以将 Authorization header 向下传递，也可以通过 fromHeaders / fromParams 携带多个不同场景的 token，具体参考 [JWTRule](https://istio.io/docs/reference/config/security/jwt/#JWTRule) 。说到 token 的传递，Authorization header 也可以在服务与服务间调用时添加，所以**最终用户**的定义并不限定为客户端，任何一个发起调用的服务都是一个**最终用户**。 
+另外需要注意的是如果调用链路有多次使用同一个 token，则必须在 RequestAuthentication 的`jwtRules`中开启`forwardOriginalToken: true`以将 Authorization header 向下传递，也可以通过 fromHeaders / fromParams 携带多个不同场景的 token，具体参考 [JWTRule](https://istio.io/docs/reference/config/security/jwt/#JWTRule) 。说到 token 的传递，Authorization header 也可以在服务与服务间调用时添加，所以**终端用户**的定义并不限定为客户端，任何一个发起调用的服务都是一个**终端用户**。 
 
 ### Ingress JWT 认证
 
@@ -565,7 +565,7 @@ scpoe=scope1 | group=group3 | $GROUP_TOKEN | √ | 拒绝
 
 ## 小结
 
-本节我们主要实践了在**来源**`from`和**自定义条件**`when`中与**最终用户**相关的属性条件，通过 JWT 标准的 `iss`、`sub`、`aud`和`azp` 以及合理的自定义 claims 设计可以满足大部分访问控制场景的需求，既可以做签发者这样基础的授权，也可以做**最终用户**到服务**接口/方法**级的访问控制。
+本节我们主要实践了在**来源**`from`和**自定义条件**`when`中与**终端用户**相关的属性条件，通过 JWT 标准的 `iss`、`sub`、`aud`和`azp` 以及合理的自定义 claims 设计可以满足大部分访问控制场景的需求，既可以做签发者这样基础的授权，也可以做**终端用户**到服务**接口/方法**级的访问控制。
 
 ## 参考
 
