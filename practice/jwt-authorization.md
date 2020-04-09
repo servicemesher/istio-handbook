@@ -563,11 +563,11 @@ scpoe=scope1 | group=group1 | $GROUP_TOKEN | √ | √
 scpoe=scope1 | group=group1 | $TOKEN | 拒绝 | -
 scpoe=scope1 | group=group3 | $GROUP_TOKEN | √ | 拒绝
 
-# 小结
+## 小结
 
 本节我们主要实践了在**来源**`from`和**自定义条件**`when`中与**最终用户**相关的属性条件，通过 JWT 标准的 `iss`、`sub`、`aud`和`azp` 以及合理的自定义 claims 设计可以满足大部分访问控制场景的需求，既可以做签发者这样基础的授权，也可以做**最终用户**到服务**接口/方法**级的访问控制。
 
-# 参考
+## 参考
 
 - [Introduction to JSON Web Tokens](https://jwt.io/introduction/)
 - [RFC 7519 - JSON Web Token (JWT)](https://tools.ietf.org/html/rfc7519#section-4)
