@@ -1,6 +1,6 @@
 ---
 authors: ["tony-Ma-yami"]
-reviewers: ["rootsongjc " , "stormgbs"]
+reviewers: ["rootsongjc" , "stormgbs"]
 ---
 
 # 故障注入
@@ -79,17 +79,17 @@ spec:
 
 首先我们收集下未配置故障注入情况下请求的响应信息。如下图所示，`Service B`服务正常响应，响应码为`200`。响应头中`content-length`标头表示本次响应体的大小、`content-type`标头表示本次响应内容的数据格式与字符集、`server`标头表示本次响应来源，这里可以看到响应来自`Service B`服务的 istio-envoy 代理。`x-envoy-upstream-service-time`表示上游服务的处理时间。
 
-![concepts-no-fault-inject](../images/concepts-no-fault-inject.png)
+![正常请求响应信息](../images/concepts-no-fault-inject.png)
 
-接下来我们 在`Service B`服务的 VirtualService 上配置 Abort 类型的故障注入。
+接下来我们 在`Service B`服务的 VirtualService 上注入 Abort 类型的故障。
 
-![concepts-fault-inject-abort](../images/concepts-fault-inject-abort.png)
+![注入 Abort 类型故障时请求响应信息](../images/concepts-fault-inject-abort.png)
 
 如上图所示，相比较正常的 Response 响应体，发现本次请求的响应体中返回的响应体为 “fault filter abort”，这说明配置生效了。返回的响应码为`400`，与我们的配置一致。而请求响应体中没有返回`x-envoy-upstream-service-time`参数。这说明当请求到达`Service B`的 Envoy 代理后直接被拦截并返回`400`，请求并没有被转发处理。
 
-接下来，我们在`Service B`服务的 VirtualService 上配置 Delay 类型的故障注入。
+接下来，我们在`Service B`服务的 VirtualService 上注入 Delay 类型的故障。
 
-![concepts-fault-inject-abort](../images/concepts-fault-inject-delay.png)
+![注入 Delay 类型故障时请求响应信息](../images/concepts-fault-inject-delay.png)
 
 如上图所示，我们配置了将所有对`Service B`服务的请求全部延迟 `5s` 处理。相比较正常的 Response 响应体，发现本次请求正常响应，响应数据大小与未配置故障注入时一致。唯一的区别在于`x-envoy-upstream-service-time`值为`5`， 表示`Service B`服务处理了`5s`的时间才返回。这里需要注意的是并不是`Service B`服务本身处理需要这么长的时间，而是 Envoy 将请求拦截后等待了`5s`才将请求转发。
 
