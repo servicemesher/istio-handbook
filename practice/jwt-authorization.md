@@ -476,9 +476,9 @@ HTTP/1.1 401 Unauthorized
 
 ### Ingress JWT 授权
 
-接下来看下在 Ingress 和 httpbin 服务使用不同策略时的响应情况。
+前面只是 Ingress 的 JWT 认证，接下来看下在 Ingress 和 httpbin 服务使用不同策略时的响应情况，结合网关的入口特点可以添加根据 HOST 的不同限定`scope`的授权，如：访问`host=authz-jwt.local`要求`scpoe=scope1`。
 
-1.前面只是 Ingress 的 JWT 认证，结合网关的入口特点可以添加根据 HOST 的不同限定`scope`的授权，如：访问`host=authz-jwt.local`要求`scpoe=scope1`
+1.Ingress 添加 AuthorizationPolicy
 
 ```bash
 $ kubectl apply -f - <<EOF
