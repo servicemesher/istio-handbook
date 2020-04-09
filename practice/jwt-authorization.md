@@ -21,7 +21,7 @@ reviewers: ["rootsongjc"]
 
 - Istio 环境
     - `istioctl manifest apply`默认安装
-- 示例下载 Istio Release 1.5.0
+- 示例下载 [Istio 1.5.1](https://github.com/istio/istio/releases/tag/1.5.1)
     - httpbin 示例
 
 ### httpbin 服务部署
