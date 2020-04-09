@@ -9,9 +9,9 @@ reviewers: ["rootsongjc "]
 
 本节重点说明以下内容：
 
-1.介绍 Istio 跟 Service Mesh 的关系
-2.介绍 Istio 的发展历程
-3.介绍 Istio 核心功能以及包含的组件
+- 1.介绍 Istio 跟 Service Mesh 的关系
+- 2.介绍 Istio 的发展历程
+- 3.介绍 Istio 核心功能以及包含的组件
 
 
 ##  Istio 跟 Service Mesh 的关系
