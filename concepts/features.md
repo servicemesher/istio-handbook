@@ -1,6 +1,6 @@
 ---
 authors: ["linda01232003"]
-reviewers: [""]
+reviewers: ["rootsongjc "]
 ---
 
 # Istio 功能介绍
