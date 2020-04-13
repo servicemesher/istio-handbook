@@ -1,4 +1,7 @@
-> 请保留下列声明。
+提交 PR 后请先自查以下内容：
+- 已阅读并保证所提交 PR 符合[写作规范](https://www.servicemesher.com/istio-handbook/wg/specification.html)。
+- 文章内容格式请参考 PR [add: practice/jwt-authorization #186](https://github.com/servicemesher/istio-handbook/pull/186/files)。
+- 保留下文中的声明。
 
 ## 声明
 
