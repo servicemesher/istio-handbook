@@ -1,4 +1,6 @@
 提交 PR 后请先自查以下内容：
+- PR 的标题格式为：在空白文档中新增内容 `add: 文档标题`，修改已有内容的文档 `update：文档标题`。
+- 在该 PR 已指明解决的 issue 链接：
 - 已阅读并保证所提交 PR 符合[写作规范](https://www.servicemesher.com/istio-handbook/wg/specification.html)。
 - 文章内容格式请参考 PR [add: practice/jwt-authorization #186](https://github.com/servicemesher/istio-handbook/pull/186/files)。
 - 保留下文中的声明。
