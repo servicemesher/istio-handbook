@@ -74,6 +74,7 @@
     - [ELK](practice/elk.md)
     - [EFK](practice/efk.md)
   - [分布式追踪](practice/distributed-tracing.md)
+    - [OpenTracing](practice/opentracing.md)
     - [Jeager](practice/jeager.md)
     - [Zipkin](practice/zipkin.md)
     - [Skywalking](practice/skywalking.md)

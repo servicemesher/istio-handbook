@@ -170,7 +170,7 @@ Istio 中定义了如下的 [CRD](https://jimmysong.io/kubernetes-handbook/conce
 | Ingress    | Listener | Gateway            |
 | Service    | Cluster  | ServiceEntry       |
 
-## 总结
+## 小结
 
 如果说 Kubernetes 管理的对象是 Pod，那么 Service Mesh 中管理的对象就是一个个 Service，所以说使用 Kubernetes 管理微服务后再应用 Service Mesh 就是水到渠成了，如果连 Service 你也不想管了，那就用如 [knative](https://github.com/knative/) 这样的 serverless 平台，但这就是后话了。
 
