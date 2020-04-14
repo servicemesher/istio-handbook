@@ -60,10 +60,10 @@ Pilot 还定义了一套用户 API， 用户 API 提供了面向业务的高层�
 图中实线连线表示控制流，虚线连线表示数据流。带 `[pilot]` 的组件表示为 Pilot 组件，图中关键的组件如下：
 - Discovery service：即 pilot-discovery，主要功能是从 Service provider（如 kubernetes 或者 consul ）中获取服务信息，从 Kubernetes API Server 中获取流量规则（Kubernetes CRD Resource），并将服务信息和流量规则转化为数据面可以理解的格式，通过标准的数据面 API 下发到网格中的各个 sidecar 中。
 - agent：即 pilot-agent 组件，该进程根据 Kubernetes API Server 中的配置信息生成 Envoy 的配置文件，负责启动、监控 sidecar 进程。
-- proxy：既 Envoy，是所有服务的流量代理，直接连接 pilot-discovery ，间接地从 Kubernetes 等服务注册中心获取集群中微服务的注册情况。
+- proxy：既 sidecar proxy，是所有服务的流量代理，直接连接 pilot-discovery ，间接地从 Kubernetes 等服务注册中心获取集群中微服务的注册情况。
 - service A/B：使用了 Istio 的应用，如 Service A/B，的进出网络流量会被 proxy 接管。
 
-下面介绍下 Pilot 相关的组件 pilot-agent、pilot-discovery 的关键实现：
+下面介绍下 Pilot 相关的组件 pilot-agent、pilot-discovery 的关键实现。
 
 ### pilot-agent
 
@@ -166,7 +166,7 @@ Envoy 启动参数关键释义：
 `pilot-discovery` 扮演服务注册中心、Istio 控制平面到 sidecar 之间的桥梁作用。pilot-discovery 的主要功能如下：
 - 监控服务注册中心（如 Kubernetes）的服务注册情况。在 Kubernetes 环境下，会监控 `service`、`endpoint`、`pod`、`node` 等资源信息。
 - 监控 Istio 控制面信息变化，在 Kubernetes 环境下，会监控包括 `RouteRule`、 `VirtualService`、`Gateway`、`EgressRule`、`ServiceEntry` 等以 Kubernetes CRD 形式存在的 Istio 控制面配置信息。
-- 将上述两类信息合并组合为 sidecar 可以理解的（即遵循 Envoy data plane api 的）配置信息，并将这些信息以 gRPC 协议提供给 sidecar。
+- 将上述两类信息合并组合为 sidecar 可以理解的（遵循 Envoy data plane api 的）配置信息，并将这些信息以 gRPC 协议提供给 sidecar。
 
 pilot-discovery 关键实现逻辑如下：
 
@@ -216,7 +216,7 @@ pilot-discovery 的初始化主要在 pilot-discovery 的 `init` 方法和在 `d
 - 配置与服务注册中心（service registry）的连接（initServiceControllers 方法）
 - 初始化 discovery 服务（initDiscoveryService），将 discovery 服务注册为 Config Controller 和 Service Controller 的 Event Handler，监听配置和服务变化消息。
 - 启动 gRPC Server 并接收来自 Envoy 端的连接请求。
-- 接收 Envoy 端的 xDS 请求，从 Config Controller、Service Controller 中获取配置和服务信息，生成响应消息发送给 sidecar。
+- 接收 sidecar 端的 xDS 请求，从 Config Controller、Service Controller 中获取配置和服务信息，生成响应消息发送给 sidecar。
 - 监听来自 Config Controller 、Service Controller 的变化消息，并将配置、服务变化内容通过 xDS 接口推送到 sidecar。
 
 #### 配置信息监控与处理
@@ -288,7 +288,7 @@ Pilot 中，目前实现了 `ConfigStoreCache` 的 `controller` 主要有以下�
 - `kube/ingress/controller.go`
 - `memory/controller.go`
 
-其中比较关键的是 `crd controller`。CRD 是 `CustomResourceDefinition 的缩写 ，CRD Contriller 利用 `SharedIndexInformer` 实现对 CRD 资源的 `list/watch`。将 `Add`、`Update`、`Delete` 事件涉及到的 CRD 资源对象封装为一个 Task ，并 push 到 `ConfigController` 的 `queue` 里，`queue` 队列始终处于监听状态，只要队列中有内容，就会回调 `task` 函数执行。关键代码的实现如下：
+其中比较关键的是 `crd controller`。CRD 是 `CustomResourceDefinition` 的缩写 ，CRD Contriller 利用 `SharedIndexInformer` 实现对 CRD 资源的 `list/watch`。将 `Add`、`Update`、`Delete` 事件涉及到的 CRD 资源对象封装为一个 Task ，并 push 到 `ConfigController` 的 `queue` 里，`queue` 队列始终处于监听状态，只要队列中有内容，就会回调 `task` 函数执行。关键代码的实现如下：
 
 ```go
 //go 语言，源码摘自 pilot-discovery，pilot-discovery 实现配置监听的关键部分，接上一段代码中的 registerHandlers
