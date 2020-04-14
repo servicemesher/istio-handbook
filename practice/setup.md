@@ -1,6 +1,6 @@
 ---
 authors: ["sunny0826"]
-reviewers: [""]
+reviewers: ["GuangmingLuo"]
 ---
 
 # 安装与部署
