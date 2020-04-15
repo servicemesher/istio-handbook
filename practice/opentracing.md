@@ -5,7 +5,7 @@ reviewers: ["rootsongjc", "GuangmingLuo"]
 
 # OpenTracing
 
-实现分布式追踪（Distributed Tracing）的方式一般是在程序代码中进行埋点，采集调用的相关信息后发送到后端的一个追踪服务器进行分析处理。在这种实现方式中，应用代码需要依赖于追踪服务器的 API，导致业务逻辑和追踪的逻辑耦合。为了解决该问题，[CNCF](https://www.cncf.io/) （云原生计算基金会）下的 [OpenTracing](http://https://opentracing.io/) 项目定义了一套分布式追踪的标准，以统一各种分布式追踪实现的实现。OpenTracing 中包含了一套分布式追踪的标准规范，各种语言的 API，以及实现了该标准的编程框架和函数库。
+实现分布式追踪（Distributed Tracing）的方式一般是在程序代码中进行埋点，采集调用的相关信息后发送到后端的一个追踪服务器进行分析处理。在这种实现方式中，应用代码需要依赖于追踪服务器的 API，导致业务逻辑和追踪的逻辑耦合。为了解决该问题，[CNCF](https://www.cncf.io/) （云原生计算基金会）下的 [OpenTracing](https://opentracing.io/) 项目定义了一套分布式追踪的标准，以统一各种分布式追踪实现的实现。OpenTracing 中包含了一套分布式追踪的标准规范，各种语言的 API，以及实现了该标准的编程框架和函数库。
 
 目前已有大量支持 [OpenTracing 规范的 Tracer 实现](https://opentracing.io/docs/supported-tracers/)，包括 Jager、Skywalking、LightStep 等。在微服务应用中采用 OpenTracing API 实现分布式追踪，可以避免厂商锁定，能够以较小的代价和任意一个兼容 OpenTracing 的分布式追踪后端 （Tracer） 进行对接。
 
@@ -88,11 +88,13 @@ X-B3-Sampled: 1
 ```
 
 假如使用 HTTP header 传递 SpanContext，在向下游服务发起 HTTP 请求时，我们需要在 JAVA 代码中调用 Tracer.inject 方法将 SpanContext 注入到 HTTP header 中。
+
 ```java
 tracer.inject(tracer.activeSpan().context(), Format.Builtin.HTTP_HEADERS, new RequestBuilderCarrier(requestBuilder));
 ```
 
 在下游服务中收到该 HTTP 调用后，需要采用 Tracer.extract 方法将 SpanContext 从 HTTP header 中取出来。
+
 ```java
 SpanContext parentSpan = tracer.extract(Format.Builtin.HTTP_HEADERS, new TextMapExtractAdapter(headers));
 ```
