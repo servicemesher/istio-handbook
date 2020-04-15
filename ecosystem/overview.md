@@ -17,15 +17,11 @@ Linkerd 技术最早由 Twitter 公司贡献，并由创业公司 Buoyant 主导
 
 2017 年 Linkerd 加入 CNCF，对于 Service Mesh 技术是一个非常重要的历史事件，这代表社区对 Service Mesh 理念的认同和赞赏，Service Mesh也因此得到社区更大范围的关注。但是，随着 Istio 的出现和伴随名企光环的快速推进，Linkerd 的风光瞬间被盖过。2017 年 7 月 11 日，Linkerd 发布版本 1.1.1，宣布和 Istio 项目集成，希望借助 Istio 的势头重拾信心。但与 Istio 体系下的 Envoy 相比，Linkerd 基于 Scala 为主的技术栈，作为数据平面代理并无优势。
 
-![linkerd2](images/linkerd2.jpg)
-
 2018 年 9 月，Buoyant 启动了 Linkerd 2.0，对自家的控制面项目 Conduit 进行整合，并基于 Golang 对 Linkerd 进行了重写，这让项目焕然一新。[Linkerd2](https://github.com/linkerd/linkerd2) 采用了数据平面+控制平面的设计，也摆脱了长期困扰 Linkerd 的数据平面性能问题，成为了 Istio 的有力竞争者。当然，项目方向的巨大调整也带来多方面阵痛，原本占得先机的 Linkerd 在转向 Linkerd2 后，稳定性和成熟度都有待验证。
 
 ### Envoy
 
 [Envoy](https://www.envoyproxy.io/) 最初由 Lyft 创建，是一款开源、高性能的边缘、中间与服务代理。Envoy 的进程外架构适用于任何应用程序、语言和运行时，非常适合用于 Service Mesh 数据平面；因此其也成为了 Istio 中最初 Sidecar 的官方标配。
-
-![envoy](images/envoy.png)
 
 在功能方面，Envoy 旨在实现服务与边缘代理功能，通过管理微服务之间的交互以确保应用程序性能。该项目提供的超时、速率限制、断路、负载均衡、重试、统计、日志记录以及分布式追踪等高级功能，可以帮助用户以高容错性和高可靠性的方式处理各类网络故障问题。Envoy 支持的协议与功能包括 HTTP/2、gRPC、MongoDB、Redis、Thrift、外部授权、全局速率限制以及一个富配置 API 等等。
 
@@ -38,8 +34,6 @@ Envoy 近几年的发展非常稳健，一方面继续收获独立客户，一�
 [Istio](https://istio.io/) 作为本书的主角，2017 年 5 月 24 日由 IBM、Google 和 Lyft 联合宣布启动，项目发起方将 Istio 定位为一个连接、管理、监视和保护微服务的开放平台。
 
 Istio 整体架构分为数据平面和控制面。数据平面默认由 Envoy 提供，被部署为 sidecar，传输和控制网格内所有服务之间的网络通信。但随着 xDS 协议向标准化方向的推进，越来越多的数据平面代理技术开始接入 Istio。控制面负责管理和配置代理，以及运行时执行的策略。最新的 1.5 版本中对控制面进行了较大的调整，将多个控制模块合而为一，旨为降低 Istio 架构长期被人诟病的复杂度和维护成本。
-
-![istio](images/istio.png)
 
 另一方面，根植于 Kubernetes 生态之上的 Istio 也在不断吸引优秀的项目融入其生态，比如使用 Kiali 或 Weave Scope 进行网格的可视化展示，使用 Prometheus 和 Grafana 为网格提供监控，使用 Zipkin 和 Jaeger 执行微服务之间的分布式跟踪，等等。
 
