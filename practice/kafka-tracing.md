@@ -1,6 +1,6 @@
 ---
-authors: ["zhaohuabing"]
+authors: [""]
 reviewers: [""]
 ---
 
-# kafka-tracing.md
+# kafka tracing
