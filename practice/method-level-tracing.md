@@ -14,7 +14,7 @@ Istio/Envoy 为微服务提供了开箱即用的分布式追踪功能。在安�
 需要注意的是， Istio/Envoy 虽然在此过程中完成了大部分工作，但还是要求对应用代码进行少量修改：应用代码中需要将收到的上游 HTTP 请求中的 b3 header 拷贝到其向下游发起的 HTTP 请求的 header 中，以将调用跟踪上下文传递到下游服务。这部分代码不能由 Envoy 代劳，原因是 Envoy 并不清楚其代理的服务中的业务逻辑，无法将入向请求和出向请求按照业务逻辑进行关联。这部分代码量虽然不大，但需要对每一处发起 HTTP 请求的代码都进行修改，非常繁琐而且容易遗漏。当然，可以将发起 HTTP 请求的代码封装为一个代码库来供业务模块使用，来简化该工作。
 
 下面以一个简单的网上商店示例程序来展示 Istio 如何提供分布式追踪。该示例程序由 eshop、inventory、billing、delivery 几个微服务组成，结构如下图所示： 
-![](../images/enhance-tracing-eshop-demo.jpg)
+![网上商店示例程序](../images/enhance-tracing-eshop-demo.jpg)
 
 eshop 微服务接收来自客户端的请求，然后调用 inventory、billing、delivery 这几个后端微服务的 REST 接口来实现用户购买商品的 checkout 业务逻辑。本例的代码可以从 github 下载： https://github.com/zhaohuabing/istio-opentracing-demo.git
 
@@ -93,7 +93,7 @@ apiVersion: v1
 ```
 
 Jaeger 用图形直观地展示了这次调用的详细信息，可以看到客户端请求从 Ingressgateway 进入到系统中，然后调用了 eshop 微服务的 checkout 接口， checkout 调用有三个 child span ，分别对应到 inventory、billing 和 delivery 三个微服务的 REST 接口。
-![](../images/enhance-tracing-istio-tracing.jpg)
+![Istio缺省的分布式跟踪](../images/enhance-tracing-istio-tracing.jpg)
 
 ## 使用 Opentracing 来传递分布式跟踪上下文
 
@@ -120,7 +120,7 @@ public Tracer jaegerTracer() {
 > * Jaeger tracer 缺省使用64 bit 的 trace id , 而 Istio/Envoy 使用了128 bit 的 trace id 。因此需要指定 Jaeger tracer 使用128 bit 的 trace id，以和 Istio/Envoy 生成的 trace id 兼容。
 
 部署采用 Opentracing 进行 HTTP header 传递的程序版本，其调用跟踪信息如下所示：
-![](../images/enhance-tracing-istio-tracing-opentracing.jpg)
+![采用 Opentracing 传递分布式跟踪上下文](../images/enhance-tracing-istio-tracing-opentracing.jpg)
 
 从上图中可以看到，相比在应用代码中直接传递 HTTP header 的方式，采用 Opentracing 进行代码埋点后，相同的调用增加了7个 Span ，这7个 Span 是由 Opentracing 的 tracer 生成的。虽然我们并没有在代码中显示创建这些 Span ，但 Opentracing 的代码埋点会自动为每一个 REST 请求生成一个 Span ，并根据调用关系关联起来。
 
@@ -199,9 +199,12 @@ kubectl apply -f k8s/eshop.yaml
 ```
 
 效果如下图所示，可以看到 trace 中增加了 transfer 和 save2db 两个方法级的 Span。
-![](../images/enhance-tracing-istio-tracing-opentracing-in-depth.jpg)
-可以打开一个方法的 Span ，查看详细信息，包括 Java 类名和调用的方法名等，在 AOP 代码中还可以根据需要添加出现异常时的异常堆栈等信息。
-![](../images/enhance-tracing-istio-tracing-opentracing-in-depth-method.jpg)
+
+![在 Istio 中加入方法级的调用跟踪](../images/enhance-tracing-istio-tracing-opentracing-in-depth.jpg)
+
+打开一个方法的 Span ，可以看到其详细信息中包括 Java 类名和调用的方法名等内容，我们还可以根据需要在详细信息中添加异常堆栈等信息，只需要在 AOP 代码中进行修改，增加相应的内容即可。
+
+![方法级调用跟踪的详细信息](../images/enhance-tracing-istio-tracing-opentracing-in-depth-method.jpg)
 
 ## 小结
 
@@ -211,9 +214,9 @@ Istio/Envoy 为微服务应用提供了进程级的分布式追踪功能，提�
 
 ## 参考资料
 
-1. [本文中eshop示例程序的源代码](https://github.com/zhaohuabing/istio-opentracing-demo)
-1. [Istio Trace context propagation](https://istio.io/docs/tasks/telemetry/distributed-tracing/overview/#trace-context-propagation)
-1. [Using OpenTracing with Istio/Envoy](https://medium.com/jaegertracing/using-opentracing-with-istio-envoy-d8a4246bdc15)
-1. [Zipkin-b3-propagation](https://github.com/apache/incubator-zipkin-b3-propagation)
-1. [Istio 调用链埋点原理剖析—是否真的“零修改”？](https://www.infoq.cn/article/pqy*PFPhox9OQQ9iCRTt)
+* [本文中eshop示例程序的源代码](https://github.com/zhaohuabing/istio-opentracing-demo)
+* [Istio Trace context propagation](https://istio.io/docs/tasks/telemetry/distributed-tracing/overview/#trace-context-propagation)
+* [Using OpenTracing with Istio/Envoy](https://medium.com/jaegertracing/using-opentracing-with-istio-envoy-d8a4246bdc15)
+* [Zipkin-b3-propagation](https://github.com/apache/incubator-zipkin-b3-propagation)
+* [Istio 调用链埋点原理剖析—是否真的“零修改”？](https://www.infoq.cn/article/pqy*PFPhox9OQQ9iCRTt)
 1. [OpenTracing Project Deep Dive](https://www.youtube.com/watch?v=ySR_FVNX4bQ&t=184s)
