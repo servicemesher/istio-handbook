@@ -222,4 +222,4 @@ Istio/Envoy 为微服务应用提供了进程级的分布式追踪功能，提�
 * [Using OpenTracing with Istio/Envoy](https://medium.com/jaegertracing/using-opentracing-with-istio-envoy-d8a4246bdc15)
 * [Zipkin-b3-propagation](https://github.com/apache/incubator-zipkin-b3-propagation)
 * [Istio 调用链埋点原理剖析—是否真的“零修改”？](https://www.infoq.cn/article/pqy*PFPhox9OQQ9iCRTt)
-1. [OpenTracing Project Deep Dive](https://www.youtube.com/watch?v=ySR_FVNX4bQ&t=184s)
+* [OpenTracing Project Deep Dive](https://www.youtube.com/watch?v=ySR_FVNX4bQ&t=184s)
