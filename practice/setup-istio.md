@@ -1,6 +1,6 @@
 ---
 authors: ["sunny0826"]
-reviewers: [""]
+reviewers: ["rootsongjc"]
 ---
 
 # 安装 Istio
@@ -9,11 +9,21 @@ reviewers: [""]
 
 ## 环境准备
 
+本章讲解本地 Kubernetes 环境下的 Istio 安装，这里仅给出本地环境需要的软硬件要求：
+
+- 硬件要求
+    - 至少 2 核 CPU 和 4G 的可用内存。
+- 软件要求
+    - [minikube v1.9.2](https://github.com/kubernetes/minikube/releases/tag/v1.9.2)
+    - `istioctl` v1.5.1
+    - `kubectl` v1.18
+    - docker 19.03.8
+
 ### 安装 Kubernetes 集群
 
- 在本地计算机上部署 Kubernetes，可以帮助开发人员快速高效的测试应用程序，同时也可以在测试时避免对线上正在运行的集群造成影响。目前有许多软件提供了在本地搭建 Kubernetes 集群的功能，本书推荐使用 Minikube 来安装 Kubernetes 集群。
+在本地计算机上部署 Kubernetes，可以帮助开发人员快速高效的测试应用程序，同时也可以在测试时避免对线上正在运行的集群造成影响。目前有许多软件提供了在本地搭建 Kubernetes 集群的功能，本书推荐使用 Minikube 来安装 Kubernetes 集群。
 
- Minikube 是一种可以在本地轻松运行 Kubernetes 的工具，适用于所有主流操作系统。Minikube 可在笔记本电脑上的虚拟机（VM）中运行单节点 Kubernetes 集群，供那些希望尝试 Kubernetes 或进行日常开发的用户使用。下面以 Linux 平台为例，简要说明 Minikube 的安装步骤。
+Minikube 是一种可以在本地轻松运行 Kubernetes 的工具，适用于所有主流操作系统。Minikube 可在笔记本电脑上的虚拟机（VM）中运行单节点 Kubernetes 集群，供那些希望尝试 Kubernetes 或进行日常开发的用户使用。下面以 Linux 平台为例，简要说明 Minikube 的安装步骤。
 
 1. 下载 Minikube，你可以在 Minikube 在 GitHub 上的 [releases 页面](https://github.com/kubernetes/minikube/releases)找到 Linux (AMD64) 的包。这里直接下载 Minikube 的二进制文件，并添加执行权限：
     ```bash
