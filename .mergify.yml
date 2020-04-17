@@ -9,7 +9,9 @@ pull_request_rules:
         method: squash
         strict: true
   - name: ask the maintainer team to review PR
+    conditions:
+      - label!=invalid
     actions:
       request_reviews:
         teams:
-          - "servicemesher/istio-handbook-wg-maintainers"
+          - "@servicemesher/istio-handbook-wg-maintainers"
