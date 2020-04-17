@@ -51,7 +51,6 @@
 - [安装与部署](practice/setup.md)
   - [安装 Istio](practice/setup-istio.md)
   - [升级](practice/upgrade.md)
-  - [Kubernetes 部署](practice/setup-in-kubernetes.md)
   - [Bookinfo 示例](practice/bookinfo.md)
   - [Katacoda 实验环境](practice/katacoda.md)
 - [入门实践](practice/primer.md)
