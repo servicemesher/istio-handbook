@@ -4,10 +4,12 @@ pull_request_rules:
       - "#approved-reviews-by>=1"
       - label!=do-not-merge
       - label!=WIP
-    request_reviews:
-      teams:
-        - "@servicemesher/istio-handbook-wg-maintainers"
     actions:
       merge:
         method: squash
         strict: true
+  - name: ask the maintainer team to review PR
+    actions:
+      request_reviews:
+        teams:
+          - "@servicemesher/istio-handbook-wg-maintainers"
