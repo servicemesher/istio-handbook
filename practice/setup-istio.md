@@ -11,13 +11,16 @@ reviewers: ["rootsongjc"]
 
 本章讲解本地 Kubernetes 环境下的 Istio 安装，这里仅给出本地环境需要的软硬件要求：
 
-- 硬件要求
-    - 至少 2 核 CPU 和 4G 的可用内存。
-- 软件要求
-    - [minikube v1.9.2](https://github.com/kubernetes/minikube/releases/tag/v1.9.2)
-    - `istioctl` v1.5.1
-    - `kubectl` v1.18
-    - docker 19.03.8
+**硬件要求**
+
+至少 2 核 CPU 和 4G 的可用内存。
+
+**软件要求**
+
+- [minikube v1.9.2](https://github.com/kubernetes/minikube/releases/tag/v1.9.2)
+- `istioctl` v1.5.1
+- `kubectl` v1.18
+- docker 19.03.8
 
 ### 安装 Kubernetes 集群
 
@@ -42,6 +45,7 @@ Minikube 是一种可以在本地轻松运行 Kubernetes 的工具，适用于�
     ```
 
 创建成功后，用户需要使用 kubectl 工具来管理和操作集群中的各种资源，`minikube start` 命令会创建一个名为 `minikube` 的 [kubectl 上下文](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-set-context-em-)。Minikube 会自动将此上下文设置为默认值，但如果您以后需要切换回它，请运行：
+
 ```bash
 $ kubectl config use-context minikube
 ```
@@ -70,6 +74,7 @@ $ curl -L https://raw.githubusercontent.com/istio/istio/release-1.5/release/down
 |`tools`| 包含用于性能测试和在本地机器上进行测试的脚本 |
 
 将`istioctl`客户端路径加入 $PATH 中：
+
 ```bash
 export PATH=$PATH:$(pwd)/istio-1.5.1/bin
 ```
@@ -77,11 +82,13 @@ export PATH=$PATH:$(pwd)/istio-1.5.1/bin
 之后就可以使用`istioctl`命令行工具了，该命令行工具具有用户输入校验功能，可以防止错误的安装和自定义选项。
 
 由于本章主要介绍快速在本地安装 Istio 环境，不涉及到性能及可用性相关话题，故使用`demo`配置安装 Istio：
+
 ```bash
 $ istioctl manifest apply --set profile=demo
 ```
 
 安装命令运行成功后，检查 Kubernetes 服务是否部署正常，检查除 `jaeger-agent` 服务外的其他服务，是否均有正确的 `CLUSTER-IP`：
+
 ```bash
 $ kubectl get svc -n istio-system
 NAME                        TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                                                                             AGE
@@ -101,6 +108,7 @@ zipkin                      ClusterIP      10.111.66.10     <none>        9411/T
 ```
 
 检查相关 pod 是否部署成功：
+
 ```bash
 $ kubectl get pods -n istio-system
 NAME                                    READY   STATUS    RESTARTS   AGE
