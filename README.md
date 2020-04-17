@@ -13,6 +13,16 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 - 提交建议、勘误、参与撰写：<https://github.com/servicemesher/istio-handbook>
 - 在线阅读：<https://www.servicemesher.com/istio-handbook>
 
+## 快速开始
+
+请访问 ServiceMesher 托管在 [katacoda](https://katacoda.com/istio-handbook) 上的课程。无需手动搭建 Kubernetes 集群，仅需 20 分钟即可快速试用 Istio 1.5 并运行 [Bookinfo](https://istio.io/zh/docs/examples/bookinfo/) 示例，完全免费。
+
+<p align="center">
+<a href="https://katacoda.com/istio-handbook">
+<img src="images/katacoda-logo.png" alt="katacoda" />
+</a>
+</p>
+
 ## 关于本书
 
 本书基于 Istio 1.5 版本编写，起源于 [rootsongjc/istio-handbook](https://github.com/rootsongjc/istio-handbook) 及 ServiceMesher 社区创作的 [Istio 知识图谱](https://github.com/servicemesher/istio-knowledge-map)。
