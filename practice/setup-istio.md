@@ -42,7 +42,7 @@ $ kubectl get pods --context=minikube
 
 详细安装步骤以及操作说明请参考 Minikube 官方文档：https://minikube.sigs.k8s.io/docs/
 
-### 安装 Istio
+## 安装 Istio
 
 从 Istio v1.15 版本开始，[使用 helm 安装](https://istio.io/zh/docs/setup/install/helm/)的方式已经废弃，需改用 [istioctl 安装](https://istio.io/zh/docs/setup/install/istioctl/)。
 
