@@ -4,16 +4,17 @@ reviewers: ["rootsongjc "]
 
 # Bookinfo示例
 
-Bookinfo是Istio社区官方推荐的示例应用之一。它可以用来演示多种Istio的特性，并且它是多语言架构的。该应用由四个单独的微服务构成。 这个应用模仿在线书店的一个分类，显示一本书的信息。 页面上会显示一本书的描述，书籍的细节（ISBN、页数等），以及关于这本书的一些评论。 
+Bookinfo是Istio社区官方推荐的示例应用之一。它可以用来演示多种Istio的特性，并且它是异构的微服务架构。该应用由四个单独的微服务构成。 这个应用模仿了在线书店，可以展示书店中书籍的信息。例如页面上会显示一本书的描述，书籍的细节（ISBN、页数等），以及关于这本书的一些评论。 
 
-Bookinfo 应用分为四个单独的微服务：
+Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依赖，但是构成了一个有代表性的服务网格的例子：它由多个服务、多个语言构成，并且其中有一个应用会包含多个版本。 
+：
 
-- `productpage`. 这个微服务会调用 `details` 和 `reviews` 两个微服务，用来生成页面。
-- `details`. 这个微服务中包含了书籍的信息。
-- `reviews`. 这个微服务中包含了书籍相关的评论。它还会调用 `ratings` 微服务。
-- `ratings`. 这个微服务中包含了由书籍评价组成的评级信息。
+- `productpage`会调用 `details` 和 `reviews` 两个微服务，用来生成页面。
+- `details` 中包含了书籍的信息。
+- `reviews`中包含了书籍相关的评论。它还会调用 `ratings` 微服务。
+- `ratings`中包含了由书籍评价组成的评级信息。
 
-`reviews` 微服务有 3 个版本：
+`reviews` 微服务有 3 个版本，可用来展示各服务之间的不同的调用链路：
 
 - v1 版本不会调用 `ratings` 服务。
 - v2 版本会调用 `ratings` 服务，并使用 1 到 5 个黑色星形图标来显示评分信息。
@@ -23,17 +24,15 @@ Bookinfo 应用分为四个单独的微服务：
 
 ![Bookinfo Application without Istio](../images/Bookinfo Application without Istio.png)
 
-Bookinfo 应用中的几个微服务是由不同的语言编写的。 这些服务对 Istio 并无依赖，但是构成了一个有代表性的服务网格的例子：它由多个服务、多个语言构成，并且 `reviews` 服务具有多个版本。 
+## 部署应用
 
-### 部署应用
-
-要在 Istio 中运行这一应用，无需对应用自身做出任何改变。 您只要简单的在 Istio 环境中对服务进行配置和运行，具体一点说就是把 Envoy sidecar 注入到每个服务之中。 最终的部署结果将如下图所示： 
+要想该应用接入 Istio 服务网格，无需对应用自身做出任何改变。 您只要在 Istio 环境中对服务所在的命名空间进行yaml配置并重新启动运行就可以完成设置，下文中详细解说了将命名空间打入自动注入 sidecar 的命令和方法。 最终的部署结果将如下图所示： 
 
 ![Bookinfo Application](../images/Bookinfo Application.png)
 
- 所有的微服务都和 Envoy sidecar 集成在一起，被集成服务所有的出入流量都被 sidecar 所劫持，这样就为外部控制准备了所需的 Hook，然后就可以利用 Istio 控制平面为应用提供服务路由、遥测数据收集以及策略实施等功能。 
+ 所有的微服务都和 Envoy sidecar 集成在一起，被集成服务所有的出入流量都被 sidecar 所劫持，这样就为外部控制准备了所需的 Hook，然后就可以利用 Istio 控制平面下发对应的 XDS 协议从而使 Envoy Sidecar 为应用提供服务路由、遥测数据收集以及策略实施等功能。 
 
-### 启动应用服务
+## 启动应用服务
 
 1. 进入 Istio 安装目录。
 
@@ -102,7 +101,7 @@ $ kubectl get pods
    $ kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
    ```
 
-2. 确认网关创建完成：
+1. 确认网关创建完成：
 
    ```
    $ kubectl get gateway
@@ -110,9 +109,9 @@ $ kubectl get pods
    bookinfo-gateway   32s
    ```
 
-3. 根据[文档](https://preliminary.istio.io/zh/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-i-p-and-ports)设置访问网关的 `INGRESS_HOST` 和 `INGRESS_PORT` 变量。确认并设置。
+1. 根据[文档](https://preliminary.istio.io/zh/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-i-p-and-ports)设置访问网关的 `INGRESS_HOST` 和 `INGRESS_PORT` 变量。确认并设置。
 
-4. 设置 `GATEWAY_URL`：
+1. 设置 `GATEWAY_URL`：
 
    ```
    $ export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
@@ -173,7 +172,7 @@ $ kubectl get destinationrules -o yaml
    $ samples/bookinfo/platform/kube/cleanup.sh
    ```
 
-2. 确认应用已经关停
+1. 确认应用已经关停
 
    ```
    $ kubectl get virtualservices   #-- there should be no virtual services
@@ -182,6 +181,6 @@ $ kubectl get destinationrules -o yaml
    $ kubectl get pods              #-- the Bookinfo pods should be deleted
    ```
 
-参考资料：
+## 参考资料：
  https://preliminary.istio.io/zh/docs/examples/bookinfo 
 
