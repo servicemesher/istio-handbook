@@ -5,11 +5,11 @@ reviewers: [""]
 
 ## MOSN 简介
 
-MOSN（Modular Open Smart Network） 是一款使用 Go 语言开发的网络代理软件，作为云原生的网络数据平面，旨在为服务提供多协议，模块化，智能化，安全的代理能力。MOSN 可以与任何支持 xDS API 的 Service Mesh 集成，另外可以作为独立的四、七层负载均衡器，API Gateway，云原生 Ingress 等场景使用。
+MOSN（Modular Open Smart Network）是一款使用 Go 语言开发的网络代理软件，作为云原生的网络数据平面，旨在为服务提供多协议、模块化、智能化、安全的代理能力。MOSN 可以与任何支持 xDS API 的 Service Mesh 集成，另外也可以作为独立的四/七层负载均衡器、API Gateway、云原生 Ingress 等场景下使用。
 
 ## 框架介绍
 
-对 MOSN 有了初步了解后，接下来我们将从其功能特性、架构分层、内存及连接池这几方面来深入剖析一下 MOSN 。
+对 MOSN 有了初步了解后，接下来我们将从其功能特性、架构分层、内存及连接池等方面对 MOSN 进行深入剖析一下。
 
 ### 功能特性
 
@@ -19,41 +19,36 @@ MOSN（Modular Open Smart Network） 是一款使用 Go 语言开发的网络代
 
 其中：
 
-* Starter, Server, Listener, Config, xDS 为 MOSN 启动模块，用于完成 MOSN 的运行
-* 最左侧的 Hardware, NET/IO, Protocol, Stream, Proxy 为 MOSN 架构 中介绍的 MOSN 核心模块，
-用来完成 Service MESH 的核心功能
-* Istio 集成
-  * 支持 Istio Pilot V2 API，可基于全动态资源配置运行
-* Router 为 MOSN 的核心路由模块，支持的功能包括：
+* Starter, Server, Listener, Config 为 MOSN 启动模块，用于完成 MOSN 的运行
+* 最左侧的 Hardware, NET/IO, Protocol, Stream, Proxy, xDS 为 MOSN 架构的核心模块，用来实现 Service Mesh 的核心功能
+* Router 为 MOSN 的路由模块，支持的功能包括：
   * VirtualHost 形式的路由功能
-  * 基于 subset 的子集群路由匹配
+  * 基于 Subset 的子集群路由匹配
   * 路由重试以及重定向功能
 * Upstream 为后端管理模块，支持的功能包括：
   * Cluster 动态更新
   * Host 动态更新
-  * 对 Cluster 的 主动/被动 健康检查
+  * 对 Cluster 的主动/被动健康检查
   * 熔断保护机制
   * CDS/EDS 对接能力
-* Protocol 为 MOSN 提供多协议框架，可方便的扩展自定义协议，目前支持的协议包括：
-  * HTTP/HTTP2 作为标准的HTTP系协议
-  * SOFA/Dubbo 作为服务之间常用的RPC协议
 * Metrics 模块可对协议层的数据做记录和追踪
-  * Metrics当前统计了网络读写流量、请求状态、连接数等元数据
+  * Metrics 当前统计了网络读写流量、请求状态、连接数等元数据
   * Trace 框架集成 SkyWalking 组件，可方便的观察请求的链路 
-* 进程管理
-  * 支持平滑 reload
-  * 支持平滑升级，连接无损迁移
-* LoadBalance 当前支持 RR, Random, Subset LB, Original_Dst 等负载均衡算法
+* LoadBalance 是负载均衡管理模块，当前支持 RR, Random, Subset LB, Original_Dst 等负载均衡算法
+* Mixer 模块用来适配外部的服务，如鉴权、资源信息上报等
+* FlowControl 模块是流量控制模块，当前集成了 Sentinel SDK 可用来做限流保护
+* Lab 模块是用来集成 IOT, DB, Media 等 Mesh 服务
+* Admin 模块是 MOSN 的资源控制器，用来查看和管理其运行状态及资源信息
 
 ### 架构解析
 
-MOSN 延续 OSI(Open System Interconnection) 的分层思想，将其系统分为 NET/IO 、Protocol 、 Stream 、 Proxy 四层，如下图所示：
+MOSN 延续 OSI（Open Systems Interconnection）的分层思想，将其系统分为 NET/IO, Protocol, Stream, Proxy 四层，如下图所示：
 
 ![concepts-mosn-arch](../images/concepts-mosn-arch.png)
 
 其中：
 
-* NET/IO 作为网络层，监测连接和数据包的到来，同时作为listener filter 和 network filter的挂载点
+* NET/IO 作为网络层，监测连接和数据包的到来，同时作为 listener filter 和 network filter 的挂载点
 * Protocol 作为多协议引擎层，对数据包进行检测，并使用对应协议做 decode/encode 处理
 * Stream 对 decode 的数据包做二次封装为 stream ，作为 stream filter的挂载点
 * Proxy 作为 MOSN 的转发框架，对封装的 stream 做 proxy 处理
@@ -66,13 +61,13 @@ MOSN 整体框架采用分而治之的架构思想，其中每一层通过工厂
 
 MOSN 为了规避 Runtime GC 带来的卡顿自身做了内存池的封装方便多种对象高效的复用内存，另外为了提升服务网格之间的建连性能还设计了多种协议的连接池从而方便的实现连接复用及管理。
 
-MOSN 的 Proxy 模块在 Downstream 收到 Request 的时候，在经过路由、负载均衡等模块处理获取到 Upstream Host 以及对应的转发协议时，会去 Cluster Manager 获取对应协议的连接池 ，如果连接池不存在则创建并加入缓存中，之后在长连接上创建 Stream，并发送数据。
+MOSN 的 Proxy 模块在 Downstream 收到 Request 的时候，在经过路由、负载均衡等模块处理获取到 Upstream Host 以及对应的转发协议时，通过 Cluster Manager 获取对应协议的连接池 ，如果连接池不存在则创建并加入缓存中，之后在长连接上创建 Stream，并发送数据。
 
 如下图所示为连接池工作的示意图：
 
 ![concepts-mosn-connpool](../images/concepts-mosn-connpool.png)
 
-MOSN 基于 sync.Pool 之上封装了一层自己的注册管理逻辑，可以方便的扩展各种类型的对象进行复用和管理。其中 bpool 是用来存储各类对象的构建方法，vpool 用来存放 bpool 中各个实例对象具体的值。运行时通过bpool里保存的构建方法来创建对应的对象通过index关联记录到vpool中，使用完后通过 sync.Pool 进行空闲对象的管理达到复用，如下图所示：
+MOSN 在 sync.Pool 之上封装了一层资源对象的注册管理模块，可以方便的扩展各种类型的对象进行复用和管理。其中 bpool 是用来存储各类对象的构建方法，vpool 用来存放 bpool 中各个实例对象具体的值。运行时通过 bpool 里保存的构建方法来创建对应的对象通过 index 关联记录到 vpool 中，使用完后通过 sync.Pool 进行空闲对象的管理达到复用，如下图所示：
 
 ![concepts-mosn-mempool](../images/concepts-mosn-mempool.png)
 
