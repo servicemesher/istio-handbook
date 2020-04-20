@@ -93,9 +93,15 @@ spec:
 
 如上图所示，我们配置了将所有对`Service B`服务的请求全部延迟 `5s` 处理。相比较正常的 Response 响应体，发现本次请求正常响应，响应数据大小与未配置故障注入时一致。唯一的区别在于`x-envoy-upstream-service-time`值为`5`， 表示`Service B`服务处理了`5s`的时间才返回。这里需要注意的是并不是`Service B`服务本身处理需要这么长的时间，而是 Envoy 将请求拦截后等待了`5s`才将请求转发。
 
-### 总结
+## 总结
 
 Istio 本身虽然也有服务自我故障恢复的机制，但是我们必须对服务异常码进行必要的回退处理或故障转移，否则上游服务即使恢复也将会发生持续性重新故障。另外当系统中在多个地方配置了故障注入策略时，他们都是独立进行工作的，比如你在下游服务中配置了请求上游服务超时时间为2s, 而在上游服务的 VirtualService 的故障注入中配置了3秒的延迟，这时，下游服务中的配置将优先生效。
 
 通过以上对 Istio 故障注入的介绍、配置、及实现原理的介绍，不难看出故障注入一般适用在开发测试阶段，非常方便在该阶段对功能及接口进行测试。它依赖于 Envoy 的特性将故障注入与业务代码分离，使得业务代码更加的纯粹，故障注入测试时更加简洁方便，这个功能大大降低了模拟测试的复杂度。但需要注意的是，在上线前一定要对配置文件做检查校正，防止此类配置推送到生产坏境。
 
+## 参考
+
+- [Envoy envoy-api-msg-config-filter-http-fault-v2-httpfault 配置](https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/http/fault/v2/fault.proto#envoy-api-msg-config-filter-http-fault-v2-httpfault)
+- [Envoy config.filter.http.fault.v2.FaultAbort 配置](https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/http/fault/v2/fault.proto#envoy-api-msg-config-filter-http-fault-v2-faultabort) 
+- [Envoy config.filter.fault.v2.FaultDelay 配置](https://www.envoyproxy.io/docs/envoy/latest/api-v2/config/filter/fault/v2/fault.proto#envoy-api-msg-config-filter-fault-v2-faultdelay)
+- [Envoy config-http-filters-fault-injection-http-header 基于Header实现故障注入介绍](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/fault_filter#config-http-filters-fault-injection-http-header)
