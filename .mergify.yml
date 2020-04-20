@@ -8,3 +8,10 @@ pull_request_rules:
       merge:
         method: squash
         strict: true
+  - name: ask the maintainer team to review PR
+    conditions:
+      - label!=invalid
+    actions:
+      request_reviews:
+        teams:
+          - "@servicemesher/istio-handbook-wg-maintainers"

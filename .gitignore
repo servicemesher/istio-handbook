@@ -19,3 +19,4 @@ docs
 # Github Pages
 deploy.sh
 .DS_Store
+.idea
