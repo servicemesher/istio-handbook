@@ -1,13 +1,13 @@
 ---
 authors: ["zhaohuabing"]
-reviewers: [""]
+reviewers: ["rootsongjc", "GuangmingLuo"]
 ---
 
 # 实现方法级的调用跟踪
 
-Istio 为微服务提供了开箱即用的分布式追踪功能。在安装了 Istio 的微服务系统中， Sidecar 会拦截服务的入向和出向请求，为微服务的每个HTTP远程调用请求自动生成调用跟踪数据。通过在服务网格中接入一个分布式跟踪的后端，例如 zipkin 或者 Jaeger ，就可以查看一个分布式调用请求的端到端详细内容，例如该请求经过了哪些服务，调用了哪个 REST 接口，每个 REST 接口所花费的时间等。
+Istio 为微服务提供了开箱即用的分布式追踪功能。在安装了 Istio 的微服务系统中， Sidecar 会拦截服务的入向和出向请求，为微服务的每个 HTTP 远程调用请求自动生成调用跟踪数据。通过在服务网格中接入一个分布式跟踪的后端，例如 zipkin 或者 Jaeger ，就可以查看一个分布式调用请求的端到端详细内容，例如该请求经过了哪些服务，调用了哪个 REST 接口，每个 REST 接口所花费的时间等。
 
-在某些情况下，进程/服务级别的调用跟踪信息有可能不足以分析系统中的问题。例如分析导致客户端调用耗时过长的原因时，我们可以通过Istio提供的分布式追踪找到导致瓶颈的微服务进程，但无法进一步找到导致该问题的程序模块和方法。在这种情况下，我们就需要用到进程内方法级的调用跟踪来对调用链进行更细粒度的分析。本文将介绍如何在 Istio 的分布式追踪加入方法级别的调用链。
+在某些情况下，进程/服务级别的调用跟踪信息有可能不足以分析系统中的问题。例如分析导致客户端调用耗时过长的原因时，我们可以通过 Istio 提供的分布式追踪找到导致瓶颈的微服务进程，但无法进一步找到导致该问题的程序模块和方法。在这种情况下，我们就需要用到进程内方法级的调用跟踪来对调用链进行更细粒度的分析。本文将介绍如何在 Istio 的分布式追踪实现方法级别的调用链。
 
 ## Isito的分布式追踪
 
@@ -53,8 +53,8 @@ private HttpHeaders passTracingHeader(HttpHeaders headers) {
 在 Kubernetes 中部署该程序，查看 Istio 分布式追踪的效果。
 
 * 首先部署 Kubernetes cluster ，注意需要启用 API Server 的 Webhook 选项
-* 在 Kubernetes cluster 中部署 Istio ，并且启用 default namespace 的 sidecar auto injection 
-* 在 Kubernetes cluster 中部署 eshop 应用
+* 参照本书前面部署安装相关章节在 Kubernetes cluster 中部署 Istio 和 Jaeger，并且启用 default namespace 的 sidecar auto injection 
+* 在 Kubernetes cluster 中部署 eshop 应用。
 
 ```bash
 git clone https://github.com/zhaohuabing/istio-opentracing-demo.git
@@ -101,14 +101,14 @@ Jaeger 用图形直观地展示了这次调用的详细信息，可以看到客�
 
 Opentracing 提供了基于 Spring 的代码埋点，因此我们可以使用 Opentracing Spring 框架来提供 HTTP header 的传递，以避免这部分硬编码工作。在 Spring 中采用 Opentracing 来传递分布式跟踪上下文非常简单，只需要下述两个步骤：
 
-* 在 Maven POM 文件中声明相关的依赖，一是对 Opentracing SPring Cloud Starter 的依赖；另外由于后端接入的是 Jaeger ，也需要依赖 Jaeger 的相关 jar 包。
-* 在 Spring Application 中声明一个 Tracer bean 。
+* 在 Maven POM 文件中声明相关的依赖，首先是对 Opentracing Spring Cloud Starter 的依赖；另外由于本示例中后端接入的是 Jaeger ，也需要依赖 Jaeger 的相关 jar 包。 当然，你也可以选择使用其他支持 Opentracing 的 Tracer，例如 Zipkin、LightStep、SkyWalking 等。 由于 Opentracing 统一了 API，切换不同 Tracer 只需要非常少的修改，包括 Maven 依赖和生成 Tracer 的部分代码。
+* 在 Spring Application 中声明一个 Tracer bean。
 
 ```java
 @Bean
 public Tracer jaegerTracer() {
 	// 我们需要设置下面的环境变量：
-	// JAEGER_ENDPOINT="http://10.42.126.171:28019/api/traces"
+	// JAEGER_ENDPOINT="http://${JAEGER_IP}:28019/api/traces"
 	// JAEGER_PROPAGATION="b3"
 	// JAEGER_TRACEID_128BIT="true" 使用 128bit 的 tracer id， 以兼容 Istio
 	return Configuration.fromEnv("eshop-opentracing").getTracer();
@@ -117,8 +117,8 @@ public Tracer jaegerTracer() {
 
 > 注意：
 >
-> * Jaeger tracer 缺省使用的是 uber-trace-id header ,而 Istio/Envoy 不支持该 header 。因此需要指定 Jaeger tracer 使用 b3 header 格式，以和 Istio/Envoy 兼容。
-> * Jaeger tracer 缺省使用64 bit 的 trace id , 而 Istio/Envoy 使用了128 bit 的 trace id 。因此需要指定 Jaeger tracer 使用128 bit 的 trace id，以和 Istio/Envoy 生成的 trace id 兼容。
+> * Jaeger tracer 缺省使用的是 uber-trace-id header，而 Istio/Envoy 不支持该 header。因此需要指定 Jaeger tracer 使用 b3 header 格式，以和 Istio/Envoy 兼容。
+> * Jaeger tracer 缺省使用64 bit 的 trace id，而 Istio/Envoy 使用了128 bit 的 trace id。因此需要指定 Jaeger tracer 使用128 bit 的 trace id，。和 Istio/Envoy 生成的 trace id 兼容。
 
 部署采用 Opentracing 进行 HTTP header 传递的程序版本，其调用跟踪信息如下所示：
 
@@ -211,7 +211,7 @@ kubectl apply -f k8s/eshop.yaml
 
 ## 小结
 
-Istio 为微服务应用提供了进程级的分布式追踪功能，提高了服务调用的可见性。为了使用该功能，我们需要在应用中添加传递调用跟踪上下文相关 HTTP header 的代码。通过使用 Opentracing ，我们可以去掉这部分代码； 我们还可以通过 Opentracing 将方法级的调用信息加入到 Istio 缺省提供的调用链跟踪信息中，以提供更细粒度的调用跟踪信息，方便分析程序调用流程中的故障和性能瓶颈。
+Istio 为微服务应用提供了进程级的分布式追踪功能，提高了服务调用的可见性。为了使用该功能，我们需要在应用中添加传递调用跟踪上下文相关 HTTP header 的代码。通过使用 Opentracing ，我们可以去掉这部分代码； 我们还可以通过 Opentracing 以及埋点库（如Jaeger）将方法级的调用信息加入到 Istio 缺省提供的调用链跟踪信息中，以提供更细粒度的调用跟踪信息，方便分析程序调用流程中的故障和性能瓶颈。
 
 除了同步调用之外，异步消息也是微服务架构中常见的一种通信方式。在下一节中，我们将继续利用 eshop demo 程序来探讨如何通过 Opentracing 将 Kafka 异步消息也纳入到 Istio 的分布式追踪中。
 
