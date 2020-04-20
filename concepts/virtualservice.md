@@ -7,7 +7,7 @@ reviewers: [""]
 
 ## 虚拟服务 {#virtual-services}
 
-[虚拟服务（Virtual Service)](/docs/reference/config/networking/virtual-service/#VirtualService) 和[目标规则（Distination rules）](#distination-rules)一样，都是 Istio 流量管理的关键功能模块。一个虚拟服务可以使您的配置请求在Istio服务网格中怎样路由至一个具体的服务，从而构建基础连接以被您的 Istio 和平台发现。每一个虚拟服务包含一系列预置有序路由集合，使 Istio 在网格中匹配每一个至虚拟服务特定真实目标的给定请求。根据使用的具体场景，您的网格需要配置零个或者多个虚拟服务。
+[虚拟服务（Virtual Service)](/docs/reference/config/networking/virtual-service/#VirtualService) 和[目标规则（Distination rules）](#distination-rules)一样，都是 Istio 流量管理的关键功能模块。一个虚拟服务可以使您的配置请求在 Istio 服务网格中怎样路由至一个具体的服务，从而构建基础连接以被您的 Istio 和平台发现。每一个虚拟服务包含一系列预置有序路由集合，使 Istio 在网格中匹配每一个至虚拟服务特定真实目标的给定请求。根据使用的具体场景，您的网格需要配置零个或者多个虚拟服务。
 
 ### 为什么使用虚拟服务
 
