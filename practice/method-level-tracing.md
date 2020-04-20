@@ -52,8 +52,8 @@ private HttpHeaders passTracingHeader(HttpHeaders headers) {
 ```
 在 Kubernetes 中部署该程序，查看 Istio 分布式追踪的效果。
 
-* 首先部署 Kubernetes cluster ，注意需要启用 API Server 的 Webhook 选项
-* 参照本书前面部署安装相关章节在 Kubernetes cluster 中部署 Istio 和 Jaeger，并且启用 default namespace 的 sidecar auto injection 
+* 首先部署 Kubernetes cluster ，注意需要启用 API Server 的 Webhook 选项。
+* 参照本书前面部署安装相关章节在 Kubernetes cluster 中部署 Istio 和 Jaeger，并且启用 default namespace 的 sidecar auto injection。
 * 在 Kubernetes cluster 中部署 eshop 应用。
 
 ```bash
@@ -118,7 +118,7 @@ public Tracer jaegerTracer() {
 > 注意：
 >
 > * Jaeger tracer 缺省使用的是 uber-trace-id header，而 Istio/Envoy 不支持该 header。因此需要指定 Jaeger tracer 使用 b3 header 格式，以和 Istio/Envoy 兼容。
-> * Jaeger tracer 缺省使用64 bit 的 trace id，而 Istio/Envoy 使用了128 bit 的 trace id。因此需要指定 Jaeger tracer 使用128 bit 的 trace id，。和 Istio/Envoy 生成的 trace id 兼容。
+> * Jaeger tracer 缺省使用64 bit 的 trace id，而 Istio/Envoy 使用了128 bit 的 trace id。因此需要指定 Jaeger tracer 使用128 bit 的 trace id，以和 Istio/Envoy 生成的 trace id 兼容。
 
 部署采用 Opentracing 进行 HTTP header 传递的程序版本，其调用跟踪信息如下所示：
 
