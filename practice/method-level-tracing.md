@@ -17,7 +17,7 @@ Istio 为微服务提供了开箱即用的分布式追踪功能。在安装了 I
 
 ![网上商店示例程序](../images/enhance-tracing-eshop-demo.jpg)
 
-eshop 微服务接收来自客户端的请求，然后调用 inventory、billing、delivery 这几个后端微服务的 REST 接口来实现用户购买商品的 checkout 业务逻辑。本例的代码可以从 github 下载： https://github.com/zhaohuabing/istio-opentracing-demo.git
+eshop 微服务接收来自客户端的请求，然后调用 inventory、billing、delivery 这几个后端微服务的 REST 接口来实现用户购买商品的 checkout 业务逻辑。本例的代码可以从 github 下载： https://github.com/servicemesher/istio-handbook-resources.git
 
 如下面的代码所示，我们需要在 eshop 微服务的应用代码中传递 b3 HTTP Header，以将 eshop 微服务进程中的 Span 和其下游微服务的 Span 关联到同一个 Trace 中。
 
@@ -57,8 +57,10 @@ private HttpHeaders passTracingHeader(HttpHeaders headers) {
 * 在 Kubernetes cluster 中部署 eshop 应用。
 
 ```bash
-git clone https://github.com/zhaohuabing/istio-opentracing-demo.git
-cd istio-opentracing-demo
+git clone https://github.com/servicemesher/istio-handbook-resources.git
+cd  cd istio-handbook-resources/code/practice/enhance-tracing/
+git submodule init
+git submodule update
 git checkout without-opentracing
 kubectl apply -f k8s/eshop.yaml
 ```
@@ -217,7 +219,7 @@ Istio 为微服务应用提供了进程级的分布式追踪功能，提高了�
 
 ## 参考资料
 
-* [本文中eshop示例程序的源代码](https://github.com/zhaohuabing/istio-opentracing-demo)
+* [本文中eshop示例程序的源代码](https://github.com/servicemesher/istio-handbook-resources)
 * [Istio Trace context propagation](https://istio.io/docs/tasks/telemetry/distributed-tracing/overview/#trace-context-propagation)
 * [Using OpenTracing with Istio/Envoy](https://medium.com/jaegertracing/using-opentracing-with-istio-envoy-d8a4246bdc15)
 * [Zipkin-b3-propagation](https://github.com/apache/incubator-zipkin-b3-propagation)
