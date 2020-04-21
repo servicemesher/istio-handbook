@@ -22,13 +22,17 @@ Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依
 
 下图展示了这个应用的端到端架构。
 
-![Bookinfo Application without Istio](../images/Bookinfo Application without Istio.png)
+![Bookinfo Application without Istio](../images/Bookinfo-Application-without-Istio.png)
+
+## 环境准备
+
+3.1.1安装 Istio 小节中描述了 Istio 系统的安装，确认 Istio 安装成功之后，在 Istio 目录下的 samples/bookinfo 下可以找到 bookinfo 部署和源码文件，使用kubernete命令就可以实现bookinfo的安装部署。
 
 ## 部署应用
 
 要想该应用接入 Istio 服务网格，无需对应用自身做出任何改变。 您只要在 Istio 环境中对服务所在的命名空间进行yaml配置并重新启动运行就可以完成设置，下文中详细解说了将命名空间打入自动注入 sidecar 的命令和方法。 最终的部署结果将如下图所示： 
 
-![Bookinfo Application](../images/Bookinfo Application.png)
+![Bookinfo Application](../images/Bookinfo-Application.png)
 
 所有的微服务都和 Envoy sidecar 集成在一起，被集成服务所有的出入流量都被 sidecar 所劫持，这样就为外部控制准备了所需的 Hook，然后就可以利用 Istio 控制平面下发对应的 XDS 协议从而使 Envoy Sidecar 为应用提供服务路由、遥测数据收集以及策略实施等功能。 
 
@@ -38,7 +42,7 @@ Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依
 
 - Istio 默认自动注入 Sidecar. 请为 `default` 命名空间打上标签 `istio-injection=enabled`：
 ```bash
-$ kubectl label namespace default istio-   injection=enabled
+$ kubectl label namespace default istio-injection=enabled
 ```
 -  使用 `kubectl` 部署应用：
 
