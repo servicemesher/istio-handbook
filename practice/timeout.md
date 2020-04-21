@@ -184,7 +184,7 @@ productpage v1 --> reviews v2 -（延迟2秒）-> ratings v1
 ```
 
 刷新 Bookinfo 页面，可以明显感到延迟，但是应用是运行正常，正确路由到`reviews v2`（评级和黑色星型符号正常显示）。
-![正确路由到 reviews v2](../images/bookinfo-virtual-service-reviews-v2.png)
+![正确路由到reviewsV2](../images/bookinfo-virtual-service-reviews-v2.png)
 
 使用`curl`检测延迟，可以看到由于`reviews`调用`ratings`存在 2 秒的延迟，导致整个页面的延迟增加了 2 秒：
 ```bash
@@ -195,7 +195,7 @@ time_total:2.048224
 
 现在给对`reviews`服务的调用增加一个 0.5 秒的请求超时：
 ```bash
-kubectl apply -f - <<EOF
+$ kubectl apply -f - <<EOF
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -213,7 +213,7 @@ EOF
 ```
 
 刷新 Bookinfo 页面，这是就可以看到`reviews`已显示不可用：
-![reviews 不可用](../images/bookinfo-virtual-service-reviews-timeout.png)
+![reviews不可用](../images/bookinfo-virtual-service-reviews-timeout.png)
 
 目前服务的调用关系：
 ```bash
