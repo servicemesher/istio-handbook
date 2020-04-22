@@ -1,11 +1,11 @@
 ---
 authors: ["wangfakang"]
-reviewers: ["King Ye"]
+reviewers: ["ikingye"]
 ---
 
-## MOSN 简介
+# MOSN
 
-MOSN（Modular Open Smart Network-proxy）是一款使用 Go 语言开发的网络代理软件，作为云原生的网络数据平面，旨在为服务提供多协议、模块化、智能化、安全的代理能力。MOSN 可以与任何支持 xDS API 的 Service Mesh 集成，另外也可以作为独立的四/七层负载均衡器、API Gateway、云原生 Ingress 等场景下使用。
+MOSN（Modular Open Smart Network-proxy）是一款蚂蚁金服开源的使用 Go 语言开发的网络代理软件，作为云原生的网络数据平面，旨在为服务提供多协议、模块化、智能化、安全的代理能力。MOSN 可以与任何支持 xDS API 的 Service Mesh 集成（如 Istio），另外也可以作为独立的四/七层负载均衡器、API Gateway、云原生 Ingress 等场景下使用。
 
 ## 框架介绍
 
@@ -19,8 +19,8 @@ MOSN（Modular Open Smart Network-proxy）是一款使用 Go 语言开发的网�
 
 其中：
 
-* Starter, Server, Listener, Config 为 MOSN 启动模块，用于完成 MOSN 的运行
-* 最左侧的 Hardware, NET/IO, Protocol, Stream, Proxy, xDS 为 MOSN 架构的核心模块，用来实现 Service Mesh 的核心功能
+* Starter、Server、Listener、Config 为 MOSN 启动模块，用于完成 MOSN 的运行
+* 最左侧的 Hardware、NET/IO、Protocol、Stream、Proxy、xDS 为 MOSN 架构的核心模块，用来实现 Service Mesh 的核心功能
 * Router 为 MOSN 的路由模块，支持的功能包括：
   * VirtualHost 形式的路由功能
   * 基于 Subset 的子集群路由匹配
@@ -34,10 +34,10 @@ MOSN（Modular Open Smart Network-proxy）是一款使用 Go 语言开发的网�
 * Metrics 模块可对协议层的数据做记录和追踪
   * Metrics 当前统计了网络读写流量、请求状态、连接数等元数据
   * Trace 框架集成 SkyWalking 组件，可方便的观察请求的链路 
-* LoadBalance 是负载均衡管理模块，当前支持 RR, Random, Subset LB, Original_Dst 等负载均衡算法
+* LoadBalance 是负载均衡管理模块，当前支持 RR、Random、Subset LB、Original_Dst 等负载均衡算法
 * Mixer 模块用来适配外部的服务，如鉴权、资源信息上报等
 * FlowControl 模块是流量控制模块，当前集成了 Sentinel SDK 可用来做限流保护
-* Lab 模块是用来集成 IOT, DB, Media 等 Mesh 服务
+* Lab 模块是用来集成 IOT、DB、Media 等 Mesh 服务
 * Admin 模块是 MOSN 的资源控制器，用来查看和管理其运行状态及资源信息
 
 ### 架构解析
@@ -50,7 +50,7 @@ MOSN 延续 OSI（Open Systems Interconnection）的分层思想，将其系统�
 
 * NET/IO 作为网络层，监测连接和数据包的到来，同时作为 listener filter 和 network filter 的挂载点
 * Protocol 作为多协议引擎层，对数据包进行检测，并使用对应协议做 decode/encode 处理
-* Stream 对 decode 的数据包做二次封装为 stream ，作为 stream filter的挂载点
+* Stream 对 decode 的数据包做二次封装为 stream，作为 stream filter的挂载点
 * Proxy 作为 MOSN 的转发框架，对封装的 stream 做 proxy 处理
 
 MOSN 整体框架采用分治的架构思想，每一层通过工厂设计模式向外暴露其接口，方便用户灵活地注册自身的需求。通过协程池的方式使得用户以同步的编码风格实现异步功能特性。通过区分协程类型，MOSN 实现了 read 和 proxy worker 两大类协程，read 协程主要是处理网络的读取及协议解析，proxy worker 协程用来完成读取后数据的加工、路由、转发等。其架构如下图所示：
