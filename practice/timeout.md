@@ -32,100 +32,11 @@ productpage v1 -（设置超时）-> reviews v2 -（注入延迟）-> ratings v1
 $ kubectl apply -f samples/bookinfo/networking/destination-rule-all.yaml
 ```
 
-用 kubectl 命令查看配置：
-```bash
-$ kubectl get destinationrules -o yaml
-apiVersion: v1
-items:
-- apiVersion: networking.istio.io/v1beta1
-  kind: DestinationRule
-  metadata:
-    ......
-    name: productpage
-    namespace: default
-    ......
-  spec:
-    host: productpage
-    subsets:
-    - labels:
-        version: v1
-      name: v1
-- apiVersion: networking.istio.io/v1beta1
-  kind: DestinationRule
-  metadata:
-    ......
-    name: reviews
-    namespace: default
-    ......
-  spec:
-    host: reviews
-    subsets:
-    - labels:
-        version: v1
-      name: v1
-    - labels:
-        version: v2
-      name: v2
-    - labels:
-        version: v3
-      name: v3
-- apiVersion: networking.istio.io/v1beta1
-  kind: DestinationRule
-  metadata:
-    ......
-    name: ratings
-    namespace: default
-    ......
-  spec:
-    host: ratings
-    subsets:
-    - labels:
-        version: v1
-      name: v1
-    - labels:
-        version: v2
-      name: v2
-    - labels:
-        version: v2-mysql
-      name: v2-mysql
-    - labels:
-        version: v2-mysql-vm
-      name: v2-mysql-vm
-- apiVersion: networking.istio.io/v1beta1
-  kind: DestinationRule
-  metadata:
-    ......
-    name: details
-    namespace: default
-    ......
-  spec:
-    host: details
-    subsets:
-    - labels:
-        version: v1
-      name: v1
-    - labels:
-        version: v2
-      name: v2
-kind: List
-......
-```
-
 **初始化版本路由**
 
 ```bash
-kubectl apply -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+$ kubectl apply -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
-
-初始化路由后的调用关系：
-```
-productpage v1 --> reviews v1
-               \
-                -> details v1
-```
-在浏览器中打开 Bookinfo 的网址`http://$GATEWAY_URL/productpage`，在这里`reviews`服务的 v1 版本并没有调用`ratings`服务，所以这里页面效果是这样的：
-
-![初始化版本路由页面](../images/bookinfo-virtual-service-all-v1.png)
 
 **设置虚拟服务**
 
@@ -183,8 +94,8 @@ productpage v1 --> reviews v2 -（延迟2秒）-> ratings v1
                 -> details v1
 ```
 
-刷新 Bookinfo 页面，可以明显感到延迟，但是应用是运行正常，正确路由到`reviews v2`（评级和黑色星型符号正常显示）。
-![正确路由到reviewsV2](../images/bookinfo-virtual-service-reviews-v2.png)
+在浏览器中打开 Bookinfo 的网址`http://$GATEWAY_URL/productpage`，可以明显感到延迟，但是应用是运行正常。
+![访问页面](../images/bookinfo-virtual-service-reviews-v2.png)
 
 使用`curl`检测延迟，可以看到由于`reviews`调用`ratings`存在 2 秒的延迟，导致整个页面的延迟增加了 2 秒：
 ```bash
@@ -213,7 +124,7 @@ EOF
 ```
 
 刷新 Bookinfo 页面，这是就可以看到`reviews`已显示不可用：
-![reviews不可用](../images/bookinfo-virtual-service-reviews-timeout.png)
+![页面显示不可用信息](../images/bookinfo-virtual-service-reviews-timeout.png)
 
 目前服务的调用关系：
 ```bash
