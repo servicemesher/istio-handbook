@@ -137,10 +137,11 @@ kubectl apply -f k8s/eshop.yaml
 
 要分析导致该问题的原因，我们首先需要了解 [“Active Span”](https://opentracing.io/docs/overview/scopes-and-threading/) 的概念。在 Opentracing 中，一个线程可以有一个 Active Span，该 Active Span 代表了目前该线程正在执行的工作。在调用 Tracer.buildSpan() 方法创建新的 Span 时，如果 Tracer 目前存在一个 Active Span，则会将该 Active Span 缺省作为新创建的 Span 的 Parent Span。
 
-Tracer.buildSpan 方法的说明如下：
+Tracer.buildSpan 方法的 Javadoc 说明如下：
 
 ```
 Tracer.SpanBuilder buildSpan(String operationName)
+
 Return a new SpanBuilder for a Span with the given `operationName`.
 You can override the operationName later via BaseSpan.setOperationName(String).
 
@@ -149,7 +150,7 @@ A contrived example:
 
    Tracer tracer = ...
 
-   // 如果存在 active span，则其创建的新 Span 会隐式地创建一个 CHILD_OF 引用到该 active span
+  // 如果存在 active span，则其创建的新 Span 会隐式地创建一个 CHILD_OF 引用到该 active span
    try (ActiveSpan workSpan = tracer.buildSpan("DoWork").startActive()) {
        workSpan.setTag("...", "...");
        // etc, etc
