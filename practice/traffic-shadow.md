@@ -175,7 +175,7 @@ $ kubectl logs service-business-v2-5879797985-xlpt5  -c service-business --tail 
 
 很多情况下，我们需要将生产坏境的流量镜像到测试坏境中一份进行测试，它的场景模型如下图所示：
 
-![场景模型：一个集群中不同版本服务间流量镜像](../images/shadow-in-two-mesh.png)基于场景一中的配置结果，首先我们登录到测试坏境的集群里，使用下面的命令在测试坏境创建镜像服务`service-business-v2`。
+![场景模型：将一个集群的流量镜像到另外一个集群当中](../images/shadow-in-two-mesh.png)基于场景一中的配置，首先我们登录到测试坏境的集群里，使用下面的命令在测试坏境创建镜像服务`service-business-v2`。
 
 ```shell
 $ kubectl apply -f deploy/service-business-v2-in-other-cluster-all-deploy.yaml
