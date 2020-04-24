@@ -130,4 +130,4 @@ prometheus-6c88c4cb8-xchzd              2/2     Running   0          4m24s
 ## 参考
 
 - [使用 Minikube 安装 Kubernetes - kubernetes.io](https://kubernetes.io/zh/docs/setup/learning-environment/minikube/)
-- [开始 - istio.io](https://istio.io/zh/docs/setup/getting-started/#download)
+- [开始 - istio.io](https://istio.io/zh/docs/setup/getting-started/)
