@@ -1,10 +1,13 @@
+```
+---
 authors: ["linda01232003"]
-
-reviewers: ["rootsongjc "]
+reviewers: ["rootsongjc"]
+---
+```
 
 # Bookinfo示例
 
-Bookinfo是Istio社区官方推荐的示例应用之一。它可以用来演示多种Istio的特性，并且它是异构的微服务架构。该应用由四个单独的微服务构成。 这个应用模仿了在线书店，可以展示书店中书籍的信息。例如页面上会显示一本书的描述，书籍的细节（ISBN、页数等），以及关于这本书的一些评论。 
+Bookinfo 是 Istio 社区官方推荐的示例应用之一。它可以用来演示多种 Istio 的特性，并且它是异构的微服务架构。该应用由四个单独的微服务构成。 这个应用模仿了在线书店，可以展示书店中书籍的信息。例如页面上会显示一本书的描述，书籍的细节（ ISBN、页数等），以及关于这本书的一些评论。 
 
 Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依赖，但是构成了一个有代表性的服务网格的例子：它由多个服务、多个语言构成，并且其中有一个应用会包含多个版本。 
 
@@ -26,11 +29,11 @@ Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依
 
 ## 环境准备
 
-3.1.1安装 Istio 小节中描述了 Istio 系统的安装，确认 Istio 安装成功之后，在 Istio 目录下的 samples/bookinfo 下可以找到 bookinfo 部署和源码文件，使用kubernete命令就可以实现bookinfo的安装部署。
+3.1.1安装 Istio 小节中描述了 Istio 系统的安装，确认 Istio 安装成功之后，在 Istio 目录下的 samples/bookinfo 下可以找到 bookinfo 部署和源码文件，使用 kubernete 命令就可以实现 bookinfo 的安装部署。
 
 ## 部署应用
 
-要想该应用接入 Istio 服务网格，无需对应用自身做出任何改变。 您只要在 Istio 环境中对服务所在的命名空间进行yaml配置并重新启动运行就可以完成设置，下文中详细解说了将命名空间打入自动注入 sidecar 的命令和方法。 最终的部署结果将如下图所示： 
+要想该应用接入 Istio 服务网格，无需对应用自身做出任何改变。 您只要在 Istio 环境中对服务所在的命名空间进行 yaml 配置并重新启动运行就可以完成设置，下文中详细解说了将命名空间打入自动注入 sidecar 的命令和方法。 最终的部署结果将如下图所示： 
 
 ![Bookinfo Application](../images/Bookinfo-Application.png)
 
@@ -45,7 +48,6 @@ Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依
 $ kubectl label namespace default istio-injection=enabled
 ```
 -  使用 `kubectl` 部署应用：
-
 ```bash
 $ kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
 ```
@@ -58,7 +60,6 @@ $ kubectl apply -f <(istioctl kube-inject -f samples/bookinfo/platform/kube/book
 在实际部署中，微服务版本的启动过程需要持续一段时间，并不是同时完成的，上面的命令会启动全部的四个服务，其中也包括了 reviews 服务的三个版本（v1、v2 以及 v3）。
 
 -  确认所有的服务和 Pod 都已经正确的定义和启动：
-
 ```bash
 $ kubectl get services
    NAME                       CLUSTER-IP   EXTERNAL-IP   PORT(S)              AGE
@@ -68,7 +69,6 @@ $ kubectl get services
    ratings                    10.0.0.15    <none>        9080/TCP             6m
    reviews                    10.0.0.170   <none>        9080/TCP             6m
 ```
-
 ```bash
 $ kubectl get pods
    NAME                                        READY     STATUS    RESTARTS   AGE
@@ -81,7 +81,6 @@ $ kubectl get pods
 ```
 
 - 要确认 Bookinfo 应用是否正在运行，请在某个 Pod 中用 `curl` 命令对应用发送请求，例如 `ratings`：
-
 ```bash
 $ kubectl exec -it $(kubectl get pod -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
    <title>Simple Bookstore App</title>
@@ -92,13 +91,11 @@ $ kubectl exec -it $(kubectl get pod -l app=ratings -o jsonpath='{.items[0].meta
 现在 Bookinfo 服务启动并运行中，您需要使应用程序可以从外部访问 Kubernetes 集群，可以使用浏览器通过访问 Istio Gateway 来访问应用，通过以下操作步骤来实现。
 
 - 为应用程序定义 Ingress 网关：
-
 ```bash
 $ kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
 ```
 
 - 确认网关创建完成：
-
 ```bash
 $ kubectl get gateway
    NAME               AGE
@@ -113,7 +110,6 @@ $ export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingress
 ```
 
 - 设置 `GATEWAY_URL`：
-
 ```bash
 $ export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
 ```
@@ -123,26 +119,23 @@ $ export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
 
 ## 应用默认目标规则
 
-在使用 Istio 控制 Bookinfo 版本路由之前，您需要在目标规则中定义好可用的版本，命名为 *subsets* 。
+在使用 Istio 控制 Bookinfo 版本路由之前，您需要在目标规则中定义好可用的版本，命名为 subsets 。
 
 运行以下命令为 Bookinfo 服务创建的默认的目标规则：
 
 - 如果没有启用双向 TLS，请执行以下命令：
 
   如果您是 Istio 的新手，并且使用了 demo，请选择此步。
-
 ```bash
 $ kubectl apply -f samples/bookinfo/networking/destination-rule-all.yaml
 ```
 
 - 如果启用了双向 TLS，请执行以下命令：
-
 ```bash
 $ kubectl apply -f samples/bookinfo/networking/destination-rule-all-mtls.yaml
 ```
 等待几秒钟，以使目标规则生效。
 您可以使用以下命令查看目标规则：
-
 ```bash
 $ kubectl get destinationrules -o yaml
 ```
@@ -156,13 +149,11 @@ $ kubectl get destinationrules -o yaml
 结束对 Bookinfo 示例应用的体验之后，就可以使用下面的命令来完成应用的删除和清理了：
 
 - 删除路由规则，并销毁应用的 Pod
-
 ```bash
 $ samples/bookinfo/platform/kube/cleanup.sh
 ```
 
 - 确认应用已经关停
-
 ```bash
    $ kubectl get virtualservices   #-- there should be no virtual services
    $ kubectl get destinationrules  #-- there should be no destination rules
