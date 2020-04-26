@@ -26,7 +26,7 @@ reviewers: [""]
 
 因其独特的部署结构，使得 sidecar 模式具有以下优势：
 
-- 将与应用业务逻辑无关的功能抽象到共同基础设施降低了微服务代码的复杂度。
+- 将与应用业务逻辑无关的功能抽象到共同基础设施，降低了微服务代码的复杂度。
 - 因为不再需要编写相同的第三方组件配置文件和代码，所以能够降低微服务架构中的代码重复度。
 - Sidecar 可独立升级，降低应用程序代码和底层平台的耦合度。
 
@@ -51,7 +51,7 @@ istioctl kube-inject -f ${YAML_FILE} | kuebectl apply -f -
 
 该命令会使用 Istio 内置的 sidecar 配置来注入，下面使用 Istio详细配置请参考 [Istio 官网](https://istio.io/docs/setup/additional-setup/sidecar-injection/#manual-sidecar-injection)。
 
-注入完成后您将看到 Istio 为原有 pod template 注入了以下配置 `initContainer` 及 sidecar proxy。
+注入完成后您将看到 Istio 为原有 pod template 注入了 `initContainer` 及 sidecar proxy相关的配置。
 
 ### Init 容器
 
@@ -376,7 +376,7 @@ Inbound handler 的作用是将 iptables 拦截到的 downstream 的流量转交
 
 ```ini
 ADDRESS            PORT      TYPE
-172.17.0.15        9080      HTTP <--- 接收所有 Inbound HTTP 流量，该地址即为当前 Pod 的 IP 地址
+172.17.0.15        9080      HTTP <--- 接收所有 Inbound HTTP 流量，该地址即为业务进程的真实监听地址
 172.17.0.15        15020     TCP <--- Ingress Gateway，Pilot 健康检查
 10.109.20.166      15012     TCP <--- Istiod http dns
 10.103.34.135      14250     TCP <--+
@@ -411,8 +411,8 @@ ADDRESS            PORT      TYPE
 0.0.0.0            9080      TCP    |
 0.0.0.0            9090      TCP    |
 0.0.0.0            9411      TCP <--+
-0.0.0.0            15001     TCP <--- 接收所有经 iptables 拦截的 Inbound 流量并转交给虚拟监听器处理
-0.0.0.0            15006     TCP <--- 接收所有经 iptables 拦截的 Outbound 流量并转交给虚拟监听器处理
+0.0.0.0            15001     TCP <--- 接收所有经 iptables 拦截的 Outbound 流量并转交给虚拟监听器处理
+0.0.0.0            15006     TCP <--- 接收所有经 iptables 拦截的 Inbound 流量并转交给虚拟监听器处理
 ```
 
 当来自 `productpage` 的流量抵达 `reviews`  Pod 的时候，downstream 已经明确知道 Pod 的 IP 地址为 `172.17.0.16` 所以才会访问该 Pod，所以该请求是 `172.17.0.15:9080`。
