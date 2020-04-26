@@ -199,7 +199,7 @@ virtualservice.networking.istio.io/service-shadow   [istio-system/ingressgateway
 ```shell
 $ export TEST_GATEWAY_URL=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 
-$ curl http://${TEST_GATEWAY_URL}/service-shadow/actuator/info
+$ curl http://${TEST_GATEWAY_URL}/service-business/actuator/info
 {"app":{"name":"service-business","version":"1.0.0.0"}}
 ```
 
