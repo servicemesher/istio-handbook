@@ -21,6 +21,7 @@
   - [数据平面](concepts/data-plane.md)
     - [Envoy](concepts/envoy.md)
     - [MOSN](concepts/mosn.md)
+    - [Sidecar 注入及透明流量劫持](concepts/sidecar-injection.md)
 - [核心功能](concepts/core-features.md)
   - [流量控制](concepts/traffic-control.md)
     - [路由](concepts/route.md)
