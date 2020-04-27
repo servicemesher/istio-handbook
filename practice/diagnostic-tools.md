@@ -7,11 +7,11 @@ reviewers: [""]
 
 “工欲善其事，必先利其器。” —— 这句话出自《论语》，常常被用于比喻想要做好一件事，首先应该把准备工作做充分，例如工具就非常重要。对于 Istio 而言同样如此，为了提高用户在网格使用过程中用户体验和问题排查效率，社区在文档方面的投入有目共睹，从概念介绍、安装指引、入门任务、应用示例、问题排查以及操作运维等方面做得面面俱到，在开源项目中可以堪称典范。
 
-尤其在网格的问题诊断方面，除了在文档方面提供帮助之外，最重要的是提供了配套的辅助诊断工具，本章节将重点介绍如何使用 istioctl 和 ControlZ 这两个工具来对网格进行问题的诊断分析；
+尤其在网格的问题诊断方面，除了在文档方面提供帮助之外，最重要的是提供了配套的辅助诊断工具，本章节将重点介绍如何使用 istioctl 和 ControlZ 这两个工具来对网格进行问题的诊断分析。
 
 ## istioctl 命令行工具
 
-istioctl 是官方提供的一个基于命令行的辅助工具，它的版本更新发布与 Istio 版本是绑定的，因为截至目前为止 istioctl 的源码和 Istio 共用一个 git 仓库，作为 Istio 的一个组成部分，只是在发布时考虑用户的分发便捷性独立拆分出了一个二进制文件；从官方对于 istioctl 的定位来看，它并不只是局限于问题诊断方面，同时也涵盖运维相关的职责，例如手工注入sidecar、把服务加入/移除网格、升级网格控制面、管理网格多集群等等，不过下文将侧重介绍下 istioctl 工具在诊断问题方面的相关使用；
+istioctl 是官方提供的一个基于命令行的辅助工具，它的版本更新发布与 Istio 版本是绑定的，因为截至目前为止 istioctl 的源码和 Istio 共用一个 git 仓库，作为 Istio 的一个组成部分，只是在发布时考虑用户的分发便捷性独立拆分出了一个二进制文件。从官方对于 istioctl 的定位来看，它并不只是局限于问题诊断方面，同时也涵盖运维相关的职责，例如手工注入sidecar、把服务加入/移除网格、升级网格控制面、管理网格多集群等等，不过下文将侧重介绍下 istioctl 工具在诊断问题方面的相关使用。
 
 ### 安装 istioctl 工具
 
@@ -31,7 +31,7 @@ $ export PATH=$PATH:$HOME/.istioctl/bin
 
 如过你使用的是 bash 或者是 ZSH，还可以参考官方的 [配置自动补全教程](https://istio.io/docs/ops/diagnostic-tools/istioctl/#enabling-auto-completion) 来为 istioctl 工具添加自动补全命令的能力以提升后续的使用体验，这个配置是可选的。
 
-安装完成之后，直接执行 istioctl 即可看到所有支持的子命令以及相关的介绍如下：
+安装完成之后，直接执行 istioctl 即可看到所有支持子命令的相关介绍如下：
 
 ```bash
 $ istioctl
@@ -63,7 +63,7 @@ Available Commands:
   version         Prints out build version information
 ```
 
-如上所示，istioctl 工具的介绍里写明这是一个为服务操作人员提供的基于命令行的程序，用于调试和诊断 Istio 服务网格的。每个命令都有对应的介绍说明能够看出它基本作用，如果希望详细了解下具体某个命令的用法，可以通过执行 `istioctl [command] -h` 来查看详细介绍，大部分命令都提供了参数说明和使用示例，上手非常容易。
+如上所示，istioctl 工具的介绍里写明这是一个为服务操作人员提供的基于命令行的程序，用于调试和诊断 Istio 服务网格的。每个命令都可以通过对应的介绍说明看出它的基本作用，如果希望详细了解下具体某个命令的用法，可以通过执行 `istioctl [command] -h` 来查看详细介绍，大部分命令都提供了参数说明和使用示例，上手非常容易。
 
 支持的命令里，manifest 、kube-inject、operator、profile、register、deregister、upgrade 等主要侧重于安装运维等，本书其它章节另有讲解，此章不做深入展开介绍，有兴趣的读者可参阅相应章节或者直接查看命令使用帮助，下文将重点讲解与网格问题诊断相关的命令。
 
@@ -167,21 +167,21 @@ reviews-v2-575b55477f-m5wrs.default                    SYNCED     SYNCED     SYN
 reviews-v3-6584c5887c-fl59f.default                    SYNCED     SYNCED     SYNCED     SYNCED       istiod-585f4dbb79-xlxpk     1.5.1
 ```
 
-从输出结果看，主要包含了两部分信息，分别是 xds 配置对应不同类型的同步状态，包含 CDS、LDS、EDS、RDS ，另外部分是 pod 所连接的控制面信息，包括 istiod 对应的 pod 名称和版本信息；
+从输出结果看，主要包含了两部分信息，分别是 xds 配置对应不同类型的同步状态，包含 CDS、LDS、EDS、RDS ，另外部分是 pod 所连接的控制面信息，包括 istiod 对应的 pod 名称和版本信息。
 
 针对 xds 的不同类型配置对应在 pod 维度都有一个独立的同步状态，定义如下：
 
-**SYNCED**：正常状态，表明最后一次配置同步操作已经从 istiod 下发到了 envoy，并且收到了正确应答；
+**SYNCED**：正常状态，表明最后一次配置同步操作已经从 istiod 下发到了 envoy，并且收到了正确应答。
 
-**NOT SENT**：表示 istiod 还没有发送任何配置给 envoy，这往往是因为没有配置可以下发，例如上述示例列表中的 istio-egressgateway 这个 pod，因为默认我们没有配置任何外部服务，所以 EDS 的配置是空的，对应的配置状态就是 NOT SENT；
+**NOT SENT**：表示 istiod 还没有发送任何配置给 envoy，这往往是因为没有配置可以下发，例如上述示例列表中的 istio-egressgateway 这个 pod，因为默认我们没有配置任何外部服务，所以 EDS 的配置是空的，对应的配置状态就是 NOT SENT。
 
 **STALE**：异常状态，它表示 istiod 已经发送了一个配置更新请求给 envoy，但是并没有收到任何的应答，这种情况往往是由于 envoy 和 istiod 之间的网络原因或者是 istio 本身存在的 bug 导致的。
 
-从内部实现上来，`istioctl ps` 获取配置的同步状态信息是依赖于 istiod 控制面实现的，如果你没有在结果列表中找到某个特定 pod，那说明它还没有正常连接至 istiod 控制面，或者是可能根本就没有被注入 sidecar，需要检查下 pod 的 sidecar 注入状态，比如通过 `kubectl get pod -n <namespace> ` 来查看 pod 数量，或者是通过 `kubectl describe pod <pod-name>` 查看 Containers 信息里有没有 istio-proxy，也有更加直接的 describe 命令可以用来直接检查 pod 是否已加入网格，下文另有介绍；
+从内部实现上来，`istioctl ps` 获取配置的同步状态信息是依赖于 istiod 控制面实现的，如果你没有在结果列表中找到某个特定 pod，那说明它还没有正常连接至 istiod 控制面，或者是可能根本就没有被注入 sidecar，需要检查下 pod 的 sidecar 注入状态，比如通过 `kubectl get pod -n <namespace> ` 来查看 pod 数量，或者是通过 `kubectl describe pod <pod-name>` 查看 Containers 信息里有没有 istio-proxy，也有更加直接的 describe 命令可以用来直接检查 pod 是否已加入网格，下文另有介绍。
 
 #### 检查 Envoy 和 istiod 之间的配置差异
 
-默认情况下，ps 后面如果不带参数显示的是整个集群内已经 注入sidecar 的 pod 配置状态，并且显示的是比较简要的同步信息；如果想详细检查某个 pod 对应数据面和控制面之间的配置详细差异内容，可以通过 `istioctl ps <pod-name>` 来检查 pod 里的详细的配置差异，如果配置都同步成功，应该是如下结果：
+默认情况下，ps 后面如果不带参数显示的是整个集群内已经注入 sidecar 的 pod 配置状态，并且显示的是比较简要的同步信息。如果想详细检查某个 pod 对应数据面和控制面之间的配置详细差异内容，可以通过 `istioctl ps <pod-name>` 来检查 pod 里的详细的配置差异，如果配置都同步成功，应该是如下结果：
 
 ```bash
 $ istioctl ps productpage-v1-77d9f9fcdf-psv2z.default
@@ -214,13 +214,13 @@ Routes Don't Match (RDS last loaded at Tue, 21 Apr 2020 18:18:42 CST)
  }
 ```
 
-上述显示了 `productpage` 这个服务对应 pod 中的 envoy 配置和 istiod 的配置 Clusters 信息是一致的，但是 Listeners 和 Routes 信息存在差异，并显示了内容的差异项，需要留意的是，istio 1.5.0 版本中在对比配置时，会把配置项排列顺序不一致也当成是差异，导致在执行 `istioctl ps <pod-name>` 命令时会给出很多不一致差异内容误报，该问题已经在 1.5.1 版本中修复；
+上述显示了 `productpage` 这个服务对应 pod 中的 envoy 配置和 istiod 的配置 Clusters 信息是一致的，但是 Listeners 和 Routes 信息存在差异，并显示了内容的差异项，需要留意的是，istio 1.5.0 版本中在对比配置时，会把配置项排列顺序不一致也当成是差异，导致在执行 `istioctl ps <pod-name>` 命令时会给出很多不一致差异内容误报，该问题已经在 1.5.1 版本中修复。
 
 配置的正常同步下发是 istio 后续流量管理控制的基础，也是比较容易发现的问题，需要优先解决处理。如果发现集群内的配置同步存在问题，需要检查控制面和数据面的网络是否存在不稳定，或者是两者版本信息不一致等。
 
 ### 使用 proxy-config 命令检查配置详情
 
-上节中我们介绍了 proxy-status 命令，在排查 istiod 和 envoy 之间的配置是否同步问题上为我们提供了帮助；但在实际的使用过程中，大部分问题往往并不是由于同步问题导致的，而是由于配置错误引发的，如果想要详细诊断 Istio 的配置详情，就需要介绍另一个配置相关命令，那就是 proxy-config ,  与 proxy-status 类似，它也有对应的缩写，区别是 proxy-config 提供了子命令，可以指定具体的配置类型进行查看，我们直接运行查看使用说明：
+上节中我们介绍了 proxy-status 命令，在排查 istiod 和 envoy 之间的配置是否同步问题上为我们提供了帮助。但在实际的使用过程中，大部分问题往往并不是由于同步问题导致的，而是由于配置错误引发的，如果想要详细诊断 Istio 的配置详情，就需要介绍另一个配置相关命令，那就是 proxy-config ,  与 proxy-status 类似，它也有对应的缩写，区别是 proxy-config 提供了子命令，可以指定具体的配置类型进行查看，我们直接运行查看使用说明：
 
 ```bash
 $ istioctl pc -h
@@ -259,7 +259,7 @@ Global Flags:
 Use "istioctl proxy-config [command] --help" for more information about a command.
 ```
 
-proxy-config 的子命令支持了基本上 envoy 所涉及的所有配置类型，除了 xds 之外，甚至连日志的配置级别都能够查询，不过目前仍然是一个实验性的功能；proxy-config 在结果的输出上，除了支持默认的 short 类型之外，还支持 json 格式的内容展示，前者只是简单的将结果进行筛选并通过列表的形式进行输出，在视图上更加友好，但是相对来说输出内容有限，可能会有一些关键配置信息遗漏；json 格式则是一个全面的配置结果展示，在诊断问题的时候，比较推荐使用 json 格式输出进行查看；
+proxy-config 的子命令支持了基本上 envoy 所涉及的所有配置类型，除了 xds 之外，甚至连日志的配置级别都能够查询，不过目前仍然是一个实验性的功能。proxy-config 在结果的输出上，除了支持默认的 short 类型之外，还支持 json 格式的内容展示，前者只是简单的将结果进行筛选并通过列表的形式进行输出，在视图上更加友好，但是相对来说输出内容有限，可能会有一些关键配置信息遗漏。json 格式则是一个全面的配置结果展示，在诊断问题的时候，比较推荐使用 json 格式输出进行查看。
 
 #### 查看指定 pod 的网格配置详情
 
@@ -319,7 +319,7 @@ $ istioctl pc cluster productpage-v1-77d9f9fcdf-psv2z.default -o json
     # 此处省去大量类似的配置
 ```
 
-json 格式输出的配置信息基本上是 envoy 原生的配置格式定义，相比 short 类型的格式，json 里还能展示到更加细节的配置内容，比如上述结果里的连接超时配置、负载均衡策略、熔断参数配置等等；
+json 格式输出的配置信息基本上是 envoy 原生的配置格式定义，相比 short 类型的格式，json 里还能展示到更加细节的配置内容，比如上述结果里的连接超时配置、负载均衡策略、熔断参数配置等等。
 
 #### 通过过滤条件快速定位配置内容
 
@@ -365,13 +365,13 @@ $ istioctl pc cluster productpage-v1-77d9f9fcdf-psv2z.default --port 9080 --dire
 ]
 ```
 
-通过添加特定条件的对配置进行过滤，能够非常精确的输出我们想要的具体某块配置，方便我们进行问题的诊断和定位，比如检查下endpoint信息是否正确、服务治理配置是否存在问题等等；
+通过添加特定条件的对配置进行过滤，能够非常精确的输出我们想要的具体某块配置，方便我们进行问题的诊断和定位，比如检查下 endpoint 信息是否正确、服务治理配置是否存在问题等等。
 
 ### 使用 analyze 命令诊断网格配置
 
-上文中介绍了 proxy-status 和 proxy-config 两个配置相关的命令，通过它们可以很方便得检查网格内的配置同步状态，并且能够快速获取特定某个 pod 内对应 envoy 上用户关心的某块配置，极大提高了在配置检查方面的效率；如果说这两个命令足以满足用户日常的配置诊断场景的话，那接下来要介绍的同样集成在 istioctl 工具里的可以算的上是另外一个诊断利器，那就是 analyze 命令；
+上文中介绍了 proxy-status 和 proxy-config 两个配置相关的命令，通过它们可以很方便得检查网格内的配置同步状态，并且能够快速获取特定某个 pod 内对应 envoy 上用户关心的某块配置，极大提高了在配置检查方面的效率。如果说这两个命令足以满足用户日常的配置诊断场景的话，那接下来要介绍的同样集成在 istioctl 工具里的可以算的上是另外一个诊断利器，那就是 analyze 命令。
 
-istioctl analyze 是一个专用于分析和定位问题的命令，可以理解成这是一个基于配置的更加上层的诊断工具，帮助用户发现网格内存在的潜在问题，该命令可以针对一个正在运行的集群，或者是一堆本地配置文件，甚至还可以针对多个文件和在线集群组合进行分析，以帮助用户在配置被应用到集群之前进行分析检查，从而预防一些潜在的配置问题；
+istioctl analyze 是一个专用于分析和定位问题的命令，可以理解成这是一个基于配置的更加上层的诊断工具，帮助用户发现网格内存在的潜在问题，该命令可以针对一个正在运行的集群，或者是一堆本地配置文件，甚至还可以针对多个文件和在线集群组合进行分析，以帮助用户在配置被应用到集群之前进行分析检查，从而预防一些潜在的配置问题。
 
 通过自带的帮助参数来查看命令的使用方式：
 
@@ -454,16 +454,16 @@ Warn [IST0102](Namespace default) The namespace is not enabled for Istio injecti
 错误的名称为 `IstioProxyImageMismatch` ，代表 Istio 的某个 pod 数据面 Proxy 镜像与控制面的定义不一致，这个问题的级别是告警，而且这个错误可能会在以下的情况下被触发：
 
 - 启用了 sidecar 自动注入功能
-- pod 在启用了 sidecar 注入的命名空间中运行（命名空间带有标签 `istio-injection=enabled`）
-- sidecar 上运行的代理版本与自动注入使用的版本不匹
+- pod 在启用了 sidecar 注入的命名空间中运行（命名空间带有标签 `istio-injection=enabled`）。
+- sidecar 上运行的代理版本与自动注入使用的版本不匹。
 
-文档中还指出这个问题往往发生在升级 Istio 控制平面后，但是 pod 没有被重建；升级 Istio（包括 sidecar 注入）后，用户必须重新创建 Istio sidecar 的所有正在运行的工作负载，以允许注入新版本的 sidecar。
+文档中还指出这个问题往往发生在升级 Istio 控制平面后，但是 pod 没有被重建。升级 Istio（包括 sidecar 注入）后，用户必须重新创建 Istio sidecar 的所有正在运行的工作负载，以允许注入新版本的 sidecar。
 
 并且给出了相关的问题解决思路：
 
 通过使用常规的部署策略重新部署应用来更新 sidecar 版本是最简单的方式。对于 Kubernetes deployment：
 
-- 如果您使用的是 Kubernetes 1.15 或更高版本，则可以运行 `kubectl rollout restart ` 来重新部署。
+- 如果您使用的是 Kubernetes 1.15 或更高版本，则可以运行 `kubectl rollout restart` 来重新部署。
 - 或者，您可以修改 deployment 的 `template` 字段来强制进行新的部署。通常是通过在 pod 模板定义中添加一个类似 `force-redeploy=` 的标签来完成的。
 
 通过上文可以看到，analyze 分析命令不只是提出问题，甚至把问题出现的可能原因，以及如何解决这个问题都做了详细的说明，哪怕是对于一个 Istio 新用户而言，使用好工具并配合文档，足以能够解决大部分可被识别出来的问题，这正是 Istio 文档和工具方面做得令人佩服的方面。
@@ -482,7 +482,7 @@ $ istioctl analyze a.yaml b.yaml my-app-config/
 $ istioctl analyze --recursive a.yaml b.yaml my-app-config/
 ```
 
-需要注意的是，analyze 命令在执行分析诊断的时候，默认会读取当前集群内的网格配置，再结合输入参数里的配置文件内容进行分析。默认的这种分析策略在用户实际的应用场景里是非常实用的，比如运维人员在准备应用一大堆配置文件的时候，如果逐一进行内容检查，显然是一项非常耗时且头疼的工作，况且人工排查还有可能会出现差错。通过结合 istioctl 命令行工具，就可以非常方便的执行一次 analyze 命令进行配置应用前的检查分析，从而一定程度上发现可能存在的潜在问题，及时避免问题发生；
+需要注意的是，analyze 命令在执行分析诊断的时候，默认会读取当前集群内的网格配置，再结合输入参数里的配置文件内容进行分析。默认的这种分析策略在用户实际的应用场景里是非常实用的，比如运维人员在准备应用一大堆配置文件的时候，如果逐一进行内容检查，显然是一项非常耗时且头疼的工作，况且人工排查还有可能会出现差错。通过结合 istioctl 命令行工具，就可以非常方便的执行一次 analyze 命令进行配置应用前的检查分析，从而一定程度上发现可能存在的潜在问题，及时避免问题发生。
 
 但是，在某些特殊的场景，用户可能又不希望结合所在集群的配置进行分析，比如是在开发环境上编辑的配置或者是将要应用在另外一个集群的配置等等，这个时候可以我们通过设置 `--use-kube=false` 来控制，该参数表示本次分析诊断是否需要组合当前集群内的 istio 配置，默认值是 `ture`，如果用户是想脱离集群仅对输入的文件配置进行分析，显式设定参数为 `false` 即可：
 
@@ -492,7 +492,7 @@ $ istioctl analyze --use-kube=false --recursive a.yaml b.yaml my-app-config/
 
 #### 忽略 analyze 特定的错误类型
 
-在有些时候，用户希望针忽略某些已知的可被容忍的错误类型。比如我们上文中分析出来的默认注入问题的告警信息，默认会提示我们存在错误：
+在有些时候，用户希望针忽略某些已知的可被容忍的错误类型。比如我们上文中分析出来的默认注入问题的告警信息，默认会提示我们存在错误。
 
 ```bash
 $ istioctl analyze -k --all-namespaces
@@ -501,7 +501,7 @@ Error: Analyzers found issues.
 See https://istio.io/docs/reference/config/analysis for more information about causes and resolutions.
 ```
 
-这也许是因为我们没有更新命名空间的权限，或者已经知晓这个问题，并且 default namespace 确实不需要被设置为自动注入，此时可以直接使用 `istioctl analyze` 添加 `--suppress` 参数来忽略上述输出中的错误消息：
+这也许是因为我们没有更新命名空间的权限，或者已经知晓这个问题，并且 default namespace 确实不需要被设置为自动注入，此时可以直接使用 `istioctl analyze` 添加 `--suppress` 参数来忽略上述输出中的错误消息。
 
 ```bash
 $ istioctl analyze -k --all-namespaces --suppress "IST0102=Namespace frod"
@@ -521,7 +521,7 @@ $ istioctl analyze -k --all-namespaces --suppress "IST0102=Namespace frod" --sup
 $ kubectl annotate deployment my-deployment galley.istio.io/analyze-suppress=IST0107
 ```
 
-要忽略该资源上的多种错误类型，可以使用逗号分隔每处代码：
+要忽略该资源上的多种错误类型，可以使用逗号分隔每处代码。
 
 ```bash
 $ kubectl annotate deployment my-deployment galley.istio.io/analyze-suppress=IST0107,IST0002
@@ -572,17 +572,17 @@ status:
 
 该分析器默认会在后台运行，自动校验网格里的资源配置是否存在问题，并将问题信息同步更新在资源的状态字段里，但是它并不能完全替代 istioctl analyze 命令，因为有一些局限性：
 
-- 并非所有的资源类型都具备自定义的状态字段（例如 Kubernetes 的 `namespace` 资源），因此如果有错误信息是针对这部分资源的话并不能显示在它的资源状态字段里；
+- 并非所有的资源类型都具备自定义的状态字段（例如 Kubernetes 的 `namespace` 资源），因此如果有错误信息是针对这部分资源的话并不能显示在它的资源状态字段里。
 - `enableAnalysis` 是从 istio 1.4 版本开始引入的，而 `istioctl analyze` 命令可以用于较早的版本
-- 最关键的是，用户可以方便的通过资源文件看到它存在的潜在问题，但是如果想要了解整个网格内的所有配置诊断信息的话会比较麻烦，因为要检查查看多个资源配置文件并找到对应的 status 字段，相比之下 istioctl analyze 命令可以一键分析出整个网格集群内存在的潜在问题；
+- 最关键的是，用户可以方便的通过资源文件看到它存在的潜在问题，但是如果想要了解整个网格内的所有配置诊断信息的话会比较麻烦，因为要检查查看多个资源配置文件并找到对应的 status 字段，相比之下 istioctl analyze 命令可以一键分析出整个网格集群内存在的潜在问题。
 
-综上，galley 的自动配置分析可以作为一种辅助的配置诊断手段，用户可以自行根据实际情况选择是否启用；
+综上，galley 的自动配置分析可以作为一种辅助的配置诊断手段，用户可以自行根据实际情况选择是否启用。
 
 ### 使用 describe 命令理解网格
 
-早在 istio 1.3 版本的 istioctl 命令行工具里，就引入了一个实验性的命令 —— describe，该命令可以帮助我们更好的理解一些配置是如何影响网格内的pod，在排查问题的时候，相比直接查看 CRD 配置文件这种手段，通过 describe 命令可以大大提高问题的诊断效率；
+早在 istio 1.3 版本的 istioctl 命令行工具里，就引入了一个实验性的命令 —— describe，该命令可以帮助我们更好的理解一些配置是如何影响网格内的pod，在排查问题的时候，相比直接查看 CRD 配置文件这种手段，通过 describe 命令可以大大提高问题的诊断效率。
 
-与上节 analyze 命令不同的是，analyze 更加偏重于整个 Istio 网格层面的问题，比如 Proxy 的镜像版本是否匹配、是否缺少必要的注解配置、Sidecar 是否被正常注入等等；而 describe 命令则更加像是针对网格流量方面的配置检查和验证，尤其是当一些配置出现冲突或者没有闭环时，能够被检查出来告知用户并提供相应的解决建议；
+与上节 analyze 命令不同的是，analyze 更加偏重于整个 Istio 网格层面的问题，比如 Proxy 的镜像版本是否匹配、是否缺少必要的注解配置、Sidecar 是否被正常注入等等。而 describe 命令则更加像是针对网格流量方面的配置检查和验证，尤其是当一些配置出现冲突或者没有闭环时，能够被检查出来告知用户并提供相应的解决建议。
 
 下文我们将通过一些简单的示例来说明下如何用 describe  命令来对 pod 进行一些网格的状态检查和配置验证。
 
@@ -758,7 +758,7 @@ VirtualService: reviews
 
 以上输出内容显示了一个告警信息，因为目标 pod 被定义为成了 `v1` 子集，而我们部署的两条路由分别被指向 `v2` 和  `v3` 两个子集。 规则显示，如果请求头中包含 `end-user=jason`，该 virtual service 配置将会把流量路由到 `v2` 子集，其余情况下都路由到 `v3` 子集。
 
-通过 describe 命令可以有效且快速地帮助我们校验一些路由配置，相比直接通过应用的 Istio 配置文件去查询检查，工具提供了更加高效、聚合且人性化的直观诊断数据，在大规模的 istio 应用场景里显得尤为重要；
+通过 describe 命令可以有效且快速地帮助我们校验一些路由配置，相比直接通过应用的 Istio 配置文件去查询检查，工具提供了更加高效、聚合且人性化的直观诊断数据，在大规模的 istio 应用场景里显得尤为重要。
 
 #### 验证 strict mutual TLS 配置
 
@@ -779,7 +779,7 @@ spec:
 EOF
 ```
 
-同样通过 describe 命令来描述  `ratings` 对应 pod：
+同样通过 describe 命令来描述 `ratings` 对应 pod：
 
 ```bash
 $ istioctl x describe pod $RATINGS_POD
@@ -811,11 +811,11 @@ WARNING Pilot predicts TLS Conflict on ratings-v1-f745cf57b-qrxl2 port 9080 (pod
 $ kubectl apply -f samples/bookinfo/networking/destination-rule-all-mtls.yaml
 ```
 
-以上就是我们使用 istioctl 命令行工具中的 describe 命令来诊断 istio 系统中由于安全认证配置不一致而导致的问题，并最终通过工具找到原因并修复的过程；从工具的使用过程来看，特别是输出结果信息中明确指出了问题原因和解决思路，对于 Istio 的使用者而言可谓是非常友好。
+以上就是我们使用 istioctl 命令行工具中的 describe 命令来诊断 istio 系统中由于安全认证配置不一致而导致的问题，并最终通过工具找到原因并修复的过程。从工具的使用过程来看，特别是输出结果信息中明确指出了问题原因和解决思路，对于 Istio 的使用者而言可谓是非常友好。
 
 ## ControlZ 组件自检工具  
 
-通过上文分析，istioctl 工具在诊断 Istio 配置方面提供了很多非常有效的命令，可以帮助用户尽快发现问题所在并且及时修复它们；除此之外，Istio 还提供了一个基于 web 的可视化自检工具可用于对控制平面的组件进行自检，它使查看和调整正在运行组件的内部状态变得更加容易，这个工具就是 ControlZ。在 Istio 1.5 版本之前，由于控制平面的各个组件都是独立部署的，因此类似于 Pilot、Galley、Mixer 等都拥有各自对应的 ControlZ 查看页面，自 1.5 版本之后，控制面组件合并成了单一的 istiod，对应的 ControlZ 工具页面也统一成了一个。默认情况下，我们使用 istioctl 的 dashboard 命令来开启 ：
+通过上文分析，istioctl 工具在诊断 Istio 配置方面提供了很多非常有效的命令，可以帮助用户尽快发现问题所在并且及时修复它们。除此之外，Istio 还提供了一个基于 web 的可视化自检工具可用于对控制平面的组件进行自检，它使查看和调整正在运行组件的内部状态变得更加容易，这个工具就是 ControlZ。在 Istio 1.5 版本之前，由于控制平面的各个组件都是独立部署的，因此类似于 Pilot、Galley、Mixer 等都拥有各自对应的 ControlZ 查看页面，自 1.5 版本之后，控制面组件合并成了单一的 istiod，对应的 ControlZ 工具页面也统一成了一个。默认情况下，我们使用 istioctl 的 dashboard 命令来开启 ：
 
 ```bash
 export ISTIOD_POD=$(kubectl get pod -n istio-system -l app=istiod -o jsonpath='{.items[0].metadata.name}')
@@ -844,7 +844,7 @@ istioctl dashboard controlz $ISTIOD_POD -n istio-system
 
 ## 小结
 
-本章节主要介绍了 Istio 服务网格相关的诊断工具，其中 istioctl 作为官方标配工具集调试、诊断、运维等能力一体，极大提高了用户排查和解决问题的能力；诊断工具中 proxy-status 和 proxy-config 两个命令主要用来检查各类 xds 配置的同步状态和内容详情，而 analyze 和 describe 命令则用于分析和诊断网格里存在的潜在问题，并且够会给出参考的解决方案，该工具足以满足我们在日常应用场景下的各类问题，当你在使用 Istio 时遇到问题时，不妨用 istioctl 工具进行分析诊断一番，也许问题就会迎刃而解了。
+本章节主要介绍了 Istio 服务网格相关的诊断工具，其中 istioctl 作为官方标配工具集调试、诊断、运维等能力一体，极大提高了用户排查和解决问题的能力。诊断工具中 proxy-status 和 proxy-config 两个命令主要用来检查各类 xds 配置的同步状态和内容详情，而 analyze 和 describe 命令则用于分析和诊断网格里存在的潜在问题，并给出相应的解决方案。该工具足以满足我们在日常应用场景下的各类问题，当你在使用 Istio 时遇到问题时，不妨用 istioctl 工具进行分析诊断一番，也许问题就会迎刃而解了。
 
 ## 参考
 
