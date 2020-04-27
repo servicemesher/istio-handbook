@@ -1,5 +1,5 @@
 ---
-authors: ["rootsongjc"]
+authors: ["rootsongjc","zhaohuabing"]
 reviewers: [""]
 ---
 
@@ -368,229 +368,186 @@ Chain ISTIO_REDIRECT (1 references)
 
 ## 流量路由过程详解
 
-流量路由分为 Inbound 和 Outbound 两个过程，下面将根据上文中的示例及 sidecar 的配置为读者详细分析此过程。
+### Sidecar  配置文件解析
 
-### 理解 Inbound Handler
+我们通过查看 sidecar 配置文件的具体内容来理解其内部的处理逻辑。首先采用下面的命令来将 `productpage` 服务 sidecar 的配置导出到文件中。
 
-Inbound handler 的作用是将 iptables 拦截到的 downstream 的流量转交给 localhost，与 Pod 内的应用程序容器建立连接。假设其中一个 Pod 的名字是 `reviews-v1-54b8794ddf-jxksn`，运行 `istioctl proxy-config listener reviews-v1-54b8794ddf-jxksn` 查看该 Pod 中的具有哪些 Listener。
-
-```ini
-ADDRESS            PORT      TYPE
-172.17.0.15        9080      HTTP <--- 接收所有 Inbound HTTP 流量，该地址即为业务进程的真实监听地址
-172.17.0.15        15020     TCP <--- Ingress Gateway，Pilot 健康检查
-10.109.20.166      15012     TCP <--- Istiod http dns
-10.103.34.135      14250     TCP <--+
-10.103.34.135      14267     TCP    |
-10.103.34.135      14268     TCP    |
-10.104.122.175     15020     TCP    |
-10.104.122.175     15029     TCP    |
-10.104.122.175     15030     TCP    |
-10.104.122.175     15031     TCP    |
-10.104.122.175     15032     TCP    |
-10.104.122.175     15443     TCP    |
-10.104.122.175     31400     TCP    | 接收与 0.0.0.0:15006 监听器配对的 Outbound 流量
-10.104.122.175     443       TCP    |
-10.104.62.18       15443     TCP    |
-10.104.62.18       443       TCP    |
-10.106.201.253     16686     TCP    |
-10.109.20.166      443       TCP    |
-10.96.0.1          443       TCP    |
-10.96.0.10         53        TCP    |
-10.96.0.10         9153      TCP    |
-10.98.184.149      15011     TCP    |
-10.98.184.149      15012     TCP    |
-10.98.184.149      443       TCP    |
-0.0.0.0            14250     TCP    |
-0.0.0.0            15010     TCP    |
-0.0.0.0            15014     TCP    |
-0.0.0.0            15090     HTTP   |
-0.0.0.0            20001     TCP    |
-0.0.0.0            3000      TCP    |
-0.0.0.0            80        TCP    |
-0.0.0.0            8080      TCP    |
-0.0.0.0            9080      TCP    |
-0.0.0.0            9090      TCP    |
-0.0.0.0            9411      TCP <--+
-0.0.0.0            15001     TCP <--- 接收所有经 iptables 拦截的 Outbound 流量并转交给虚拟监听器处理
-0.0.0.0            15006     TCP <--- 接收所有经 iptables 拦截的 Inbound 流量并转交给虚拟监听器处理
+```
+kubectl exec -it productpage-v1-6d8bc58dd7-ts8kw -c istio-proxy curl http://127.0.0.1:15000/config_dump > config_dump
 ```
 
-当来自 `productpage` 的流量抵达 `reviews`  Pod 的时候，downstream 已经明确知道 Pod 的 IP 地址为 `172.17.0.16` 所以才会访问该 Pod，所以该请求是 `172.17.0.15:9080`。
+该文件内容比较长，但结构还是比较清晰的。下面我们来对其中的关键内容进行一一分析。文件的结构如下图所示：
 
-**`virtualInbound` Listener**
+![productpage sidecar 配置文件](../images/envoy-config.png)  
 
-从该 Pod 的 Listener 列表中可以看到，`0.0.0.0:15006/TCP` 的 Listener（其实际名字是 `virtualInbound`）监听所有的 Inbound 流量，下面是该 Listener 的详细配置。
+文件中的配置主要包括以下内容：
+
+#### Bootstrap
+
+从名字可以知道这是 sidecar 的初始化配置，展开该配置节点，可以看到文件中的内容中包含 sidecar 所处的节点信息，sidecar 的管理接口，以及 xDS 服务器地址等配置信息。这些信息是在 sidecar 启动时通过初始化配置文件传递给 sidecar 的。
+
+![productpage sidecar 的 bootstrap 配置](../images/envoy-config-bootstrap.png)  
+
+#### Clusters 
+
+Cluster 是一个服务实例的集群，一个cluster 中包含一个到多个 endpoint，每个 endpoint 都可以对外提供服务。sidecar 根据负载均衡算法将请求发送到这些 endpoint 中。
+
+在 `productpage` 的 配置中包含 static_clusters 和 dynamic_active_clusters 两种 cluster，其中 static_clusters 是来自于 初始化配置文件 envoy-rev0.json 的 xDS server 和 zipkin server 等信息。dynamic_active_clusters 是通过 xDS 接口从 Istio 控制面获取的动态服务信息。
+
+![productpage sidecar 的 cluster 配置](../images//envoy-config-clusters.png)  
+
+Dynamic cluster中又分为以下几类 ：
+
+##### Outbound Cluster
+
+这部分的 cluster 占了绝大多数，该类 cluster 对应于 sidecar 所在节点的外部服务。例如，对于 `productpage` 来说, `reviews` 是一个外部服务，因此其 cluster 名称中包含 outbound 字样。
+
+从下面 `reviews`  服务对应的 cluster 配置中可以看到，其类型为 EDS，即表示该 cluster 的 endpoint 来自于动态发现，其 eds_config 配置为 ads，指向了 static resource 中配置的 xds-grpc cluster,即 Pilot 的地址。
 
 ```json
 {
-    "name": "virtualInbound",
-    "address": {
-        "socketAddress": {
-            "address": "0.0.0.0",
-            "portValue": 15006
+    "version_info": "2019-12-04T03:08:06Z/13",
+    "cluster": {
+        "name": "outbound|9080||reviews.default.svc.cluster.local",
+        "type": "EDS",
+        "eds_cluster_config": {
+            "eds_config": {
+                "ads": {}
+            },
+            "service_name": "outbound|9080||reviews.default.svc.cluster.local"
+        },
+        "connect_timeout": "1s",
+        "circuit_breakers": {
+            "thresholds": [
+                {
+                    "max_connections": 4294967295,
+                    "max_pending_requests": 4294967295,
+                    "max_requests": 4294967295,
+                    "max_retries": 4294967295
+                }
+            ]
         }
     },
-"filterChains": [
-    {
-        "filters": [
-        /*省略部分内容*/
-              {
-            "filterChainMatch": {
-                "destinationPort": 9080,
-                "prefixRanges": [
-                    {
-                        "addressPrefix": "172.17.0.15",
-                        "prefixLen": 32
-                    }
-                ],
-                "applicationProtocols": [
-                    "istio-peer-exchange",
-                    "istio",
-                    "istio-http/1.0",
-                    "istio-http/1.1",
-                    "istio-h2"
-                ]
-            },
-            "filters": [
-                {
-                    "name": "envoy.filters.network.metadata_exchange",
-                    "config": {
-                        "protocol": "istio-peer-exchange"
-                    }
-                },
-                {
-                    "name": "envoy.http_connection_manager",
-                    "typedConfig": {
-                        "@type": "type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager",
-                        "statPrefix": "inbound_172.17.0.15_9080",
-                        "routeConfig": {
-                            "name": "inbound|9080|http|reviews.default.svc.cluster.local",
-                            "virtualHosts": [
-                                {
-                                    "name": "inbound|http|9080",
-                                    "domains": [
-                                        "*"
-                                    ],
-                                    "routes": [
-                                        {
-                                            "name": "default",
-                                            "match": {
-                                                "prefix": "/"
-                                            },
-                                            "route": {
-                                                "cluster": "inbound|9080|http|reviews.default.svc.cluster.local",
-                                                "timeout": "0s",
-                                                "maxGrpcTimeout": "0s"
-                                            },
-                                            "decorator": {
-                                                "operation": "reviews.default.svc.cluster.local:9080/*"
-                                            }
-                                        }
-                                    ]
-                                }
-                            ],
-                            "validateClusters": false
-                        }
-  /*省略部分内容*/
+    "last_updated": "2019-12-04T03:08:22.658Z"
 }
 ```
 
-Inbound handler 的流量被 `virtualInbound` Listener 转移到 `172.17.0.15_9080` Listener，我们在查看下该 Listener 配置。
+可以通过 Pilot 的调试接口获取该 cluster 中的所有 endpoint：
 
-运行 `istioctl pc listener reviews-v1-54b8794ddf-jxksn --address 172.17.0.15 --port 9080 -o json` 查看。
-
-```json
-[
-    {
-        "name": "172.17.0.15_9080",
-        "address": {
-            "socketAddress": {
-                "address": "172.17.0.15",
-                "portValue": 9080
-            }
-        },
-        "filterChains": [
-            {
-                "filterChainMatch": {
-                    "applicationProtocols": [
-                        "istio-peer-exchange",
-                        "istio",
-                        "istio-http/1.0",
-                        "istio-http/1.1",
-                        "istio-h2"
-                    ]
-                },
-            "filters": [
-                {
-                    "name": "envoy.http_connection_manager",
-                    "config": {
-                        ... 
-                    "routeConfig": {
-                                "name": "inbound|9080|http|reviews.default.svc.cluster.local",
-                                "virtualHosts": [
-                                    {
-                                        "name": "inbound|http|9080",
-                                        "domains": [
-                                            "*"
-                                        ],
-                                        "routes": [
-                                            {
-                                                "name": "default",
-                                                "match": {
-                                                    "prefix": "/"
-                                                },
-                                                "route": {
-                                                    "cluster": "inbound|9080|http|reviews.default.svc.cluster.local",
-                                                    "timeout": "0s",
-                                                    "maxGrpcTimeout": "0s"
-                                                },
-                                                "decorator": {
-                                                    "operation": "reviews.default.svc.cluster.local:9080/*"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                ],
-            }
-        ...
-        },
-        {
-            "filterChainMatch": {
-                "transportProtocol": "tls"
-            },
-            "tlsContext": {...
-            },
-            "filters": [...
-            ]
-        }
-    ],
-...
-}]
+```
+curl http://10.97.222.108:15014/debug/edsz > pilot_eds_dump
 ```
 
-我们看其中的 `filterChains.filters` 中的 `envoy.http_connection_manager` 配置部分，该配置表示流量将转交给 Cluster `inbound|9080|http|reviews.default.svc.cluster.local` 处理。
-
-**Cluster `inbound|9080|http|reviews.default.svc.cluster.local`**
-
-运行 `istioctl proxy-config cluster reviews-v1-54b8794ddf-jxksn --fqdn reviews.default.svc.cluster.local --direction inbound -o json` 查看该 Cluster 的配置如下。
+导出的文件较长，为方便读者阅读，本文只贴出 `reviews` 服务相关的 endpoint 配置。从下面的文件内容可以看到，`reviews` cluster 配置了3个 endpoint 地址，对应 `reviews` pod 的 IP。
 
 ```json
-[
-    {
-        "name": "inbound|9080|http|reviews.default.svc.cluster.local",
+{
+    "clusterName": "outbound|9080||reviews.default.svc.cluster.local",
+    "endpoints": [
+        {
+            "lbEndpoints": [
+                {
+                    "endpoint": {
+                        "address": {
+                            "socketAddress": {
+                                "address": "10.40.0.15",
+                                "portValue": 9080
+                            }
+                        }
+                    },
+                    "metadata": {
+                        "filterMetadata": {
+                            "envoy.transport_socket_match": {
+                                "tlsMode": "istio"
+                            },
+                            "istio": {
+                                "uid": "kubernetes://reviews-v1-75b979578c-pw8zs.default"
+                            }
+                        }
+                    },
+                    "loadBalancingWeight": 1
+                },
+                {
+                    "endpoint": {
+                        "address": {
+                            "socketAddress": {
+                                "address": "10.40.0.16",
+                                "portValue": 9080
+                            }
+                        }
+                    },
+                    "metadata": {
+                        "filterMetadata": {
+                            "envoy.transport_socket_match": {
+                                "tlsMode": "istio"
+                            },
+                            "istio": {
+                                "uid": "kubernetes://reviews-v3-54c6c64795-wbls7.default"
+                            }
+                        }
+                    },
+                    "loadBalancingWeight": 1
+                },
+                {
+                    "endpoint": {
+                        "address": {
+                            "socketAddress": {
+                                "address": "10.40.0.17",
+                                "portValue": 9080
+                            }
+                        }
+                    },
+                    "metadata": {
+                        "filterMetadata": {
+                            "envoy.transport_socket_match": {
+                                "tlsMode": "istio"
+                            },
+                            "istio": {
+                                "uid": "kubernetes://reviews-v2-597bf96c8f-l2fp8.default"
+                            }
+                        }
+                    },
+                    "loadBalancingWeight": 1
+                }
+            ],
+            "loadBalancingWeight": 3
+        }
+    ]
+}
+```
+
+##### Inbound Cluster
+
+该类 cluster 对应于 sidecar 自身所在节点上的服务。对于 `productpage` pod 上的 sidecar，其对应的 Inbound Cluster 只有一个，即 `productpage`。该 cluster 对应的host为 127.0.0.1,即 `productpage` 在本地环回地址上的监听。由于 iptable 规则中排除了 127.0.0.1,入站请求通过该 Inbound Cluster 处理后将不会被 sidecar 拦截，而是直接发送给 `productpage` 进程处理。
+
+```json
+{
+    "version_info": "2019-12-04T03:08:06Z/13",
+    "cluster": {
+        "name": "inbound|9080|http|productpage.default.svc.cluster.local",
         "type": "STATIC",
-        "connectTimeout": "1s",
-        "loadAssignment": {
-            "clusterName": "inbound|9080|http|reviews.default.svc.cluster.local",
+        "connect_timeout": "1s",
+        "circuit_breakers": {
+            "thresholds": [
+                {
+                    "max_connections": 4294967295,
+                    "max_pending_requests": 4294967295,
+                    "max_requests": 4294967295,
+                    "max_retries": 4294967295
+                }
+            ]
+        },
+        "load_assignment": {
+            "cluster_name": "inbound|9080|http|productpage.default.svc.cluster.local",
             "endpoints": [
                 {
-                    "lbEndpoints": [
+                    "lb_endpoints": [
                         {
                             "endpoint": {
                                 "address": {
-                                    "socketAddress": {
+                                    "socket_address": {
                                         "address": "127.0.0.1",
-                                        "portValue": 9080
+                                        "port_value": 9080
                                     }
                                 }
                             }
@@ -598,123 +555,725 @@ Inbound handler 的流量被 `virtualInbound` Listener 转移到 `172.17.0.15_90
                     ]
                 }
             ]
-        },
-        "circuitBreakers": {
-            "thresholds": [
-                {
-                    "maxConnections": 4294967295,
-                    "maxPendingRequests": 4294967295,
-                    "maxRequests": 4294967295,
-                    "maxRetries": 4294967295
-                }
-            ]
         }
-    }
-]
-```
-
-可以看到该 Cluster 的 Endpoint 直接对应的就是 localhost，再经过 iptables 转发流量就被应用程序容器消费了。
-
-### 理解 Outbound Handler
-
-因为 `reviews` 会向 `ratings` 服务发送 HTTP 请求，请求的地址是：`http://ratings.default.svc.cluster.local:9080/`，Outbound handler 的作用是将 iptables 拦截到的本地应用程序发出的流量，经由 sidecar 判断如何路由到 upstream。
-
-应用程序容器发出的请求为 Outbound 流量，被 iptables 劫持后转移给  Outbound handler 处理，然后经过 `virtualOutbound` Listener、`0.0.0.0_9080` Listener，然后通过 Route 9080 找到 upstream 的 cluster，进而通过 EDS 找到 Endpoint 执行路由动作。
-
-**Route `ratings.default.svc.cluster.local:9080`**
-
-`reviews` 会请求 `ratings` 服务，运行 `istioctl proxy-config routes reviews-v1-54b8794ddf-jxksn --name 9080 -o json` 查看 route 配置，因为 sidecar 会根据 HTTP header 中的 domains 来匹配 VirtualHost，所以下面只列举了 `ratings.default.svc.cluster.local:9080` 这一个 VirtualHost。
-
-```json
-[{
-  {
-      "name": "ratings.default.svc.cluster.local:9080",
-      "domains": [
-          "ratings.default.svc.cluster.local",
-          "ratings.default.svc.cluster.local:9080",
-          "ratings",
-          "ratings:9080",
-          "ratings.default.svc.cluster",
-          "ratings.default.svc.cluster:9080",
-          "ratings.default.svc",
-          "ratings.default.svc:9080",
-          "ratings.default",
-          "ratings.default:9080",
-          "10.98.49.62",
-          "10.98.49.62:9080"
-      ],
-      "routes": [
-          {
-              "name": "default",
-              "match": {
-                  "prefix": "/"
-              },
-              "route": {
-                  "cluster": "outbound|9080||ratings.default.svc.cluster.local",
-                  "timeout": "0s",
-                  "retryPolicy": {
-                      "retryOn": "connect-failure,refused-stream,unavailable,cancelled,resource-exhausted,retriable-status-codes",
-                      "numRetries": 2,
-                      "retryHostPredicate": [
-                          {
-                              "name": "envoy.retry_host_predicates.previous_hosts"
-                          }
-                      ],
-                      "hostSelectionRetryMaxAttempts": "5",
-                      "retriableStatusCodes": [
-                          503
-                      ]
-                  },
-                  "maxGrpcTimeout": "0s"
-              },
-              "decorator": {
-                  "operation": "ratings.default.svc.cluster.local:9080/*"
-              }
-          }
-      ]
-  },
-..]
-```
-
-从该 Virtual Host 配置中可以看到将流量路由到 Cluster `outbound|9080||ratings.default.svc.cluster.local`。
-
-**Endpoint `outbound|9080||ratings.default.svc.cluster.local`**
-
-运行 `istioctl proxy-config endpoint reviews-v1-54b8794ddf-jxksn --port 9080 -o json`  查看 Endpoint 配置，我们只选取其中的 `outbound|9080||ratings.default.svc.cluster.local` Cluster 的结果如下。
-
-```json
-{
-  "clusterName": "outbound|9080||ratings.default.svc.cluster.local",
-  "endpoints": [
-    {
-      "locality": {
-
-      },
-      "lbEndpoints": [
-        {
-          "endpoint": {
-            "address": {
-              "socketAddress": {
-                "address": "172.33.100.2",
-                "portValue": 9080
-              }
-            }
-          },
-          "metadata": {
-            "filterMetadata": {
-              "istio": {
-                  "uid": "kubernetes://ratings-v1-8558d4458d-ns6lk.default"
-                }
-            }
-          }
-        }
-      ]
-    }
-  ]
+    },
+    "last_updated": "2019-12-04T03:08:22.658Z"
 }
 ```
 
-Endpoint 可以是一个或多个，sidecar 将根据一定规则选择适当的 Endpoint 来路由。至此 Review 服务找到了它 upstream 服务 Rating 的 Endpoint。
+##### BlackHoleCluster
+
+这是一个特殊的 cluster，并没有配置后端处理请求的 host。如其名字所暗示的一样，请求进入该 cluster 后将被直接丢弃掉。如果一个请求没有找到其对的目的服务，则被发到该 cluster。
+
+```json
+{
+    "version_info": "2019-12-04T03:08:06Z/13",
+    "cluster": {
+        "name": "BlackHoleCluster",
+        "type": "STATIC",
+        "connect_timeout": "1s"
+    },
+    "last_updated": "2019-12-04T03:08:22.658Z"
+}
+
+```
+
+##### PassthroughCluster
+
+和 BlackHoleCluter 相反，发向 PassthroughCluster 的请求会被直接发送到其请求中要求的原始目地的，sidecar 不会对请求进行重新路由。
+
+```json
+{
+    "version_info": "2019-12-04T03:08:06Z/13",
+    "cluster": {
+        "name": "PassthroughCluster",
+        "type": "ORIGINAL_DST",
+        "connect_timeout": "1s",
+        "lb_policy": "CLUSTER_PROVIDED",
+        "circuit_breakers": {
+            "thresholds": [
+                {
+                    "max_connections": 4294967295,
+                    "max_pending_requests": 4294967295,
+                    "max_requests": 4294967295,
+                    "max_retries": 4294967295
+                }
+            ]
+        }
+    },
+    "last_updated": "2019-12-04T03:08:22.658Z"
+}
+```
+
+#### Listeners
+
+Sidecar  采用 listener 来接收并处理来自 downstream 的请求，listener 采用了插件式的架构，可以通过配置不同的 filter 在 Listener 中插入不同的处理逻辑。Istio 中就配置了用于进行策略检查和 metric 上报的 Mixer filter。
+
+Listener 可以绑定到 IP Socket 或 者Unix Domain Socket 上，以接收来自客户端的请求;也可以不绑定，从其他 listener 接收转发来的数据。Istio 利用了listener 的这一特点，通过 VirtualOutboundListener 在一个端口接收所有出向请求，然后再按照请求的端口分别转发给不同的 listener 分别进行处理。
+
+
+##### VirtualOutbound Listener 
+
+sidecar 中有一个在15001端口监听的入口监听器。Iptable 会将 pod 中业务进程的对外请求拦截后重定向到本地的15001端口。该监听器接收后并不进行业务处理，而是根据请求的目的端口分发给其他监听器处理。这也是该监听器取名为 "virtual"（虚拟）监听器的原因。
+
+sidecar 是如何做到按请求的目的端口进行分发的呢？ 从下面 VirtualOutbound Listener 的配置中可以看到[use_original_dest](https://www.envoyproxy.io/docs/envoy/latest/configuration/listeners/listener_filters/original_dst_filter) 被设置为 true,表明监听器接收到的请求后，将转交给和请求原目的地址关联的 listener 进行处理。 
+
+如果在配置中找不到和请求目的地端口的 listener，则将会根据 Istio 的全局配置选项 outboundTrafficPolicy 进行处理。存在两种情况：
+
+* 如果 [outboundTrafficPolicy](https://istio.io/docs/reference/config/istio.mesh.v1alpha1/#MeshConfig-OutboundTrafficPolicy) 设置为 ALLOW_ANY：表明允许发向任何外部服务的请求，不管该服务是否在 Pilot 的服务注册表中。在该策略下，Pilot 将会在下发给 sidecar 的 VirtualOutbound Listener 中加入一个 upstream cluster 为  [PassthroughCluster](#passthroughcluster) 的 TCP proxy filter，找不到匹配端口 listener 的请求会被该 TCP proxy filter 处理，请求将会被发送到其IP头中的原始目的地地址。
+* 如果 [outboundTrafficPolicy](https://istio.io/docs/reference/config/istio.mesh.v1alpha1/#MeshConfig-OutboundTrafficPolicy) 设置为 REGISTRY_ONLY：只允许发向 Pilot 服务注册表中存在的服务的对外请求。在该策略下，Pilot 将会在 VirtualOutbound Listener 加入一个 upstream cluster 为 [BlackHoleCluster](#blackholecluster) 的 TCP proxy filter，找不到匹配端口 listener 的请求会被该 TCP proxy filter 处理，由于 BlackHoleCluster 中没有配置 upstteam host，请求实际上会被丢弃。
+
+下图是 Bookinfo 示例中 `productpage` sidecar 的 Virutal Outbound Listener 配置，outboundTrafficPolicy 配置为 ALLOW_ANY，因此 listener 的 filterchain 中第二个 filter 是一个 upstream cluster 为 PassthroughCluster 的 TCP proxy filter。注意该 filter 没有 filter_chain_match 匹配条件，因此如果进入该 listener 的请求在配置中找不到对于目的端口的listener 进行处理，就会缺省进入该 filter 进行处理。
+
+filterchain 中的第一个 filter 为一个 upstream cluster 为 BlackHoleCluster 的 TCP proxy filter，该 filter 设置了filter_chain_match 匹配条件，只有发向10.40.0.18这个 IP 的出向请求才会进入该 filter 处理。这里的10.40.0.18其实是`productpage` 服务自身的 IP 地址。该 filter 的目的是为了防止服务向自己发送请求可能导致的死循环。
+
+![productpage sidecar 的 VirutalOutbound listener 配置](../images/virtualoutbound.png)
+
+##### Outbound Listener
+
+Outbound listener 接收从 virtualOutbound listener 分发过来的出向请求，并根据配置的 filter 进行相应的处理。
+
+Productpage Pod中的Envoy创建了多个Outbound Listener，包括：
+
+* 0.0.0.0_9080 :处理对 details,reviews 和 rating 服务的出向请求
+* 0.0.0.0_9411 :处理对 zipkin 的出向请求
+* 0.0.0.0_15031 :处理对 ingressgateway 的出向请求
+* 0.0.0.0_3000 :处理对 grafana 的出向请求
+* ......
+
+除了对应到业务的9080 listener 之外，其他 listener 都是 Istio 用于处理自身组件之间通信使用的，如和控制面组件 Pilot，Mixer 进行通讯的 listener。
+
+我们这里主要分析一下9080这个业务端口的 listenrer。从配置文件中可以看到，该 listener 的 "bind_to_port" 设置为 false，因此该 listener 并没有被绑定到 tcp 端口上，其接收到的所有请求都转发自15001端口的 virtualOutbound listener。
+
+监听器的名称是 0.0.0.0_9080, 由于地址是0.0.0.0，因此可以匹配发向任意IP的9080的请求，Bookinfo 示例程序中的`productpage`,`revirews`,`ratings`,`details` 四个 service 都是9080端口，那么 sidecar 如何区别这四个不同的 service 呢？
+
+首先需要区分入向（发送给 `productpage`）请求和出向（发送给其他几个服务）请求：
+
+* 发给 `productpage` 的入向请求，Iptables 规则会将其重定向到15006端口上的 VirtualInbound listener 上，因此不会进入0.0.0.0_9080 listener 处理。
+* 从 `productpage` 外发给 `reviews`、`details` 和 `ratings` 的出向请求，virtualOutbound listener 无法找到和其目的 IP 完全匹配的 listener，因此根据通配原则转交给0.0.0.0_9080这个 Outbound Listener 处理。
+
+> 备注：根据业务逻辑，实际上 `productpage` 并不会调用 `ratings` 服务，但 Istio 并不知道各个业务之间会如何调用，因此将所有的服务信息都下发到了 sidecar 中。这样做对 sidecar 的内存占用和效率有一定影响，如果希望去掉 sidecar 配置中的无用数据，可以通过 [sidecar](https://istio.io/docs/reference/config/networking/sidecar/) 规则对 ingress 和 egress service 配置进行调整。
+
+由于对应到 `reviews`、`details` 和 `ratings` 三个服务，当0.0.0.0_9080接收到出向请求后，并不能直接发送到一个downstream cluster 中，而是需要根据请求的服务进行路由。下图为 `productpage` 服务中导出的0.0.0.0_9080 outbound listener，我们可以看到该 listener 配置了一个[路由规则9080](#routes)，在路由规则中会根据不同的请求目的地对请求进行处理。
+
+![productpage sidecar 的 Outbound listener 配置](../images/outbound-listener.png)
+
+##### VirtualInbound Listener
+
+在较早的版本中，Istio采用同一个 VirtualListener 在端口15001上同时处理入向和出向的请求。该方案存在一些潜在的问题，例如可能会导致出现死循环，参见[这个 PR](https://github.com/istio/istio/pull/15713)。在1.4以后的版本中，Istio 单独创建了一个 VirtualInboundListener，在15006端口监听入向请求，原来的15001端口只用于处理出向请求。
+
+当 VirtualInboundListener 接收到请求后，将直接在 VirtualInboundListener 采用一系列 filterChain 对入向请求进行处理，而不是像 VirtualOutboundListener 一样分发给其它独立的 listener 进行处理。
+
+这样修改后，sidecar 配置中入向和出向的请求处理流程被完全拆分开，请求处理流程更为清晰，可以避免由于配置导致的一些潜在错误。
+
+下图是 Bookinfo 例子中 `reviews` sidecar 的 virutalInbound listener 配置。
+
+![reviews sidecar 的 virutalInbound listener 配置](../images/virtualinbound.png)
+
+该 listener 中第三个 filterchain 用于处理 `review` 服务的入向请求。该 filterchain 的匹配条件为 `review` 服务的 pod IP 和9080端口，配置了一个 http_connection_manager filter，http_connection_manager  中又嵌入了 istio_auth，Mixer，envoy.router 等 http filter，经过这些 filter 进行处理后，请求最终将被转发给 "inbound|9080||reviews.default.svc.cluster.local" 这个 [inbound cluster](#inbound-cluster)，该 inbound cluster 中配置的 upstream 为127.0.0.1:9080，由于iptable 设置中127.0.0.1不会被拦截,该请求将发送到同 pod 的 `reviews` 服务的9080端口上进行业务处理。
+
+VirtualInbound listener 中的第一个 filterchain 的匹配条件为所有 IP，用于缺省处理未在 Pilot 服务注册表中注册的服务。
+
+#### Routes
+
+Istio 为每个端口设置了一个缺省的路由规则，以根据 HTTP 请求的 host 来进行路由分发。
+
+下面是 `proudctpage` 服务中9080的路由配置，从文件中可以看到对应了5个 virtual host，分别是 `details`、`productpage`、`ratings`、`reviews` 和 allow_any，前三个virtual host分别对应到不同服务的 [outbound cluster](#outbound-cluster)。最后一个对应到 [PassthroughCluster](#passthroughcluster),即当入向的i请求没有找到对应的服务时，也会让其直接通过。
+
+```json
+{
+    "version_info": "2019-12-04T03:08:06Z/13",
+    "route_config": {
+        "name": "9080",
+        "virtual_hosts": [
+            {
+                "name": "details.default.svc.cluster.local:9080",
+                "domains": [
+                    "details.default.svc.cluster.local",
+                    "details.default.svc.cluster.local:9080",
+                    "details",
+                    "details:9080",
+                    "details.default.svc.cluster",
+                    "details.default.svc.cluster:9080",
+                    "details.default.svc",
+                    "details.default.svc:9080",
+                    "details.default",
+                    "details.default:9080",
+                    "10.101.41.162",
+                    "10.101.41.162:9080"
+                ],
+                "routes": [
+                    {
+                        "match": {
+                            "prefix": "/"
+                        },
+                        "route": {
+                            "cluster": "outbound|9080||details.default.svc.cluster.local",
+                            "timeout": "0s",
+                            "retry_policy": {
+                                "retry_on": "connect-failure,refused-stream,unavailable,cancelled,resource-exhausted,retriable-status-codes",
+                                "num_retries": 2,
+                                "retry_host_predicate": [
+                                    {
+                                        "name": "envoy.retry_host_predicates.previous_hosts"
+                                    }
+                                ],
+                                "host_selection_retry_max_attempts": "5",
+                                "retriable_status_codes": [
+                                    503
+                                ]
+                            },
+                            "max_grpc_timeout": "0s"
+                        },
+                        "decorator": {
+                            "operation": "details.default.svc.cluster.local:9080/*"
+                        },
+                        "typed_per_filter_config": {
+                            "mixer": {
+                                "@type": "type.googleapis.com/istio.mixer.v1.config.client.ServiceConfig",
+                                "disable_check_calls": true,
+                                "mixer_attributes": {
+                                    "attributes": {
+                                        "destination.service.host": {
+                                            "string_value": "details.default.svc.cluster.local"
+                                        },
+                                        "destination.service.name": {
+                                            "string_value": "details"
+                                        },
+                                        "destination.service.namespace": {
+                                            "string_value": "default"
+                                        },
+                                        "destination.service.uid": {
+                                            "string_value": "istio://default/services/details"
+                                        }
+                                    }
+                                },
+                                "forward_attributes": {
+                                    "attributes": {
+                                        "destination.service.host": {
+                                            "string_value": "details.default.svc.cluster.local"
+                                        },
+                                        "destination.service.name": {
+                                            "string_value": "details"
+                                        },
+                                        "destination.service.namespace": {
+                                            "string_value": "default"
+                                        },
+                                        "destination.service.uid": {
+                                            "string_value": "istio://default/services/details"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "name": "default"
+                    }
+                ]
+            },
+            {
+                "name": "productpage.default.svc.cluster.local:9080",
+                "domains": [
+                    "productpage.default.svc.cluster.local",
+                    "productpage.default.svc.cluster.local:9080",
+                    "productpage",
+                    "productpage:9080",
+                    "productpage.default.svc.cluster",
+                    "productpage.default.svc.cluster:9080",
+                    "productpage.default.svc",
+                    "productpage.default.svc:9080",
+                    "productpage.default",
+                    "productpage.default:9080",
+                    "10.100.240.212",
+                    "10.100.240.212:9080"
+                ],
+                "routes": [
+                    {
+                        "match": {
+                            "prefix": "/"
+                        },
+                        "route": {
+                            "cluster": "outbound|9080||productpage.default.svc.cluster.local"
+													
+													......
+                        }
+                ]
+            },
+            {
+                "name": "ratings.default.svc.cluster.local:9080",
+                "domains": [
+                    "ratings.default.svc.cluster.local",
+                    "ratings.default.svc.cluster.local:9080",
+                    "ratings",
+                    "ratings:9080",
+                    "ratings.default.svc.cluster",
+                    "ratings.default.svc.cluster:9080",
+                    "ratings.default.svc",
+                    "ratings.default.svc:9080",
+                    "ratings.default",
+                    "ratings.default:9080",
+                    "10.101.170.120",
+                    "10.101.170.120:9080"
+                ],
+                "routes": [
+                    {
+                        "match": {
+                            "prefix": "/"
+                        },
+                        "route": {
+                            "cluster": "outbound|9080||ratings.default.svc.cluster.local",
+                            													
+													......
+                        }
+                ]
+            },
+            {
+                "name": "reviews.default.svc.cluster.local:9080",
+                "domains": [
+                    "reviews.default.svc.cluster.local",
+                    "reviews.default.svc.cluster.local:9080",
+                    "reviews",
+                    "reviews:9080",
+                    "reviews.default.svc.cluster",
+                    "reviews.default.svc.cluster:9080",
+                    "reviews.default.svc",
+                    "reviews.default.svc:9080",
+                    "reviews.default",
+                    "reviews.default:9080",
+                    "10.102.108.56",
+                    "10.102.108.56:9080"
+                ],
+                "routes": [
+                    {
+                        "match": {
+                            "prefix": "/"
+                        },
+                        "route": {
+                            "cluster": "outbound|9080||reviews.default.svc.cluster.local",
+                            													
+													......
+                        }
+                ]
+            },
+            {
+                "name": "allow_any",
+                "domains": [
+                    "*"
+                ],
+                "routes": [
+                    {
+                        "match": {
+                            "prefix": "/"
+                        },
+                        "route": {
+                            "cluster": "PassthroughCluster"
+                        },
+                        "typed_per_filter_config": {
+                            "mixer": {
+                                "@type": "type.googleapis.com/istio.mixer.v1.config.client.ServiceConfig",
+                                "disable_check_calls": true,
+                                "mixer_attributes": {
+                                    "attributes": {
+                                        "destination.service.name": {
+                                            "string_value": "PassthroughCluster"
+                                        }
+                                    }
+                                },
+                                "forward_attributes": {
+                                    "attributes": {
+                                        "destination.service.name": {
+                                            "string_value": "PassthroughCluster"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        ],
+        "validate_clusters": false
+    },
+    "last_updated": "2019-12-04T03:08:22.935Z"
+}
+```
+
+### Bookinfo端到端调用分析
+
+下面我们来分析一个端到端的调用请求，通过调用请求的流程把这些配置串连起来，以从全局上理解 Istio 控制面的流量控制能力是如何在数据面的 sidecar上实现的。
+
+下图描述了从 `productpage`  服务调用 `reviews` 服务时，在 两个 sidecar  内部的逻辑处理流程。
+
+![Sidecar 流量劫持示意图](../images/envoy-traffic-route.png)
+
+1. Productpage` 发起对 `eviews` 服务的调用：`http://reviews:9080/reviews/0` 。` 
+2. 请求被 `productpage` pod 的 iptable 规则拦截，重定向到本地的15001端口。
+3. 在15001端口上监听的 Virtual Outbound Listener 收到了该请求。
+4. 请求被 Virtual Outbound Listener 根据原目标 IP（通配）和端口（9080）转发到0.0.0.0_9080这个 outbound listener。
+```json
+{
+    "version_info": "2019-12-04T03:08:06Z/13",
+    "listener": {
+        "name": "virtualOutbound",
+        "address": {
+            "socket_address": {
+                "address": "0.0.0.0",
+                "port_value": 15001
+            }
+        },
+        ......
+
+         "use_original_dst": true //请求转发给和原始目的IP:Port匹配的listener
+    },
+    "last_updated": "2019-12-04T03:08:22.919Z"
+}
+```
+5. 根据0.0.0.0_9080 listener 的 http_connection_manager filter 配置,该请求采用“9080” route 进行分发。
+```json
+ {
+    "version_info": "2019-12-04T03:08:06Z/13",
+    "listener": {
+        "name": "0.0.0.0_9080",
+        "address": {
+            "socket_address": {
+                "address": "0.0.0.0",
+                "port_value": 9080
+            }
+        },
+        "filter_chains": [
+            {
+                "filters": [
+                    {
+                        "name": "envoy.http_connection_manager",
+                        "typed_config": {
+                            "@type": "type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager",
+                            "stat_prefix": "outbound_0.0.0.0_9080",
+                            "http_filters": [
+                                {
+                                    "name": "mixer",
+                                    ......
+                                },
+                                {
+                                    "name": "envoy.cors"
+                                },
+                                {
+                                    "name": "envoy.fault"
+                                },
+                                {
+                                    "name": "envoy.router"
+                                }
+                            ],
+                            ......
+                            
+                            "rds": {
+                                "config_source": {
+                                    "ads": {}
+                                },
+                                "route_config_name": "9080" //采用“9080” route进行分发
+                            }
+                        }
+                    }
+                ]
+            }
+        ],
+        "deprecated_v1": {
+            "bind_to_port": false
+        },
+        "listener_filters_timeout": "0.100s",
+        "traffic_direction": "OUTBOUND",
+        "continue_on_listener_filters_timeout": true
+    },
+    "last_updated": "2019-12-04T03:08:22.822Z"
+}   
+```
+6. “9080”这个 route 的配置中，host name 为 reviews:9080的请求对应的 cluster 为outbound|9080||reviews.default.svc.cluster.local
+```json
+{
+    "name": "reviews.default.svc.cluster.local:9080",
+    "domains": [
+        "reviews.default.svc.cluster.local",
+        "reviews.default.svc.cluster.local:9080",
+        "reviews",
+        "reviews:9080",
+        "reviews.default.svc.cluster",
+        "reviews.default.svc.cluster:9080",
+        "reviews.default.svc",
+        "reviews.default.svc:9080",
+        "reviews.default",
+        "reviews.default:9080",
+        "10.102.108.56",
+        "10.102.108.56:9080"
+    ],
+    "routes": [
+        {
+            "match": {
+                "prefix": "/"
+            },
+            "route": {
+                "cluster": "outbound|9080||reviews.default.svc.cluster.local",
+                "timeout": "0s",
+                "retry_policy": {
+                    "retry_on": "connect-failure,refused-stream,unavailable,cancelled,resource-exhausted,retriable-status-codes",
+                    "num_retries": 2,
+                    "retry_host_predicate": [
+                        {
+                            "name": "envoy.retry_host_predicates.previous_hosts"
+                        }
+                    ],
+                    "host_selection_retry_max_attempts": "5",
+                    "retriable_status_codes": [
+                        503
+                    ]
+                },
+                "max_grpc_timeout": "0s"
+            },
+            "decorator": {
+                "operation": "reviews.default.svc.cluster.local:9080/*"
+            },
+            "typed_per_filter_config": {
+                "mixer": {
+                    "@type": "type.googleapis.com/istio.mixer.v1.config.client.ServiceConfig",
+                    "disable_check_calls": true,
+                    "mixer_attributes": {
+                        "attributes": {
+                            "destination.service.host": {
+                                "string_value": "reviews.default.svc.cluster.local"
+                            },
+                            "destination.service.name": {
+                                "string_value": "reviews"
+                            },
+                            "destination.service.namespace": {
+                                "string_value": "default"
+                            },
+                            "destination.service.uid": {
+                                "string_value": "istio://default/services/reviews"
+                            }
+                        }
+                    },
+                    "forward_attributes": {
+                        "attributes": {
+                            "destination.service.host": {
+                                "string_value": "reviews.default.svc.cluster.local"
+                            },
+                            "destination.service.name": {
+                                "string_value": "reviews"
+                            },
+                            "destination.service.namespace": {
+                                "string_value": "default"
+                            },
+                            "destination.service.uid": {
+                                "string_value": "istio://default/services/reviews"
+                            }
+                        }
+                    }
+                }
+            },
+            "name": "default"
+        }
+    ]
+}
+```
+7. outbound|9080||reviews.default.svc.cluster.local cluster 为动态资源，通过 eds 查询得到该 cluster 中有3个endpoint。
+```json
+{
+    "clusterName": "outbound|9080||reviews.default.svc.cluster.local",
+    "endpoints": [
+        {
+            "lbEndpoints": [
+                {
+                    "endpoint": {
+                        "address": {
+                            "socketAddress": {
+                                "address": "10.40.0.15",
+                                "portValue": 9080
+                            }
+                        }
+                    },
+                    "metadata": {
+                        "filterMetadata": {
+                            "envoy.transport_socket_match": {
+                                "tlsMode": "istio"
+                            },
+                            "istio": {
+                                "uid": "kubernetes://reviews-v1-75b979578c-pw8zs.default"
+                            }
+                        }
+                    },
+                    "loadBalancingWeight": 1
+                },
+                {
+                    "endpoint": {
+                        "address": {
+                            "socketAddress": {
+                                "address": "10.40.0.16",
+                                "portValue": 9080
+                            }
+                        }
+                    },
+                    "metadata": {
+                        "filterMetadata": {
+                            "envoy.transport_socket_match": {
+                                "tlsMode": "istio"
+                            },
+                            "istio": {
+                                "uid": "kubernetes://reviews-v3-54c6c64795-wbls7.default"
+                            }
+                        }
+                    },
+                    "loadBalancingWeight": 1
+                },
+                {
+                    "endpoint": {
+                        "address": {
+                            "socketAddress": {
+                                "address": "10.40.0.17",
+                                "portValue": 9080
+                            }
+                        }
+                    },
+                    "metadata": {
+                        "filterMetadata": {
+                            "envoy.transport_socket_match": {
+                                "tlsMode": "istio"
+                            },
+                            "istio": {
+                                "uid": "kubernetes://reviews-v2-597bf96c8f-l2fp8.default"
+                            }
+                        }
+                    },
+                    "loadBalancingWeight": 1
+                }
+            ],
+            "loadBalancingWeight": 3
+        }
+    ]
+}
+```
+8. 请求被转发到其中一个endpoint 10.40.0.15，即 reviews-v1 所在的 pod。
+9. 然后该请求被 iptable 规则拦截，重定向到本地的15006端口。
+10. 在15006端口上监听的 Virtual  Inbound Listener 收到了该请求。
+11. 根据匹配条件，请求被 Virtual Inbound Listener 内部配置的 Http connection manager filter 处理，该 filter 设置的路由配置为将其发送给 inbound|9080|http|reviews.default.svc.cluster.local 这个 inbound cluster。
+```json
+{
+    "version_info": "2019-12-04T03:07:44Z/12",
+    "listener": {
+        "name": "virtualInbound",
+        "address": {
+            "socket_address": {
+                "address": "0.0.0.0",
+                "port_value": 15006
+            }
+        },
+        "filter_chains": [
+            ......
+            {
+                "filter_chain_match": {
+                    "prefix_ranges": [
+                        {
+                            "address_prefix": "10.40.0.15",
+                            "prefix_len": 32
+                        }
+                    ],
+                    "destination_port": 9080
+                },
+                "filters": [
+                    {
+                        "name": "envoy.http_connection_manager",
+                        "typed_config": {
+                            "@type": "type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager",
+                            "stat_prefix": "inbound_10.40.0.15_9080",
+                            "http_filters": [
+                                {
+                                    "name": "istio_authn",
+                                    ......
+                                },
+                                {
+                                    "name": "mixer",
+                                    ......
+                                },
+                                {
+                                    "name": "envoy.cors"
+                                },
+                                {
+                                    "name": "envoy.fault"
+                                },
+                                {
+                                    "name": "envoy.router"
+                                }
+                            ],
+                            ......
+                            "route_config": {
+                                "name": "inbound|9080|http|reviews.default.svc.cluster.local",
+                                "virtual_hosts": [
+                                    {
+                                        "name": "inbound|http|9080",
+                                        "domains": [
+                                            "*"
+                                        ],
+                                        "routes": [
+                                            {
+                                                "match": {
+                                                    "prefix": "/"
+                                                },
+                                                ......
+                                                "route": {
+                                                    "timeout": "0s",
+                                                    "max_grpc_timeout": "0s",
+                                                    "cluster": "inbound|9080|http|reviews.default.svc.cluster.local" //对应的inbound cluster
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "validate_clusters": false
+                            }
+                        }
+                    }
+                ],
+                ......
+}
+```
+12. inbound|9080|http|reviews.default.svc.cluster.local cluster 配置的host为127.0.0.1：9080。
+```json
+{
+    "version_info": "2019-12-04T03:08:06Z/13",
+    "cluster": {
+        "name": "inbound|9080|http|productpage.default.svc.cluster.local",
+        "type": "STATIC",
+        "connect_timeout": "1s",
+        "circuit_breakers": {
+            "thresholds": [
+                {
+                    "max_connections": 4294967295,
+                    "max_pending_requests": 4294967295,
+                    "max_requests": 4294967295,
+                    "max_retries": 4294967295
+                }
+            ]
+        },
+        "load_assignment": {
+            "cluster_name": "inbound|9080|http|productpage.default.svc.cluster.local",
+            "endpoints": [
+                {
+                    "lb_endpoints": [
+                        {
+                            "endpoint": {
+                                "address": {
+                                    "socket_address": {
+                                        "address": "127.0.0.1", //cluster配置的endpoint地址
+                                        "port_value": 9080
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "last_updated": "2019-12-04T03:08:22.658Z"
+}
+```
+13. 请求被转发到127.0.0.1：9080，即 `reviews` 服务进行业务处理。
 
 ## 小结
 
