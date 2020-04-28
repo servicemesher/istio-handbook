@@ -143,11 +143,11 @@ time_total:1.064210
 使用 kubectl 进入`productpage`容器访问`reviews`服务，返回 `504` 超时错误：
 
 ```bash
+$ kubectl exec -it productpage-v1-55cd77bf9-j8gjz bash
 $ apt-get update
 ...
 $ apt install curl  # 该镜像本身并不自带 curl，需要手动安装
 ...
-$ kubectl exec -it productpage-v1-55cd77bf9-j8gjz bash
 $ curl --silent -w"\nStatus: %{http_code}\n" http://reviews:9080/reviews/0
 upstream request timeout
 Status: 504
