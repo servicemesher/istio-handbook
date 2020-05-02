@@ -5,11 +5,11 @@ reviewers: [""]
 
 # 双向 TLS
 
-TLS 在 web 端的使用非常广泛，针对传输的内容进行加密，能够有效的防止中间人攻击。双向TLS(Two way TLS/Mutual TLS，后文均简称 mTLS)的主要使用场景是在 B2B 和 Server-to-Server 的场景中，使得服务和服务之间能够相互 authentication。
+TLS 在 web 端的使用非常广泛，针对传输的内容进行加密，能够有效的防止中间人攻击。双向TLS（Two way TLS/Mutual TLS，后文均简称 mTLS）的主要使用场景是在 B2B 和 Server-to-Server 的场景中，使得服务和服务之间能够相互鉴权。
 ![istio-official-authorization-arch](../images/authz.png)
-图片源引[Istio官网](https://istio.io/docs/concepts/security/authz.svg)
 
-图中非常明确的表示 Istio 所希望的是在 Service Mesh 中能够使用 mTLS 进行 authorization，而在 Service Mesh 外使用 JWT+mTLS 进行 authorization。服务间身份认证是使用 mTLS，来源身份验证中则是使用 JWT。
+上图源引[Istio官网](https://istio.io/docs/concepts/security/authz.svg)
+，图中非常明确的表示 Istio 所希望的是在 Service Mesh 中能够使用 mTLS 进行 authorization，而在 Service Mesh 外使用 JWT+mTLS 进行 authorization。服务间身份认证是使用 mTLS，来源身份验证中则是使用 JWT。
 
 本文将一一阐述 mTLS handshake 的过程，Envoy 中如何实现 handshake，以及 Istio 中在各个方面如何使用，在 Kubernetes 集群中使用有哪些注意事项，和选择 mTLS 的合适使用场景几个方面。
 
@@ -87,7 +87,7 @@ X.509 标准是密码学里公钥证书的格式标准。去除掉数学上的�
 3. 证书的颁发者(CA 机构)
 4. 签名值，将证书中的信息用 CA 机构的 private key 进行加密后的值，可用 public key 解密，用于比对上述信息没有被篡改
 
-5. SAN( Subject Alternative Name )，使用 subjectAltName 来扩展此证书支持的域名，使得一个证书可以支持多个不同域名的解析。SAN 的组织形式使用 [SPIFFE](https://github.com/spiffe/spiffe/blob/master/standards/X509-SVID.md)
+5. SAN（Subject Alternative Name），使用 subjectAltName 来扩展此证书支持的域名，使得一个证书可以支持多个不同域名的解析。SAN 的组织形式使用 [SPIFFE](https://github.com/spiffe/spiffe/blob/master/standards/X509-SVID.md)
 ```bash
 $ kubectl exec $(kubectl get pod -l app=httpbin -o jsonpath={.items..metadata.name}) -c istio-proxy -- cat /etc/certs/cert-chain.pem | openssl x509 -text -noout  | grep 'Subject Alternative Name' -A 1
         X509v3 Subject Alternative Name:
@@ -130,7 +130,7 @@ bool AuthenticatorBase::validateX509(const iaapi::MutualTls& mtls,
   return validateTrustDomain(connection);
 }
 ```
-在 `validateX509` 会发现首先会检查 connection 中是否为明文传输等一些内容，并根据我们在运维工程中写入的配置文件进行处理（例如 PERMISSIVE 模式下在明文情况下将直接返回 true ）。如果对方不为明文传输且拥有证书，则进入到 `validateTrustDomain`
+在 `validateX509` 会发现首先会检查 connection 中是否为明文传输等一些内容，并根据我们在运维工程中写入的配置文件进行处理（例如 PERMISSIVE 模式下在明文情况下将直接返回 true）。如果对方不为明文传输且拥有证书，则进入到 `validateTrustDomain`。
 
 ```c
 bool AuthenticatorBase::validateTrustDomain(
@@ -317,7 +317,7 @@ response code: 200
 Istio 在1.5版本前，会在每一个 namespace 下创建一个 `istio.default` 的 secret，存储默认的 CA 文件，并会被 mount 在 sidecar 中以供使用，但是在1.5版本中，不会再存储在 secret 中，只能通过 rpc 调用才能获取到响应的内容，内容最终会被分配在内存中，但我们可以使用 `openssl s_client` 进行访问来获得证书。
 ```bash
 kubectl exec <pod> -c istio-proxy -- openssl s_client -alpn istio -connect <service:port> # 获取到证书
-openssl x509 -text -noout -in server.pem #对上一个cmd返回内容中的server.pem进行解析。
+openssl x509 -text -noout -in server.pem # 对上一个cmd返回内容中的server.pem 进行解析
 Certificate:
     Data:
         Version: 3 (0x2)
@@ -388,8 +388,8 @@ response code: 403
 我们看到当 `sleep.full` 请求 `httpbin.mtls-test` 时，此时返回403，说明其存在证书，但是证书的的 SAN 值域并不在 Trust Domain 中(配置文件类似于配置了黑名单)，因此返回403。
 
 ### mTLS 与数据库
-#### Mongodb 内置 mTLS
-数据库作为 cloud 中因其 stateful 的特性以及对于性能和安全的要求，一直存在着许许多多的问题，今天我们就以 Mongodb 为例，通过 mTLS 访问外的 Mongodb 服务。Mongodb 自身能够提供 mTLS 的服务，首先我们在 Kubernetes 首先实现 mTLS，再将 client 放入到 Service Mesh 中。
+#### MongoDB 内置 mTLS
+数据库作为 cloud 中因其 stateful 的特性以及对于性能和安全的要求，一直存在着许许多多的问题，今天我们就以 MongoDB 为例，通过 mTLS 访问外的 MongoDB 服务。MongoDB 自身能够提供 mTLS 的服务，首先我们在 Kubernetes 首先实现 mTLS，再将 client 放入到 Service Mesh 中。
 首先使用 openssl 自行签发证书：
 ```bash
 openssl req -out ca.pem -new -x509 -days 3650 -subj "/C=CN/CN=root/emailAddress=11111@qq.com" # 生成根证书
@@ -503,7 +503,7 @@ spec:
 ```bash
 root@mongo-client-548f5974f-xbxx6: mongo --tls --tlsCAFile /pem/ca.pem --tlsCertificateKeyFile /pem/client.pem --host mongo
 MongoDB shell version v4.2.6
-connecting to: Mongodb://mongo:27017/?compressors=disabled&gssapiServiceName=Mongodb
+connecting to: MongoDB://mongo:27017/?compressors=disabled&gssapiServiceName=MongoDB
 Implicit session: session { "id" : UUID("150e352f-5635-4af2-9ad7-f37e2840ec6b") }
 MongoDB server version: 4.2.6
 Welcome to the MongoDB shell.
@@ -511,7 +511,7 @@ Welcome to the MongoDB shell.
 
 root@mongo-client-548f5974f-xbxx6:/ mongo  --host mongo
 MongoDB shell version v4.2.6
-connecting to: Mongodb://mongo:27017/?compressors=disabled&gssapiServiceName=Mongodb
+connecting to: MongoDB://mongo:27017/?compressors=disabled&gssapiServiceName=MongoDB
 2020-05-02T06:19:11.562+0000 I  NETWORK  [js] DBClientConnection failed to receive message from mongo:27017 - HostUnreachable: Connection closed by peer
 2020-05-02T06:19:11.562+0000 E  QUERY    [js] Error: network error while attempting to run command 'isMaster' on host 'mongo:27017'  :
 connect@src/mongo/shell/mongo.js:341:17
@@ -527,7 +527,7 @@ Failed global initialization: InvalidSSLConfiguration Can not set up PEM key fil
 
 root@mongo-client-548f5974f-xbxx6:/ mongo --tls --tlsCAFile /pem/client.pem --tlsCertificateKeyFile /pem/client.pem --host mongo
 MongoDB shell version v4.2.6
-connecting to: Mongodb://mongo:27017/?compressors=disabled&gssapiServiceName=Mongodb
+connecting to: MongoDB://mongo:27017/?compressors=disabled&gssapiServiceName=MongoDB
 2020-05-02T06:30:36.144+0000 E  NETWORK  [js] SSL peer certificate validation failed: self signed certificate in certificate chain
 2020-05-02T06:30:36.145+0000 E  QUERY    [js] Error: couldn't connect to server mongo:27017, connection attempt failed: SSLHandshakeFailed: SSL peer certificate validation failed: self signed certificate in certificate chain :
 connect@src/mongo/shell/mongo.js:341:17
@@ -535,8 +535,8 @@ connect@src/mongo/shell/mongo.js:341:17
 2020-05-02T06:30:36.147+0000 F  -        [main] exception: connect failed
 2020-05-02T06:30:36.148+0000 E  -        [main] exiting with code 1
 ```
-上述的输出可以表明，在没有证书和证书不正确的情况下都无法连入数据库，我们能够正确使用 mTLS 模式访问Mongodb，在访问 Mongodb 上现在已经有了非常安全的保障，但是在 client 端需要开发者自行处理有关证书的事宜，这不仅仅会给开发者带来困扰，也会将证书与私钥对外暴露，如果 client 在 Service Mesh 内部，我们可以让 sidecar 来负责相关的工作。
-#### Istio mTLS 结合 Mongodb
+上述的输出可以表明，在没有证书和证书不正确的情况下都无法连入数据库，我们能够正确使用 mTLS 模式访问MongoDB，在访问 MongoDB 上现在已经有了非常安全的保障，但是在 client 端需要开发者自行处理有关证书的事宜，这不仅仅会给开发者带来困扰，也会将证书与私钥对外暴露，如果 client 在 Service Mesh 内部，我们可以让 sidecar 来负责相关的工作。
+#### Istio mTLS 结合 MongoDB
 我们主要针对 client 端进行改造，将其部署在 Service Mesh 中。
 ```yaml
 apiVersion: apps/v1
@@ -566,7 +566,7 @@ spec:
         name: mongo-client
 ---
 ```
-其中 `template.annotations` 可参考[Resource Annotations](https://preliminary.istio.io/docs/reference/config/annotations/)，这里主要的用途是为了将我们client端的相关证书等内容mount进入到istio-proxy容器中。
+其中 `template.annotations` 可参考[Resource Annotations](https://preliminary.istio.io/docs/reference/config/annotations/)，这里主要的用途是为了将我们 client 端的相关证书等内容 mount 进入到 `istio-proxy` 容器中。
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -588,7 +588,7 @@ spec:
 ```bash
 root@mongo-client-7557b58674-f2rvc:/ mongo --host mongo.mongo
 MongoDB shell version v4.2.6
-connecting to: Mongodb://mongo.mongo:27017/?compressors=disabled&gssapiServiceName=Mongodb
+connecting to: MongoDB://mongo.mongo:27017/?compressors=disabled&gssapiServiceName=MongoDB
 Implicit session: session { "id" : UUID("19b8f417-4e6b-4ef6-9fda-15e9f1703ebf") }
 MongoDB server version: 4.2.6
 Welcome to the MongoDB shell.
@@ -675,5 +675,5 @@ Deployment 的主要修改在 `template.metadata` 中添加了 `sidecar.istio.io
 * [Subject Alternative Name](https://en.wikipedia.org/wiki/Subject_Alternative_Name)
 * [Authz-td-Migration](https://istio.io/docs/tasks/security/authorization/authz-td-migration)
 * [Istio 1.5 upgrade notes](https://istio.io/news/releases/1.5.x/announcing-1.5/upgrade-notes)
-* [Mongodb Configure TLS](https://docs.Mongodb.com/manual/tutorial/configure-ssl)
-* [Mongodb TLS Performance](https://www.synopsys.com/content/dam/synopsys/sig-assets/case-studies/tls-performance-overhead-Mongodb.pdf)
+* [MongoDB Configure TLS](https://docs.MongoDB.com/manual/tutorial/configure-ssl)
+* [MongoDB TLS Performance](https://www.synopsys.com/content/dam/synopsys/sig-assets/case-studies/tls-performance-overhead-MongoDB.pdf)
