@@ -25,7 +25,7 @@ istioctl dashboard controlz $ISTIOD_POD -n istio-system
 
 当我们在调试 istiod 组件时，往往会结合组件本身的日志进行一些问题排查，但是组件默认可能不会打印一些模块日志，ControlZ 工具提供了一个可视化的日志打印范围调整工具，直接通过点击左侧菜单即可访问：
 
-![istiod ControlZ 日志作用域设置页面](../images/diagnostic-tools-contolz-logging.png)
+![istiod ControlZ 日志作用域设置页面](../images/diagnostic-tools-controlz-logging.png)
 
 表格中展示的是组件内的日志作用域以及相应的描述信息，可以直接对某个特定的作用域进行日志输出级别调整，默认这些日志作用域的日志输出都是关闭的，如果希望打开日志，只需在表格的最后一列进行勾选即可，这个操作是实时生效的。
 
