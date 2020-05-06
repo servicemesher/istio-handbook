@@ -1,6 +1,6 @@
 ---
 authors: ["sunny0826"]
-reviewers: ["rootsongjc"]
+reviewers: ["rootsongjc","GuangmingLuo"]
 ---
 
 # 重试
