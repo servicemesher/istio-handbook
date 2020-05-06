@@ -5,7 +5,7 @@ reviewers: [""]
 
 # 重试
 
-在网络环境不稳定的情况下，会出现暂时的网络不可达现象，这时需要重试机制，通过多次尝试来获取正确的返回信息。重试逻辑可以写业务代码中，比如 Bookinfo 应用中的`productpage`服务就存在硬编码重试，而 Istio 可以通过简单的配置来实现重试功能，让开发人员无需顾忌重试部分的代码实现，专心实现业务代码。
+在网络环境不稳定的情况下，会出现暂时的网络不可达现象，这时需要重试机制，通过多次尝试来获取正确的返回信息。重试逻辑可以写业务代码中，比如 Bookinfo 应用中的`productpage`服务就存在硬编码重试，而 Istio 可以通过简单的配置来实现重试功能，让开发人员无需关注重试部分的代码实现，专心实现业务代码。
 
 ## 原理
 
@@ -42,7 +42,7 @@ $ kubectl run -i --rm --restart=Never dummy --image=dockerqa/curl:ubuntu-trusty 
 查看`httpbin`服务的 Proxy 日志，这里同一时刻只能看到一条访问请求日志：
 
 ```bash
-$ kubectl logs httpbin-779c54bf49-25sfc -c istio-proxy | grep "HEAD /status/500"
+$ kubectl logs $(kubectl get pod -l app=httpbin,version=v1 -o jsonpath={.items..metadata.name}) -c istio-proxy | grep "HEAD /status/500"
 ...
 [2020-04-28T02:26:32.129Z] "HEAD /status/500 HTTP/1.1" 500 - "-" "-" 0 0 4 3 "-" "curl/7.35.0" "be17043d-04b5-93cd-bf66-a03bdeee37f4" "httpbin:8000" "127.0.0.1:80" inbound|8000|http|httpbin.default.svc.cluster.local 127.0.0.1:46922 10.42.0.39:80 10.42.0.40:36416 outbound_.8000_._.httpbin.default.svc.cluster.local default
 ```
@@ -80,7 +80,7 @@ $ kubectl run -i --rm --restart=Never dummy --image=dockerqa/curl:ubuntu-trusty 
 查看`httpbin`服务的 Proxy 日志，可以看到同一时刻有 4 调请求日志，其中第一条是正常请求的访问日志，后三条为重试请求的访问日志：
 
 ```bash
-$ kubectl logs httpbin-779c54bf49-25sfc -c istio-proxy | grep "HEAD /status/500"
+$ kubectl logs $(kubectl get pod -l app=httpbin,version=v1 -o jsonpath={.items..metadata.name}) -c istio-proxy | grep "HEAD /status/500"
 ....
 [2020-04-28T02:29:53.659Z] "HEAD /status/500 HTTP/1.1" 500 - "-" "-" 0 0 4 3 "-" "curl/7.35.0" "be17043d-04b5-93cd-bf66-a03bdeee37f4" "httpbin:8000" "127.0.0.1:80" inbound|8000|http|httpbin.default.svc.cluster.local 127.0.0.1:46922 10.42.0.39:80 10.42.0.40:36416 outbound_.8000_._.httpbin.default.svc.cluster.local default
 [2020-04-28T02:29:53.704Z] "HEAD /status/500 HTTP/1.1" 500 - "-" "-" 0 0 1 0 "-" "curl/7.35.0" "be17043d-04b5-93cd-bf66-a03bdeee37f4" "httpbin:8000" "127.0.0.1:80" inbound|8000|http|httpbin.default.svc.cluster.local 127.0.0.1:46922 10.42.0.39:80 10.42.0.40:36416 outbound_.8000_._.httpbin.default.svc.cluster.local default
