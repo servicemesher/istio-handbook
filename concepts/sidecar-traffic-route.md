@@ -5,8 +5,8 @@ reviewers: [""]
 
 # Sidecar 流量路由机制分析
 
-流量管理是 Istio 的核心能力，Istio 中的很多功能，包括请求路由，负载均衡，灰度发布，流量镜像等，都是依托于流量管理的能力实现的。在 Istio 服务网格中，Pilot 作为控制面提供了流量管理的 API 和控制命令，而真正的流量路由则是由数据面的 sidecar 实现的。本节将对 sidecar 的流量路由机制进行分析，以帮助读者理解 Istio 流量管理的实现原理。
-> 备注：本节将对大量 Envoy 的配置文件内容进行分析。文中采用了 json 格式来展示 Envoy 的配置， json 文件本身并不支持注释，但为了向读者解释配置文件中的各部分内容的作用，本文将采用“// 注释...”的格式添加注释进行说明。另外，为了方便阅读，将重点展示配置中和流量路由相关的部分，省略部分内容。建议读者在阅读本节时参考[Github中的完整配置文件](https://github.com/servicemesher/istio-handbook-resources/tree/master/code/concepts/bookinfo-bookinfo-config-dump/)，以助于对本文的理解。
+流量管理是 Istio 服务网格的一项核心能力，Istio 中的很多功能，包括请求路由，负载均衡，灰度发布，流量镜像等，都是依托于其流量管理的能力实现的。在 Istio 服务网格中，Pilot 提供了控制面的流量管理接口，而真正的流量路由则是由数据面的 sidecar 实现的。本节将对 sidecar 的流量路由机制进行分析，以帮助读者理解 Istio 流量管理的实现原理。
+> 备注：本节将对大量 Envoy 的配置文件内容进行分析。文中采用了 json 格式来展示 Envoy 的配置， json 本身并不支持注释，但为了向读者解释配置文件中的各部分内容的作用，本文将采用“// 注释...”的格式添加注释进行说明。另外，为了方便阅读，将重点展示配置中和流量路由相关的部分，省略部分内容。建议读者在阅读本节时参考[Github中的完整配置文件](https://github.com/servicemesher/istio-handbook-resources/tree/master/code/concepts/bookinfo-bookinfo-config-dump/)，以助于对本文的理解。
 
 ## 基本的概念和术语
 
@@ -20,7 +20,7 @@ reviewers: [""]
 
 ## XDS服务接口
 
-Pilot 通过 xDS 接口向数据面的 sidecar 下发动态配置信息，以对网格中的数据流量进行控制。xDS 中的 DS 意为 discovery service，即发现服务，表示 xDS 接口使用动态发现的方式提供数据面所需的配置数据。而 x 则是一个代词，表示有多种 discover service。本节不对 xDS 接口展开进行描述，关于 xDS 接口的更多内容参见本书的 xDS 章节部分的介绍。
+Pilot 通过 xDS 接口向数据面的 sidecar 下发动态配置信息，以对网格中的数据流量进行控制。xDS 中的 DS 意为 discovery service，即发现服务，表示 xDS 接口使用动态发现的方式提供数据面所需的配置数据。而 x 则是一个代词，表示有多种 discovery service。本节不对 xDS 接口展开进行描述，关于 xDS 接口的更多内容参见本书的 xDS 章节部分的介绍。
 
 ## Envoy 配置介绍
 
@@ -235,7 +235,7 @@ curl http://10.97.222.108:15014/debug/edsz > pilot_eds_dump
 
 ##### Inbound Cluster
 
-该类 cluster  对应于 Envoy 所在节点上的服务。如果该服务接收到请求，当然就是一个入站请求。对于 productpage Pod 上的 Envoy，其对应的 Inbound cluster  只有一个，即 productpage。该 cluster 对应的 host 为127.0.0.1,即环回地址上 productpage 的监听端口。由于 iptable 规则中排除了127.0.0.1,入站请求通过该 Inbound cluster 处理后将跳过 Envoy，直接发送给 productpage 进程处理。
+对于 Envoy 来说，inbound cluster 对应于入向请求的 upstream 集群， 即 Envoy 自身所在节点的服务。对于 productpage Pod 上的 Envoy，其对应的 Inbound cluster 只有一个，即 productpage。该 cluster 对应的 host 为127.0.0.1,即环回地址上 productpage 的监听端口。由于 iptable 规则中排除了127.0.0.1,入站请求通过该 Inbound cluster 处理后将跳过 Envoy，直接发送给 productpage 进程处理。
 
 ```json
 {
@@ -1191,4 +1191,4 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
 
 # 小结
  
-本节介绍了 Istio 中 sidecar 内部配置的数据结构和内容，并通过 bookinfo 示例程序的一个端到端调用分析了 Envoy 是 如何实现服务网格中的流量路由的。虽然文中未涉及按照版本对请求路由，流量镜像，故障注入，熔断等高级流量管理功能，但读者也可以参考本节介绍的方法，研究和分析这些流量管理功能的内部原理，以透过表面的概念更进一步深入理解 Istio 流量管理的实现机制。
+本节介绍了 Istio 中 sidecar 内部配置的数据结构和内容，并通过 bookinfo 示例程序的一个端到端调用分析了 Envoy 是 如何实现服务网格中的流量路由的。虽然文中未涉及按照版本对请求路由、流量镜像、故障注入、熔断等高级流量管理功能，但读者也可以参考本节介绍的方法对这些功能进行分析，以透过表面的概念更进一步深入理解 Istio 流量管理的实现机制。
