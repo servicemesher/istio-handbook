@@ -38,7 +38,7 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 ## 本书作者
 
 
-|  | github | 姓名 |  | github | 姓名 |
+| 头像 | GitHub | 姓名 | 头像 | GitHub | 姓名 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
 | ![](https://avatars2.githubusercontent.com/u/3328185?s=60&v=4) | [rootsongjc](https://github.com/rootsongjc) | 宋净超 | ![](https://avatars2.githubusercontent.com/u/1321762?s=60&v=4) | [zhaohuabing](https://github.com/zhaohuabing) | 赵化冰 |
 | ![](https://avatars1.githubusercontent.com/u/24563928?s=60&v=4) | [sunny0826](https://github.com/sunny0826) | 郭旭东 | ![](https://avatars3.githubusercontent.com/u/16001996?s=60&v=4) | [GuangmingLuo](https://github.com/GuangmingLuo) | 罗广明 |
