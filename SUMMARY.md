@@ -19,6 +19,7 @@
     - [Citadel](concepts/citadel.md)
     - [Galley](concepts/galley.md)
   - [数据平面](concepts/data-plane.md)
+    - [Sidecar 注入及透明流量劫持](concepts/sidecar-injection.md)
     - [Envoy](concepts/envoy.md)
     - [MOSN](concepts/mosn.md)
 - [核心功能](concepts/core-features.md)
@@ -71,7 +72,6 @@
     - [ELK](practice/elk.md)
     - [EFK](practice/efk.md)
   - [分布式追踪](practice/distributed-tracing.md)
-    - [OpenTracing](practice/opentracing.md)
     - [Jeager](practice/jeager.md)
     - [Zipkin](practice/zipkin.md)
     - [Skywalking](practice/skywalking.md)
@@ -101,11 +101,17 @@
     - [Kong](practice/kong.md)
     - [Nginx](practice/nginx.md)
     - [MOSN](practice/mosn.md)
+  - [分布式追踪增强](practice/enhance-tracing.md)
+    - [Opentracing 介绍](practice/opentracing.md)
+    - [实现方法级调用跟踪](practice/method-level-tracing.md)
+    - [实现 Kafka 消息跟踪](practice/kafka-tracing.md)
 - [部署模型](practice/deployments.md)
   - [多集群部署与管理](practice/multiple-cluster.md)
 - [故障排查](practice/troubleshooting.md)
   - [常见问题](practice/faq.md)
   - [诊断工具](practice/diagnostic-tools.md)
+    - [istioctl 命令行工具](practice/istioctl-cmd-tool.md)
+    - [ControlZ 自检工具](practice/controlz-tool.md)
 
 ## 生态扩展
 

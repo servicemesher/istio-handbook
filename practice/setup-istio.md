@@ -28,21 +28,21 @@ reviewers: ["rootsongjc"]
 
 Minikube 是一种可以在本地轻松运行 Kubernetes 的工具，适用于所有主流操作系统。Minikube 可在笔记本电脑上的虚拟机（VM）中运行单节点 Kubernetes 集群，供那些希望尝试 Kubernetes 或进行日常开发的用户使用。下面以 Linux 平台为例，简要说明 Minikube 的安装步骤。
 
-1. 下载 Minikube，你可以在 Minikube 在 GitHub 上的 [releases 页面](https://github.com/kubernetes/minikube/releases)找到 Linux (AMD64) 的包。这里直接下载 Minikube 的二进制文件，并添加执行权限：
-    ```bash
-    $ curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube
-    ```
+下载 Minikube，你可以在 Minikube 在 GitHub 上的 [releases 页面](https://github.com/kubernetes/minikube/releases)找到 Linux (AMD64) 的包。这里直接下载 Minikube 的二进制文件，并添加执行权限。
+```bash
+$ curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube
+```
 
-2. 将 Minikube 可执行文件添加至 path：
-    ```bash
-    $ sudo mkdir -p /usr/local/bin/
-    $ sudo install minikube /usr/local/bin/
-    ```
+将 Minikube 可执行文件添加至 `$PATH`。
+```bash
+$ sudo mkdir -p /usr/local/bin/
+$ sudo install minikube /usr/local/bin/
+```
 
-3. 启动 Minikube 并创建一个集群：
-    ```bash
-    $ minikube start
-    ```
+启动 Minikube 并创建一个集群。
+```bash
+$ minikube start
+```
 
 创建成功后，用户需要使用 kubectl 工具来管理和操作集群中的各种资源，`minikube start` 命令会创建一个名为 `minikube` 的 [kubectl 上下文](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-set-context-em-)。Minikube 会自动将此上下文设置为默认值，但如果您以后需要切换回它，请运行：
 
@@ -54,7 +54,7 @@ $ kubectl config use-context minikube
 $ kubectl get pods --context=minikube
 ```
 
-详细安装步骤以及操作说明请参考 Minikube 官方文档：https://minikube.sigs.k8s.io/docs/
+详细安装步骤以及操作说明请参考 Minikube 官方文档：<https://minikube.sigs.k8s.io/docs/>。
 
 ## 安装 Istio
 
@@ -73,7 +73,7 @@ $ curl -L https://raw.githubusercontent.com/istio/istio/release-1.5/release/down
 |`samples`| 包含示例应用程序 |
 |`tools`| 包含用于性能测试和在本地机器上进行测试的脚本 |
 
-将`istioctl`客户端路径加入 $PATH 中：
+将`istioctl`客户端路径加入 `$PATH` 中：
 
 ```bash
 export PATH=$PATH:$(pwd)/istio-1.5.1/bin
@@ -130,4 +130,4 @@ prometheus-6c88c4cb8-xchzd              2/2     Running   0          4m24s
 ## 参考
 
 - [使用 Minikube 安装 Kubernetes - kubernetes.io](https://kubernetes.io/zh/docs/setup/learning-environment/minikube/)
-- [开始 - istio.io](https://istio.io/zh/docs/setup/getting-started/#download)
+- [开始 - istio.io](https://istio.io/zh/docs/setup/getting-started/)
