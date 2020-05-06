@@ -45,7 +45,7 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 | ![](https://avatars3.githubusercontent.com/u/42396612?s=60&v=4) | [tony-Ma-yami](https://github.com/tony-Ma-yami) | 马博 | ![](https://avatars3.githubusercontent.com/u/730866?s=60&v=4) | [hb-chen](https://github.com/hb-chen) | 陈洪波 | ![](https://avatars1.githubusercontent.com/u/13655991?s=60&v=4) | [dangpf](https://github.com/dangpf) | 党鹏飞 |
 | ![](https://avatars2.githubusercontent.com/u/5086059?s=60&v=4) | [violetgo](https://github.com/violetgo) | 高威 | ![](https://avatars1.githubusercontent.com/u/7353685?s=60&v=4) | [wuti1609](https://github.com/wuti1609) | 马越 | ![](https://avatars0.githubusercontent.com/u/26428832?s=60&v=4) | [Lovnx](https://github.com/Lovnx) | 叶志远 |
 
-**认领章节并提交PR，成功合并后即可成为作者，期待你的加入。**
+**[认领章节](wg/process.md)并提交 PR，成功合并后即可成为作者，期待你的加入。**
 
 ## 版权许可
 
