@@ -1,13 +1,13 @@
 ---
 authors: ["sunny0826"]
-reviewers: [""]
+reviewers: ["rootsongjc"]
 ---
 
 # 重试
 
 在网络环境不稳定的情况下，会出现暂时的网络不可达现象，这时需要重试机制，通过多次尝试来获取正确的返回信息。重试逻辑可以写业务代码中，比如 Bookinfo 应用中的`productpage`服务就存在硬编码重试，而 Istio 可以通过简单的配置来实现重试功能，让开发人员无需关注重试部分的代码实现，专心实现业务代码。
 
-## 原理
+## 背景
 
 本实践使用 [httpbin](https://github.com/istio/istio/tree/release-1.5/samples/httpbin) 示例，通过访问在集群内访问 `httpbin:8000/status/500` 地址来模拟返回状态码为 500 的现象，通过在 Istio 设置自动重试 3 次，学习重试的设置方式。
 
