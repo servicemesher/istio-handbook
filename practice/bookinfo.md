@@ -1,9 +1,8 @@
-```
 ---
 authors: ["linda01232003"]
 reviewers: ["rootsongjc", malphi", tony-Ma-yami","sunny0826"]
 ---
-```
+
 
 # Bookinfo 示例
 
