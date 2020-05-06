@@ -1,21 +1,21 @@
 ```
 ---
 authors: ["linda01232003"]
-reviewers: ["rootsongjc"]
+reviewers: ["rootsongjc", malphi", tony-Ma-yami","sunny0826"]
 ---
 ```
 
-# Bookinfo示例
+# Bookinfo 示例
 
 Bookinfo 是 Istio 社区官方推荐的示例应用之一。它可以用来演示多种 Istio 的特性，并且它是异构的微服务架构。该应用由四个单独的微服务构成。 这个应用模仿了在线书店，可以展示书店中书籍的信息。例如页面上会显示一本书的描述，书籍的细节（ ISBN、页数等），以及关于这本书的一些评论。 
 
 Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依赖，但是构成了一个有代表性的服务网格的例子：它由多个服务、多个语言构成，并且其中有一个应用会包含多个版本。 
 
 
-- `productpage`会调用 `details` 和 `reviews` 两个微服务，用来生成页面。
+- `productpage` 会调用 `details` 和 `reviews` 两个微服务，用来生成页面。
 - `details` 中包含了书籍的信息。
-- `reviews`中包含了书籍相关的评论。它还会调用 `ratings` 微服务。
-- `ratings`中包含了由书籍评价组成的评级信息。
+- `reviews ` 中包含了书籍相关的评论。它还会调用 `ratings` 微服务。
+- `ratings` 中包含了由书籍评价组成的评级信息。
 
 `reviews` 微服务有 3 个版本，可用来展示各服务之间的不同的调用链路：
 
@@ -117,36 +117,14 @@ $ export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
 ## 集群外部访问应用
 确认可以用浏览器打开网址`http://$GATEWAY_URL/productpage`，来浏览应用的 Web 页面。如果刷新几次应用的页面，就会看到 `productpage` 页面中会随机展示 `reviews` 服务的不同版本的效果（红色、黑色的星形或者没有显示）。`reviews` 服务出现这种情况是因为默认情况下的配置会随机访问三个版本，如果想设置个性化配置则可以用 Istio 来控制版本的路由。
 
-## 应用默认目标规则
-
-在使用 Istio 控制 Bookinfo 版本路由之前，您需要在目标规则中定义好可用的版本，命名为 subsets 。
-
-运行以下命令为 Bookinfo 服务创建的默认的目标规则：
-
-- 如果没有启用双向 TLS，请执行以下命令：
-
-  如果您是 Istio 的新手，并且使用了 demo，请选择此步。
-```bash
-$ kubectl apply -f samples/bookinfo/networking/destination-rule-all.yaml
-```
-
-- 如果启用了双向 TLS，请执行以下命令：
-```bash
-$ kubectl apply -f samples/bookinfo/networking/destination-rule-all-mtls.yaml
-```
-等待几秒钟，以使目标规则生效。
-您可以使用以下命令查看目标规则：
-```bash
-$ kubectl get destinationrules -o yaml
-```
 
 ## 下一步
 
-现在就可以使用这一应用来体验 Istio 的特性了，其中包括了流量的路由、故障注入、熔断等。 接下来可以根据个人爱好去研究和试验这些功能，可参见后续3.2入门实践章节内容。
+现在就可以使用这一应用来体验 Istio 的特性了，其中包括了流量的路由、故障注入、熔断等。 接下来可以根据个人爱好去研究和试验这些功能，可参见后续 3.2 入门实践章节内容。
 
 ## 清理
 
-结束对 Bookinfo 示例应用的体验之后，就可以使用下面的命令来完成应用的删除和清理了：
+结束对 Bookinfo 示例应用的体验之后，就可以使用官方提供的脚本直接清理即可：
 
 - 删除路由规则，并销毁应用的 Pod
 ```bash
