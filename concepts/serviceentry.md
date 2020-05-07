@@ -1,6 +1,6 @@
 ---
 authors: ["sunzhaochang"]
-reviewers: [""]
+reviewers: ["rootsongjc"]
 ---
 
 # ServiceEntry
@@ -16,7 +16,7 @@ Istio 支持对接 Kubernetes、Consul 等多种不同的注册中心，控制�
 ## ServiceEntry 示例和属性介绍
 
 对于网格外部的服务，下面的 ServiceEntry 示例表示网格内部的应用通过 https 访问外部的 API。
-```
+```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
@@ -33,7 +33,7 @@ spec:
 ```
 
 对于在网格内部但不属于平台服务注册表的服务，使用下面的示例可以将一组在非托管 VM 上运行的 MongoDB 实例添加到 Istio 的注册中心，以便可以将这些服务视为网格中的任何其他服务。
-```
+```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
@@ -80,18 +80,18 @@ Istio 提供了三种访问外部服务的方法：
 * REGISTRY_ONLY:  Istio 代理会阻止任何没有在网格中定义的 HTTP 服务或 ServiceEntry 的主机。
 
 可以使用下面的命令查看当前所使用的模式:
-```
+```bash
 $ kubectl get configmap istio -n istio-system -o yaml | grep -o "mode: ALLOW_ANY"
 mode: ALLOW_ANY
 ```
 如果当前使用的是ALLOW_ANY模式，可以使用下面的命令切换为REGISTRY_ONLY模式:
-```
+```bash
 $ kubectl get configmap istio -n istio-system -o yaml | sed 's/mode: ALLOW_ANY/mode: REGISTRY_ONLY/g' | kubectl replace -n istio-system -f -
 configmap "istio" replaced
 ```
 
 在 REGISTRY_ONLY 模式下，需要使用 ServiceEntry 才能完成对外部服务的访问。当创建如下的 ServiceEntry 时，服务网格内部的应用就可以正常访问 httpbin.org 服务了。
-```
+```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
@@ -112,7 +112,7 @@ spec:
 使用 ServiceEntry 可以使网格内部服务发现并访问外部服务，除此之外，还可以对这些到外部服务的流量进行管理。结合 VirtualService 为对应的 ServiceEntry 配置外部服务访问规则，如请求超时、故障注入等，实现对指定服务的受控访问。
 
 下面的示例就是为外部服务 httpbin.org 设置了超时时间，当请求时间超过3s时，请求就会直接中断，避免因外部服务访问时延过高而影响内部服务的正常运行。由于外部服务的稳定性通常无法管控和监测，这种超时机制对内部服务的正常运行具有重要意义。
-```
+```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -129,7 +129,7 @@ spec:
 ```
 
 同样的，我们也可以为 ServiceEntry 设置故障注入规则，为系统测试提供基础。下面的示例表示为所有访问 httpbin.org 服务的请求注入一个403错误。
-```
+```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
