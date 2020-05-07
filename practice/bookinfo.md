@@ -1,14 +1,14 @@
 ---
 authors: ["linda01232003"]
-reviewers: ["rootsongjc", malphi", tony-Ma-yami","sunny0826"]
+reviewers: ["rootsongjc", malphi", tony-Ma-yami","sunny0826","zhaohuabing"]
 ---
 
 
 # Bookinfo 示例
 
-Bookinfo 是 Istio 社区官方推荐的示例应用之一。它可以用来演示多种 Istio 的特性，并且它是异构的微服务架构。该应用由四个单独的微服务构成。 这个应用模仿了在线书店，可以展示书店中书籍的信息。例如页面上会显示一本书的描述，书籍的细节（ ISBN、页数等），以及关于这本书的一些评论。 
+Bookinfo 是 Istio 社区官方推荐的示例应用之一。它可以用来演示多种 Istio 的特性，并且它是一个异构的微服务应用。该应用由四个单独的微服务构成。 这个应用模仿了在线书店，可以展示书店中书籍的信息。例如页面上会显示一本书的描述，书籍的细节（ ISBN、页数等），以及关于这本书的一些评论。 
 
-Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依赖，但是构成了一个有代表性的服务网格的例子：它由多个服务、多个语言构成，并且其中有一个应用会包含多个版本。 
+Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依赖，但是构成了一个有代表性的服务网格的例子：它由多个不同语言编写的服务构成，并且其中有一个应用会包含多个版本。 
 
 
 - `productpage` 会调用 `details` 和 `reviews` 两个微服务，用来生成页面。
@@ -28,11 +28,11 @@ Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依
 
 ## 环境准备
 
-3.1.1安装 Istio 小节中描述了 Istio 系统的安装，确认 Istio 安装成功之后，在 Istio 目录下的 samples/bookinfo 下可以找到 bookinfo 部署和源码文件，使用 kubernete 命令就可以实现 bookinfo 的安装部署。
+3.1.1安装 Istio 小节中描述了 Istio 系统的安装，确认 Istio 安装成功之后，在 Istio 目录下的 samples/bookinfo 下可以找到 Bookinfo 部署和源码文件，使用 kubernetes 命令就可以实现 Bookinfo 的安装部署。
 
 ## 部署应用
 
-要想该应用接入 Istio 服务网格，无需对应用自身做出任何改变。 您只要在 Istio 环境中对服务所在的命名空间进行 yaml 配置并重新启动运行就可以完成设置，下文中详细解说了将命名空间打入自动注入 sidecar 的命令和方法。 最终的部署结果将如下图所示： 
+ 想要将应用接入 Istio 服务网格，需要将应用所在的命名空间进行 yaml 配置，以打入对应可自动注入 Sidecar的标签，通过重启应用来完成自动加入网格的动作。最终加入到服务网格中的 Bookinfo 应用架构如下所示：
 
 ![Bookinfo Application](../images/Bookinfo-Application.png)
 
