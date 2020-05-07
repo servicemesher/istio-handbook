@@ -32,6 +32,7 @@ Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依
 
 ## 部署应用
 
+
 想要将应用接入 Istio 服务网格，需要将应用所在的命名空间进行 yaml 配置，以打入对应可自动注入 Sidecar的标签，通过重启应用来完成自动加入网格的动作。最终加入到服务网格中的 Bookinfo 应用架构如下所示：
 
 ![Bookinfo Application](../images/Bookinfo-Application.png)
@@ -40,6 +41,7 @@ Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依
 
 ## 启动应用服务
 
+
 首先进入 Istio 安装目录。
 
 Istio 默认自动注入 Sidecar，为 `default` 命名空间打上标签 `istio-injection=enabled`：
@@ -47,11 +49,13 @@ Istio 默认自动注入 Sidecar，为 `default` 命名空间打上标签 `istio
 $ kubectl label namespace default istio-injection=enabled
 ```
 使用 `kubectl` 部署应用：
+
 ```bash
 $ kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
 ```
 
 如果您在安装过程中禁用了 Sidecar 自动注入功能而选择手动注入 Sidecar，请在部署应用之前使用 `istioctl kube-inject`命令修改 `bookinfo.yaml` 文件，该命令可以从 Istio ConfigMap中动态获取网格配置。
+
 
 ```bash
  $ kubectl apply -f <(istioctl kube-inject -f samples/bookinfo/platform/kube/bookinfo.yaml)
@@ -70,7 +74,6 @@ $ kubectl get services
    ratings                    10.0.0.15    <none>        9080/TCP             6m
    reviews                    10.0.0.170   <none>        9080/TCP             6m
 ```
-
 ```bash
 $ kubectl get pods
    NAME                                        READY     STATUS    RESTARTS   AGE
@@ -82,36 +85,45 @@ $ kubectl get pods
    reviews-v3-1813607990-8ch52                 2/2       Running   0          6m
 ```
 
+
 要确认 Bookinfo 应用是否正在运行，请在某个 Pod 中用 `curl` 命令对应用发送请求，例如 `ratings`：
 ```bash
 $ kubectl exec -it $(kubectl get pod -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
 <title>Simple Bookstore App</title>
-```
+
 
 ## 确定 Ingress 的 IP 和端口
 
 现在 Bookinfo 服务启动并运行中，您需要使应用程序可以从外部访问 Kubernetes 集群，可以使用浏览器通过访问 Istio Gateway 来访问应用，通过以下操作步骤来实现。
 
+
 为应用程序定义 Ingress 网关：
+
 ```bash
 $ kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
 ```
 
+
 确认网关创建完成：
+
 ```bash
 $ kubectl get gateway
    NAME               AGE
    bookinfo-gateway   32s
 ```
 
+
 设置访问网关的 `INGRESS_HOST` 和 `INGRESS_PORT` 变量，例如node port模式。即当前环境未使用外部负载均衡器，需要通过 node port 访问。执行如下命令
+
 ```bash
 $ export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
 $ export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
  $ export INGRESS_HOST=127.0.0.1
 ```
 
+
 设置 `GATEWAY_URL`：
+
 ```bash
 $ export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
 ```
@@ -128,12 +140,16 @@ $ export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
 
 结束对 Bookinfo 示例应用的体验之后，就可以使用官方提供的脚本直接清理即可：
 
+
 删除路由规则，并销毁应用的 Pod。
+
 ```bash
 $ samples/bookinfo/platform/kube/cleanup.sh
 ```
 
+
 确认应用已经关停。
+
 ```bash
    $ kubectl get virtualservices   #-- there should be no virtual services
    $ kubectl get destinationrules  #-- there should be no destination rules
