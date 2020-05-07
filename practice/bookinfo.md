@@ -87,10 +87,11 @@ $ kubectl get pods
 
 
 要确认 Bookinfo 应用是否正在运行，请在某个 Pod 中用 `curl` 命令对应用发送请求，例如 `ratings`：
+
 ```bash
 $ kubectl exec -it $(kubectl get pod -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
 <title>Simple Bookstore App</title>
-
+```
 
 ## 确定 Ingress 的 IP 和端口
 
@@ -118,7 +119,7 @@ $ kubectl get gateway
 ```bash
 $ export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
 $ export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
- $ export INGRESS_HOST=127.0.0.1
+$ export INGRESS_HOST=127.0.0.1
 ```
 
 
