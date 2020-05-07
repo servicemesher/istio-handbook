@@ -40,7 +40,7 @@
             "label": "编辑本页"
         },
         "image-captions": {
-            "caption": "图片 - _CAPTION_"
+            "caption": "图 _PAGE_LEVEL_._PAGE_IMAGE_NUMBER_：_CAPTION_"
         },
         "github-buttons": {
             "repo": "servicemesher/istio-handbook",
