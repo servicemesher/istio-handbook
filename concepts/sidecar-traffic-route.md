@@ -1,11 +1,11 @@
 ---
 authors: ["zhaohuabing"]
-reviewers: [""]
+reviewers: ["rootsongjc"]
 ---
 
 # Sidecar 流量路由机制分析
 
-流量管理是 Istio 服务网格的一项核心能力，Istio 中的很多功能，包括请求路由，负载均衡，灰度发布，流量镜像等，都是依托于其流量管理的能力实现的。在 Istio 服务网格中，Pilot 提供了控制面的流量管理接口，而真正的流量路由则是由数据面的 sidecar 实现的。本节将对 sidecar 的流量路由机制进行分析，以帮助读者理解 Istio 流量管理的实现原理。
+流量管理是 Istio 服务网格的一项核心能力，Istio 中的很多功能，包括请求路由，负载均衡，灰度发布，流量镜像等，都是依托于其流量管理的能力实现的。在 Istio 服务网格中，Pilot 提供了控制平面的流量管理接口，而真正的流量路由则是由数据平面的 sidecar 实现的。本节将对 sidecar 的流量路由机制进行分析，以帮助读者理解 Istio 流量管理的实现原理。
 > 备注：本节将对大量 Envoy 的配置文件内容进行分析。文中采用了 json 格式来展示 Envoy 的配置， json 本身并不支持注释，但为了向读者解释配置文件中的各部分内容的作用，本文将采用“// 注释...”的格式添加注释进行说明。另外，为了方便阅读，将重点展示配置中和流量路由相关的部分，省略部分内容。建议读者在阅读本节时参考[Github中的完整配置文件](https://github.com/servicemesher/istio-handbook-resources/tree/master/code/concepts/bookinfo-bookinfo-config-dump/)，以助于对本文的理解。
 
 ## 基本的概念和术语
@@ -20,7 +20,7 @@ reviewers: [""]
 
 ## XDS服务接口
 
-Pilot 通过 xDS 接口向数据面的 sidecar 下发动态配置信息，以对网格中的数据流量进行控制。xDS 中的 DS 意为 discovery service，即发现服务，表示 xDS 接口使用动态发现的方式提供数据面所需的配置数据。而 x 则是一个代词，表示有多种 discovery service。本节不对 xDS 接口展开进行描述，关于 xDS 接口的更多内容参见本书的 xDS 章节部分的介绍。
+Pilot 通过 xDS 接口向数据平面的 sidecar 下发动态配置信息，以对网格中的数据流量进行控制。xDS 中的 DS 意为 discovery service，即发现服务，表示 xDS 接口使用动态发现的方式提供数据平面所需的配置数据。而 x 则是一个代词，表示有多种 discovery service。本节不对 xDS 接口展开进行描述，关于 xDS 接口的更多内容参见本书的 xDS 章节部分的介绍。
 
 ## Envoy 配置介绍
 
@@ -28,7 +28,7 @@ Envoy 是一个四层/七层代理，其架构非常灵活，采用了插件式�
 
 ### Envoy 初始化配置文件
 
-在 Istio 中，Envoy 的大部分配置都来自于控制面通过 xDS 接口下发的动态配置，包括网格中服务相关的 service cluster, listener, route 规则等。但 Envoy 是如何知道 xDS server 的地址呢？这就是在 Envoy 初始化配置文件中以静态资源的方式配置的。 Sidecar 容器中有一个 pilot-agent 进程，该进程根据启动参数生成 Envoy 的初始配置文件，并采用该配置文件来启动 Envoy 进程。
+在 Istio 中，Envoy 的大部分配置都来自于控制平面通过 xDS 接口下发的动态配置，包括网格中服务相关的 service cluster, listener, route 规则等。但 Envoy 是如何知道 xDS server 的地址呢？这就是在 Envoy 初始化配置文件中以静态资源的方式配置的。 Sidecar 容器中有一个 pilot-agent 进程，该进程根据启动参数生成 Envoy 的初始配置文件，并采用该配置文件来启动 Envoy 进程。
 
 可以使用下面的命令将productpage pod中该文件导出来查看其中的内容：
 
@@ -65,7 +65,7 @@ Envoy 完整配置的生成流程如下图所示：
 
 ![Envoy 配置生成流程](../images/envoy-config-init.png)
 
-1. Pilot-agent 根据启动参数生成 Envoy 的初始配置文件 envoy-rev0.json，该文件告诉 Envoy 从指定的 xDS server 中获取动态配置信息，并配置了 xDS server 的地址信息，即控制面的 Pilot 服务器地址。
+1. Pilot-agent 根据启动参数生成 Envoy 的初始配置文件 envoy-rev0.json，该文件告诉 Envoy 从指定的 xDS server 中获取动态配置信息，并配置了 xDS server 的地址信息，即控制平面的 Pilot 服务器地址。
 2. Pilot-agent 使用 envoy-rev0.json 启动 Envoy 进程。
 3. Envoy 根据初始配置获得 Pilot 地址，采用 xDS 接口从 Pilot 获取到 listener，cluster，route 等动态配置信息。
 4. Envoy 根据获取到的动态配置启动 Listener，并根据 listener 的配置，结合 route  和 cluster  对拦截到的流量进行处理。
@@ -144,7 +144,7 @@ kubectl exec -it productpage-v1-6d8bc58dd7-ts8kw -c istio-proxy curl http://127.
 
 这部分配置定义了 Envoy 中所有的 cluster，即服务集群，cluster 中包含一个到多个 endpoint，每个 endpoint 都可以提供服务，Envoy 根据负载均衡算法将请求发送到这些 endpoint 中。
 
-从配置文件结构中可以看到，在 productpage 的 clusters 配置中包含 static_clusters 和 dynamic_active_clusters 两部分，其中 static_clusters 是来自于 envoy-rev0.json 的初始化配置中的 prometheus_stats、xDS server、zipkin server 信息。dynamic_active_clusters 是 Envoy 通过 xDS 接口从 Istio 控制面获取的服务信息。
+从配置文件结构中可以看到，在 productpage 的 clusters 配置中包含 static_clusters 和 dynamic_active_clusters 两部分，其中 static_clusters 是来自于 envoy-rev0.json 的初始化配置中的 prometheus_stats、xDS server、zipkin server 信息。dynamic_active_clusters 是 Envoy 通过 xDS 接口从 Istio 控制平面获取的服务信息。
 
 其中 dynamic cluster 又分为以下几类：
 
@@ -770,7 +770,7 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
 
 通过前面对 Envoy 配置文件的分析，我们对 Envoy 上生成的各种配置数据的结构，包括 listener、cluster、route 和 endpoint 有了一定的了解。那么这些配置是如何有机地结合在一起，以对经过网格中的流量进行路由的呢？
 
-下面我们通过 bookinfo 示例程序中一个端到端的调用请求把这些相关的配置串连起来，使用该完整的调用流程来帮助理解 Istio 控制面的流量控制能力是如何在数据面的 Envoy 上实现的。
+下面我们通过 bookinfo 示例程序中一个端到端的调用请求把这些相关的配置串连起来，使用该完整的调用流程来帮助理解 Istio 控制平面的流量控制能力是如何在数据平面的 Envoy 上实现的。
 
 下图描述了 bookinfo 示例程序中 productpage 服务调用 reviews 服务的请求流程：
 ![Bookinfo 服务调用请求流程](../images/envoy-traffic-route.jpg)
