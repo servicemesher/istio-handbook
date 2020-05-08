@@ -25,6 +25,7 @@
 - [核心功能](concepts/core-features.md)
   - [流量控制](concepts/traffic-control.md)
     - [路由](concepts/route.md)
+      - [Sidecar 流量路由机制分析](concepts/sidecar-traffic-route.md)
       - [VirtualService](concepts/virtualservice.md)
       - [DestinationRule](concepts/destinationrule.md)
       - [ServiceEntry](concepts/serviceentry.md)
