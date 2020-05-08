@@ -111,6 +111,8 @@
 - [故障排查](practice/troubleshooting.md)
   - [常见问题](practice/faq.md)
   - [诊断工具](practice/diagnostic-tools.md)
+    - [istioctl 命令行工具](practice/istioctl-cmd-tool.md)
+    - [ControlZ 自检工具](practice/controlz-tool.md)
 
 ## 生态扩展
 
