@@ -5,13 +5,13 @@ reviewers: [""]
 
 # HTTP 流量授权
 
-在前文中，我们已经解了 Istio 的授权策略，简单来说，授权策略^[授权策略文档请参考：https://istio.io/docs/reference/config/security/authorization-policy/#AuthorizationPolicy]由三部分构成：selector（谁）、action（是否允许）、rules（符合某种条件的请求）。
+在前文中，我们已经解了 Istio 的授权策略，简单来说，授权策略由三部分构成：selector（谁）、action（是否允许）、rules（符合某种条件的请求）。
 
-本文将基于 Bookinfo^[Bookinfo 的安装请参考 3.1 节的内容]向你演示一些 Istio 授权策略的常见用法。
+本文将基于 Bookinfo 向你演示一些 Istio 授权策略的常见用法。
 
 # 缺省行为
 
-授权策略 action 的缺省行为^[action 缺省行为描述，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#AuthorizationPolicy-Action]是 **ALLOW**。对于没有配置任何授权策略的网格，Istio 是允许所有请求的。从安全的角度考虑，这种策略存在一定的安全隐患，我们应该尽量阻止未知和不可信的访问请求，特别是来自于网格外的访问请求。
+授权策略 action 的缺省行为是 **ALLOW**。对于没有配置任何授权策略的网格，Istio 是允许所有请求的。从安全的角度考虑，这种策略存在一定的安全隐患，我们应该尽量阻止未知和不可信的访问请求，特别是来自于网格外的访问请求。
 
 一个简单的方法是：拒绝所有请求，再根据需要，逐步添加允许访问策略。
 
@@ -43,7 +43,7 @@ EOF
 
 # HTTP 流量授权
 
-```http request
+```http
 PATCH /repos/servicemesher/istio-handbook/issues/126 HTTP/1.1
 Host: api.github.com
 Accept: application/vnd.github.inertia-preview+json
@@ -245,7 +245,7 @@ rules 是 Istio 授权策略 **最重要** 也是最复杂的一部分，rules �
 每一条 rule 又由三个字段构成，分别是：from、to 和 when。三个字段分别对应 []From、[]To 和 []When。表示对一个请求的来源、操作（或者说目的）和两者进行规则验证。
 每个对象内置了丰富的字段，可以进行各种规则的验证。
 
-虽然 rule 稍微复杂一点，但其大部分的字段^[rule 支持的完整字段，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#Rule]还是基于前面提到的那些信息（HTTP 请求行、HTTP 请求头、IP、Port、Namespace 等），并没有多少特别的地方。
+虽然 rule 稍微复杂一点，但其大部分的字段还是基于前面提到的那些信息（HTTP 请求行、HTTP 请求头、IP、Port、Namespace 等），并没有多少特别的地方。
 
 > 需要注意的是：注意区分多条 rule、单条 rule 的单个字段、单条 rule 的多个字段之间的逻辑关系。
 
@@ -315,7 +315,7 @@ Istio 使用双向 TLS 认证保障通信安全，而在 Istio 授权策略中�
 
 ### source 
 
-source 资源^[source 支持的完整字段列表，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#Source]有两个依赖双向 TLS 的字段：
+source 资源有两个依赖双向 TLS 的字段：
 
 - principals 字段 
 - namespaces 字段
@@ -324,7 +324,7 @@ source 资源^[source 支持的完整字段列表，请参考：https://istio.io
 
 ### when
 
-when 资源^[when 支持的完整字段列表，请参考：https://istio.io/docs/reference/config/security/conditions/#supported-conditions]有三个依赖双向 TLS 的字段：
+when 资源有三个依赖双向 TLS 的字段：
 
 - source.principal 字段
 - source.namespace 字段 
@@ -440,3 +440,17 @@ $ kubectl delete authorizationpolicy.security.istio.io/ratings-viewer
 ## 小结
 
 Istio 的授权策略在易于理解和使用的同时，依然提供了强大的功能，让很多以前需要在代码内完成的功能，现在只需要通过编写授权策略即可轻松完成。在理解其工作流程后，相信你一定可以根据业务需求轻松制定适合自己的授权策略。此外，RBAC 已在 1.4 版本中被弃用，并将在 Istio 1.6 中被移除，如果你有历史遗留项目，未来升级至 1.6 时需要注意相关问题。
+
+## 参考
+
+HTTP 授权策略：https://istio.io/docs/tasks/security/authorization/authz-http/
+
+授权策略完整文档，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#AuthorizationPolicy
+ 
+action 缺省行为描述，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#AuthorizationPolicy-Action
+
+rule 支持的完整字段，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#Rule
+
+source 支持的完整字段列表，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#Source
+
+when 支持的完整字段列表，请参考：https://istio.io/docs/reference/config/security/conditions/#supported-conditions
