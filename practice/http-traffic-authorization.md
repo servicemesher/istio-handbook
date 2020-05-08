@@ -9,7 +9,7 @@ reviewers: [""]
 
 本文将基于 Bookinfo 向你演示一些 Istio 授权策略的常见用法。
 
-# 缺省行为
+## 缺省行为
 
 授权策略 action 的缺省行为是 **ALLOW**。对于没有配置任何授权策略的网格，Istio 是允许所有请求的。从安全的角度考虑，这种策略存在一定的安全隐患，我们应该尽量阻止未知和不可信的访问请求，特别是来自于网格外的访问请求。
 
@@ -41,7 +41,7 @@ EOF
 
 接下来，我们将根据需要，逐步添加（允许访问）授权策略。
 
-# HTTP 流量授权
+## HTTP 流量授权
 
 ```http
 PATCH /repos/servicemesher/istio-handbook/issues/126 HTTP/1.1
@@ -357,23 +357,9 @@ spec:
   {}
 ```
 
-也相当于其 selector、action、rules 均为 nil。
+相当于其 selector、action、rules 均为 nil。
 
-等价的策略是：
-
-```yaml
-apiVersion: security.istio.io/v1beta1 
-kind: AuthorizationPolicy
-metadata:
-  name: deny-all
-  namespace: default
-spec:
-  selector:
-  action:
-  rules:
-```
-
-经过前面的学习，我们可以知道，selector 为 nil 表示匹配 namespace 下的所有 workload。action 为 nil 表示 ALLOW。
+经过前面的学习，我们知道，selector 为 nil 表示匹配 namespace 下的所有 workload。action 为 nil 表示 ALLOW。
 
 但我们并没有讲到 rules 为 nil，是什么效果。同学们可以猜测一下其效果是什么，匹配任何请求？不匹配任何请求？
 
@@ -383,7 +369,7 @@ spec:
 
 这看起来很奇怪，但事实上，这条策略是我们在本文开始时应用的第一条策略，并且我们已经验证过其效果了，它确实会拒绝所有的请求。
 
-所有，在这条特殊策略中，策略匹配的结果会所许不同：
+在这条特殊策略中，此时策略匹配的结果会有所不同：
 
 1. 如果请求匹配了任意一条 DENY 策略，则拒绝请求。
 1. 如果请求匹配到任何 ALLOW 策略，则允许请求。
@@ -391,7 +377,7 @@ spec:
 
 为 workload 配置默认的拒绝策略时，这种用法会很有用，正如本文开始时应用的第一条策略那样。
 
-特殊策略的条件是：action 为 nil（或 ALLOW），且 rules 为 nil 的授权策略是一条特殊的授权策略。
+特殊策略的条件是：action 为 nil（或 ALLOW），且 rules 为 nil。
 
 所以下面这条策略依然算作是特殊策略，只是其仅作用于 details。
 
@@ -443,14 +429,8 @@ Istio 的授权策略在易于理解和使用的同时，依然提供了强大�
 
 ## 参考
 
-HTTP 授权策略：https://istio.io/docs/tasks/security/authorization/authz-http/
+[Istio 安全概念](https://istio.io/docs/concepts/security/)
 
-授权策略完整文档，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#AuthorizationPolicy
- 
-action 缺省行为描述，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#AuthorizationPolicy-Action
+[HTTP 授权策略实践](https://istio.io/docs/tasks/security/authorization/authz-http/)
 
-rule 支持的完整字段，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#Rule
-
-source 支持的完整字段列表，请参考：https://istio.io/docs/reference/config/security/authorization-policy/#Source
-
-when 支持的完整字段列表，请参考：https://istio.io/docs/reference/config/security/conditions/#supported-conditions
+[授权策略文档](https://istio.io/docs/reference/config/security/authorization-policy/#AuthorizationPolicy)
