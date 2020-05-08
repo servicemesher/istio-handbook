@@ -152,7 +152,7 @@ kubectl exec -it productpage-v1-6d8bc58dd7-ts8kw -c istio-proxy curl http://127.
 
 这部分的 cluster  占了绝大多数，该类 cluster  对应于 Envoy 所在节点的外部服务。以 reviews 为例，对于 productpage 来说,reviews 是一个外部服务，因此其 cluster  名称中包含 outbound 字样。
 
-从 reviews 服务对应的 cluster 配置中可以看到，其类型为 EDS，即表示该 cluster  的 endpoint 来自于动态发现，动态发现中 eds_config 则指向了ads，最终指向 static resource 中配置的 xds-grpc cluster ,即 Pilot 的地址。
+从 reviews 服务对应的 cluster 配置中可以看到，其类型为 EDS，即表示该 cluster 的 endpoint 来自于动态发现，动态发现中 eds_config 则指向了ads，最终指向 static resource 中配置的 xds-grpc cluster，即 Pilot 的地址。
 
 ```json
 {
@@ -235,7 +235,7 @@ curl http://10.97.222.108:15014/debug/edsz > pilot_eds_dump
 
 ##### Inbound Cluster
 
-对于 Envoy 来说，inbound cluster 对应于入向请求的 upstream 集群， 即 Envoy 自身所在节点的服务。对于 productpage Pod 上的 Envoy，其对应的 Inbound cluster 只有一个，即 productpage。该 cluster 对应的 host 为127.0.0.1,即环回地址上 productpage 的监听端口。由于 iptable 规则中排除了127.0.0.1,入站请求通过该 Inbound cluster 处理后将跳过 Envoy，直接发送给 productpage 进程处理。
+对于 Envoy 来说，inbound cluster 对应于入向请求的 upstream 集群， 即 Envoy 自身所在节点的服务。对于 productpage Pod 上的 Envoy，其对应的 Inbound cluster 只有一个，即 productpage。该 cluster 对应的 host 为127.0.0.1，即环回地址上 productpage 的监听端口。由于 iptable 规则中排除了127.0.0.1，入站请求通过该 Inbound cluster 处理后将跳过 Envoy，直接发送给 productpage 进程处理。
 
 ```json
 {
@@ -291,7 +291,7 @@ curl http://10.97.222.108:15014/debug/edsz > pilot_eds_dump
 
 ##### PassthroughCluster
 
-该 cluster 的 type 被设置为 ORIGINAL_DST 类型， 表明任何发向该 cluster 的请求都会被直接发送到其请求中的原始目地的，Envoy 不会对请求进行重新路由，
+该 cluster 的 type 被设置为 `ORIGINAL_DST` 类型， 表明任何发向该 cluster 的请求都会被直接发送到其请求中的原始目地的，Envoy 不会对请求进行重新路由，
 
 ```json
 {
@@ -315,20 +315,20 @@ curl http://10.97.222.108:15014/debug/edsz > pilot_eds_dump
 
 Envoy 采用 listener 来接收并处理 downstream 发过来的请求，listener 采用了插件式的架构，可以通过配置不同的 filter 在 listener 中插入不同的处理逻辑。
 
-Listener 可以绑定到 IP Socket 或者 Unix Domain Socket 上，以接收来自客户端的请求;也可以不绑定，而是接收从其他 listener 转发来的数据。Istio 利用了 Envoy listener 的这一特点，通过 VirtualOutboundListener 在一个端口接收所有出向请求，然后再按照请求的端口分别转发给不同的 listener 分别处理。
+Listener 可以绑定到 IP Socket 或者 Unix Domain Socket 上，以接收来自客户端的请求；也可以不绑定，而是接收从其他 listener 转发来的数据。Istio 利用了 Envoy listener 的这一特点，通过 VirtualOutboundListener 在一个端口接收所有出向请求，然后再按照请求的端口分别转发给不同的 listener 分别处理。
 
 ##### VirtualOutbound Listener
 
-Istio 在 Envoy 中配置了一个在15001端口监听的虚拟入口监听器。Iptable 规则将 Envoy 所在 pod 的对外请求拦截后发向本地的15001端口，该监听器接收后并不进行业务处理，而是根据请求的目的端口分发给其他监听器处理。这就是该监听器取名为 "virtual”（虚拟）监听器的原因。
+Istio 在 Envoy 中配置了一个在 15001 端口监听的虚拟入口监听器。Iptable 规则将 Envoy 所在 pod 的对外请求拦截后发向本地的 15001 端口，该监听器接收后并不进行业务处理，而是根据请求的目的端口分发给其他监听器处理。这就是该监听器取名为 "virtual”（虚拟）监听器的原因。
 
-Envoy 是如何做到按请求的目的端口进行分发的呢？ 从下面 VirtualOutbound listener 的配置中可以看到 use_original_dest 属性被设置为 true, 这表示该监听器在接收到来自 downstream 的请求后，会将请求转交给匹配该请求原目的地址的 listener （即名字格式为 0.0.0.0_请求目的端口 的 listener）进行处理。
+Envoy 是如何做到按请求的目的端口进行分发的呢？ 从下面 VirtualOutbound listener 的配置中可以看到 `use_original_dest` 属性被设置为 true, 这表示该监听器在接收到来自 downstream 的请求后，会将请求转交给匹配该请求原目的地址的 listener（即名字格式为 `0.0.0.0_` 请求目的端口 的 listener）进行处理。
 
 如果在 Enovy 的配置中找不到匹配请求目的端口的 listener，则将会根据 Istio 的 outboundTrafficPolicy 全局配置选项进行处理。存在两种情况：
 
-* 如果 outboundTrafficPolicy 设置为 ALLOW_ANY：这表明网格允许发向任何外部服务的请求，无论该服务是否在 Pilot 的服务注册表中。在该策略下，Pilot 将会在下发给 Enovy 的 VirtualOutbound listener 加入一个 upstream cluster 为PassthroughCluster 的 TCP proxy filter，找不到匹配端口 listener 的请求会被该 TCP proxy filter 处理，请求将会被发送到其IP头中的原始目的地地址。
-* 如果 outboundTrafficPolicy 设置为 REGISTRY_ONLY：只允许发向 Pilot 服务注册表中存在的服务的对外请求。在该策略下，Pilot 将会在下发给 Enovy 的 VirtualOutbound listener 加入一个 upstream cluster 为 BlackHoleCluster 的 TCP proxy filter，找不到匹配端口 listene r的请求会被该 TCP proxy filter 处理，由于 BlackHoleCluster 中没有配置 upstteam host，请求实际上会被丢弃。
+* 如果 outboundTrafficPolicy 设置为 `ALLOW_ANY`：这表明网格允许发向任何外部服务的请求，无论该服务是否在 Pilot 的服务注册表中。在该策略下，Pilot 将会在下发给 Envoy 的 VirtualOutbound listener 加入一个 upstream cluster 为 PassthroughCluster 的 TCP proxy filter，找不到匹配端口 listener 的请求会被该 TCP proxy filter 处理，请求将会被发送到其 IP 头中的原始目的地地址。
+* 如果 outboundTrafficPolicy 设置为 `REGISTRY_ONLY`：只允许发向 Pilot 服务注册表中存在的服务的对外请求。在该策略下，Pilot 将会在下发给 Enovy 的 VirtualOutbound listener 加入一个 upstream cluster 为 BlackHoleCluster 的 TCP proxy filter，找不到匹配端口 listener 的请求会被该 TCP proxy filter 处理，由于 BlackHoleCluster 中没有配置 upstteam host，请求实际上会被丢弃。
 
-下图是 bookinfo 例子中 productpage 服务中 Enovy Proxy 的 Virutal Outbound Listener 配置。由于 outboundTrafficPolicy 的默认配置为 ALLOW_ANY，因此 listener 的 filterchain 中第二个 filter chain 中是一个 upstream cluster 为 PassthroughCluster 的 TCP proxy filter。注意该 filter 没有 filter_chain_match 匹配条件，因此如果进入该 listener 的请求在配置中找不到匹配其目的端口的 listener，就会缺省进入该 filter 进行处理。
+下图是 bookinfo 例子中 productpage 服务中 Enovy Proxy 的 Virutal Outbound Listener 配置。由于 outboundTrafficPolicy 的默认配置为 `ALLOW_ANY`，因此 listener 的 filterchain 中第二个 filter chain 中是一个 upstream cluster 为 PassthroughCluster 的 TCP proxy filter。注意该 filter 没有 filter_chain_match 匹配条件，因此如果进入该 listener 的请求在配置中找不到匹配其目的端口的 listener，就会缺省进入该 filter 进行处理。
 
 filterchain 中的第一个 filter chain 中是一个 upstream cluster 为 BlackHoleCluster 的 TCP proxy filter，该 filter 设置了 filter_chain_match 匹配条件，只有发向 10.40.0.18 这个 IP 的出向请求才会进入该 filter 处理。10.40.0.18 是 productpage 服务自身的IP地址。该 filter 的目的是为了防止服务向自己发送请求可能导致的死循环。
 
@@ -394,9 +394,9 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
 > 备注： 根据业务逻辑，实际上 productpage 并不会调用 ratings 服务，但 Istio 并不知道各个业务之间会如何调用，因此将所有的服务信息都下发到了 Envoy 中。这样做对 Envoy 的内存占用和效率有一定影响，如果希望去掉 Envoy 配置中的无用数据，可以通过 sidecar CRD 对 Envoy 的 ingress 和 egress service 配置进行调整。
 
 
-首先，iptables 拦截到 productpage 向外发出的 HTTP 请求，并转发到同一 pod 中的 Envoy sidecar 监听的 15001 virtualOutbound listener 进行处理。 Envoy 根据目的端口匹配到0.0.0.0_9080这个 Outbound listener，并转交给该 listener。
+首先，iptables 拦截到 productpage 向外发出的 HTTP 请求，并转发到同一 pod 中的 Envoy sidecar 监听的 15001 virtualOutbound listener 进行处理。 Envoy 根据目的端口匹配到 `0.0.0.0_9080` 这个 Outbound listener，并转交给该 listener。
 
-如下面的配置所示，当0.0.0.0_9080接收到出向请求后，并不会直接发送到一个 downstream cluster，而是配置了一个路由规则9080，在该路由规则中会根据不同的请求目的地对请求进行处理。
+如下面的配置所示，当 `0.0.0.0_9080` 接收到出向请求后，并不会直接发送到一个 downstream cluster，而是配置了一个路由规则 9080，在该路由规则中会根据不同的请求目的地对请求进行处理。
 
 ```json
 {
@@ -444,7 +444,7 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
 
 ##### VirtualInbound Listener
 
-在较早的版本中，Istio 采用同一个 VirtualListener 在端口15001上同时处理入向和出向的请求。该方案存在一些潜在的问题，例如可能会导致出现死循环，参见[这个PR](https://github.com/istio/istio/pull/15713)。在1.4版本之后，Istio 为 Envoy 单独创建了 一个VirtualInboundListener，在15006端口监听入向请求，原来的15001端口只用于处理出向请求。
+在较早的版本中，Istio 采用同一个 VirtualListener 在端口 15001 上同时处理入向和出向的请求。该方案存在一些潜在的问题，例如可能会导致出现死循环，参见[这个 PR](https://github.com/istio/istio/pull/15713)。在 1.4 版本之后，Istio 为 Envoy 单独创建了 一个 VirtualInboundListener，在 15006 端口监听入向请求，原来的 15001 端口只用于处理出向请求。
 
 另外一个变化是当 VirtualInboundListener 接收到请求后，将直接在 VirtualInboundListener 采用一系列 filterChain 对入向请求进行处理，而不是像 VirtualOutboundListene 一样分发给其它独立的 listener 进行处理。
 
@@ -635,17 +635,17 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
 }
 ```
 
-该 filterchain 配置了一个 http_connection_manager filter，http_connection_manager 中又配置了 wasm、istio_authn、envoy.router等 http filter，Istio 中提供的一些基础能力，例如安全认证、指标收集、请求限流等，就是通过这些 filter 实现的。请求经过这些 HTTP filter 处理后，最终被转发给 "inbound|9080|http|reviews.default.svc.cluster.local" 这个 Inbound cluster，该 Inbound cluster  中配置的 Upstream 为127.0.0.1:9080，因此该请求将发送到和 sidecar 同一个 pod 上的 reviews 服务的9080端口上进行业务处理。
+该 filterchain 配置了一个 `http_connection_manager filter`，`http_connection_manager` 中又配置了 wasm、istio_authn、`envoy.router` 等 http filter，Istio 中提供的一些基础能力，例如安全认证、指标收集、请求限流等，就是通过这些 filter 实现的。请求经过这些 HTTP filter 处理后，最终被转发给 `inbound|9080|http|reviews.default.svc.cluster.local` 这个 Inbound cluster，该 Inbound cluster  中配置的 Upstream 为 `127.0.0.1:9080`，因此该请求将发送到和 sidecar 同一个 pod 上的 reviews 服务的 9080 端口上进行业务处理。
 
-在 transport_socket 部分配置的是 tls 双向认证所需的证书信息，从配置中可以得知，Envoy 将通过 SDS （Secret Discovery Service） 获取自身的服务器证书和验证客户端证书所需的根证书。
+在 `transport_socket` 部分配置的是 TLS 双向认证所需的证书信息，从配置中可以得知，Envoy 将通过 SDS （Secret Discovery Service） 获取自身的服务器证书和验证客户端证书所需的根证书。
 
-如果一个入向访问的目的端口不能匹配到业务服务的 filterchain，则会进入到 passthrough 的 filter chain 进行处理，该 filter chain 对应的 cluster 为 InboundPassthroughClusterIpv4，结合 iptables 规则， 该 cluster 将会把请求转发到其本地的原始目的端口处理。
+如果一个入向访问的目的端口不能匹配到业务服务的 filterchain，则会进入到 passthrough 的 filter chain 进行处理，该 filter chain 对应的 cluster 为 `InboundPassthroughClusterIpv4`，结合 iptables 规则， 该 cluster 将会把请求转发到其本地的原始目的端口处理。
 
 #### Routes
 
 这部分配置是 Envoy 的 HTTP 路由规则。在前面 listener 的分析中，我们看到 Outbound listener 是以端口为最小粒度来进行处理的，而不同的服务可能采用了相同的端口，因此需要通过 Route 来进一步对发向同一目的端口的不同服务的请求进行区分和处理。Istio  在下发给 sidecar 的缺省路由规则中为每个端口设置了一个路由规则，然后再根据 host 来对请求进行路由分发。
 
-下面是 proudctpage 服务中 9080 的路由配置，从文件中可以看到对应了5个 virtual host，分别是 details、productpage、ratings、reviews 和 allow_any，前三个 virtual host 分别对应到不同服务的 [outbound cluster](#outbound-cluster)。最后一个对应到 [PassthroughCluster](#passthroughcluster),即当入向的请求没有找到对应的服务时，也会让其直接通过。
+下面是 proudctpage 服务中 9080 的路由配置，从文件中可以看到对应了5个 virtual host，分别是 details、productpage、ratings、reviews 和 allow_any，前三个 virtual host 分别对应到不同服务的 [outbound cluster](#outbound-cluster)。最后一个对应到 [PassthroughCluster](#passthroughcluster)，即当入向的请求没有找到对应的服务时，也会让其直接通过。
 
 ```json
 {
@@ -773,12 +773,14 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
 下面我们通过 bookinfo 示例程序中一个端到端的调用请求把这些相关的配置串连起来，使用该完整的调用流程来帮助理解 Istio 控制平面的流量控制能力是如何在数据平面的 Envoy 上实现的。
 
 下图描述了 bookinfo 示例程序中 productpage 服务调用 reviews 服务的请求流程：
+
 ![Bookinfo 服务调用请求流程](../images/envoy-traffic-route.jpg)
 
 1. Productpage 发起对 reviews 服务的调用：`http://reviews:9080/reviews/0` 。
-2. 请求被 productpage Pod 的 iptable 规则拦截，重定向到本地的15001端口。
-3. 在15001端口上监听的 VirtualOutbound listener 收到了该请求。
-4. 请求被 VirtualOutbound listener 根据原目标 IP（通配）和端口（9080）转发到0.0.0.0_9080这个 outbound listener。
+2. 请求被 productpage Pod 的 iptable 规则拦截，重定向到本地的 15001 端口。
+3. 在 15001 端口上监听的 VirtualOutbound listener 收到了该请求。
+4. 请求被 VirtualOutbound listener 根据原目标 IP（通配）和端口（9080）转发到 `0.0.0.0_9080` 这个 outbound listener。
+
 ```json
 {
  "name": "virtualOutbound",
@@ -801,7 +803,9 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
   "last_updated": "2020-03-11T08:14:04.929Z"
 }
 ```
-5. 根据0.0.0.0_9080 listener 的 http_connection_manager filte r配置,该请求采用“9080” route 进行分发。
+
+5. 根据 `0.0.0.0_9080` listener 的 `http_connection_manager` filter 配置，该请求采用 9080 route 进行分发。
+
 ```json
 {
      "name": "0.0.0.0_9080",
@@ -880,7 +884,9 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
      }
     },
 ```
-6. “9080”这个 route 的配置中，host name 为 reviews:9080的请求对应的 cluster 为outbound|9080||reviews.default.svc.cluster.local。
+
+6. 9080 这个 route 的配置中，host name 为 `reviews:9080` 的请求对应的 cluster 为 `outbound|9080||reviews.default.svc.cluster.local`。
+
 ```json
 {
  "version_info": "2020-03-11T08:13:39Z/22",
@@ -986,7 +992,9 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
  "last_updated": "2020-03-11T08:14:04.971Z"
 }
 ```
-7. outbound|9080||reviews.default.svc.cluster.local cluster 为动态资源，通过 eds 查询得到该 cluster 中有3个 endpoint。
+
+7. `outbound|9080||reviews.default.svc.cluster.local cluster` 为动态资源，通过 EDS 查询得到该 cluster 中有3个 endpoint。
+
 ```json
 {
   "clusterName": "outbound|9080||reviews.default.svc.cluster.local",
@@ -1035,10 +1043,12 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
   ]
 }
 ```
-8. 请求被转发到其中一个 endpoint 10.40.0.15，即 Reviews-v1 所在的 Pod。
-9. 然后该请求被 iptable 规则拦截，重定向到本地的15006端口。
-10. 在15006端口上监听的 VirtualInbound listener 收到了该请求。
-11. 根据匹配条件，请求被 VirtualInbound listener 内部配置的 Http connection manager filter 处理，该 filter 设置的路由配置为将其发送给 inbound|9080|http|reviews.default.svc.cluster.local 这个 inbound cluster。
+
+8. 请求被转发到其中一个 endpoint `10.40.0.15`，即 `reviews-v1` 所在的 Pod。
+9. 然后该请求被 iptable 规则拦截，重定向到本地的 15006 端口。
+10. 在 15006 端口上监听的 VirtualInbound listener 收到了该请求。
+11. 根据匹配条件，请求被 VirtualInbound listener 内部配置的 Http connection manager filter 处理，该 filter 设置的路由配置为将其发送给 `inbound|9080|http|reviews.default.svc.cluster.local` 这个 inbound cluster。
+
 ```json
 {
  "name": "virtualInbound",
@@ -1145,7 +1155,9 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
  }
 }
 ```
-12. inbound|9080|http|reviews.default.svc.cluster.local cluster 配置的 host 为127.0.0.1：9080。
+
+12. `inbound|9080|http|reviews.default.svc.cluster.local cluster` 配置的 host 为 `127.0.0.1:9080`。
+
 ```json
 {
  "version_info": "2020-03-11T08:13:14Z/21",
@@ -1187,7 +1199,8 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
  "last_updated": "2020-03-11T08:13:39.118Z"
 }
 ```
-13. 请求被转发到127.0.0.1：9080，即 reviews 服务进行业务处理。
+
+13. 请求被转发到 `127.0.0.1:9080`，即 reviews 服务进行业务处理。
 
 # 小结
  
