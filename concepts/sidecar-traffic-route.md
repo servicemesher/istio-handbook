@@ -780,7 +780,6 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
 2. 请求被 productpage Pod 的 iptable 规则拦截，重定向到本地的 15001 端口。
 3. 在 15001 端口上监听的 VirtualOutbound listener 收到了该请求。
 4. 请求被 VirtualOutbound listener 根据原目标 IP（通配）和端口（9080）转发到 `0.0.0.0_9080` 这个 outbound listener。
-
 ```json
 {
  "name": "virtualOutbound",
@@ -803,9 +802,7 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
   "last_updated": "2020-03-11T08:14:04.929Z"
 }
 ```
-
 5. 根据 `0.0.0.0_9080` listener 的 `http_connection_manager` filter 配置，该请求采用 9080 route 进行分发。
-
 ```json
 {
      "name": "0.0.0.0_9080",
@@ -884,9 +881,7 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
      }
     },
 ```
-
 6. 9080 这个 route 的配置中，host name 为 `reviews:9080` 的请求对应的 cluster 为 `outbound|9080||reviews.default.svc.cluster.local`。
-
 ```json
 {
  "version_info": "2020-03-11T08:13:39Z/22",
@@ -992,9 +987,7 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
  "last_updated": "2020-03-11T08:14:04.971Z"
 }
 ```
-
 7. `outbound|9080||reviews.default.svc.cluster.local cluster` 为动态资源，通过 EDS 查询得到该 cluster 中有3个 endpoint。
-
 ```json
 {
   "clusterName": "outbound|9080||reviews.default.svc.cluster.local",
@@ -1043,12 +1036,10 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
   ]
 }
 ```
-
 8. 请求被转发到其中一个 endpoint `10.40.0.15`，即 `reviews-v1` 所在的 Pod。
 9. 然后该请求被 iptable 规则拦截，重定向到本地的 15006 端口。
 10. 在 15006 端口上监听的 VirtualInbound listener 收到了该请求。
 11. 根据匹配条件，请求被 VirtualInbound listener 内部配置的 Http connection manager filter 处理，该 filter 设置的路由配置为将其发送给 `inbound|9080|http|reviews.default.svc.cluster.local` 这个 inbound cluster。
-
 ```json
 {
  "name": "virtualInbound",
@@ -1155,9 +1146,7 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
  }
 }
 ```
-
 12. `inbound|9080|http|reviews.default.svc.cluster.local cluster` 配置的 host 为 `127.0.0.1:9080`。
-
 ```json
 {
  "version_info": "2020-03-11T08:13:14Z/21",
@@ -1199,7 +1188,6 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
  "last_updated": "2020-03-11T08:13:39.118Z"
 }
 ```
-
 13. 请求被转发到 `127.0.0.1:9080`，即 reviews 服务进行业务处理。
 
 # 小结
