@@ -54,15 +54,15 @@ spec:
 
 结合上面给出的示例，这里对 ServiceEntry 涉及的关键属性解释如下：
 
-* "hosts": 表示与该 ServiceEntry 相关的主机名，可以是带有通配符前缀的 DNS 名称。
-* "address": 与服务相关的虚拟 IP 地址，可以是 CIDR 前缀的形式。
-* "ports": 和外部服务相关的端口，如果外部服务的 endpoints 是 Unix socket 地址，这里必须只有一个端口。
-* "location": 用于指定该服务属于网格内部（MESH_INTERNAL）还是外部（MESH_EXTERNAL）。
-* "resolution": 主机的服务发现模式，可以是 NONE、STATIC、DNS。
-* "endpoints": 与服务相关的一个或多个端点。
-* "exportTo": 用于控制 ServiceEntry 跨命名空间的可见性，这样就可以控制在一个命名空间下定义的资源对象是否可以被其他命名空间下的 Sidecar、Gateway 和 VirtualService 使用。目前支持两种选项，"." 表示仅应用到当前命名空间，"*" 表示应用到所有命名空间。
+* `hosts`: 表示与该 ServiceEntry 相关的主机名，可以是带有通配符前缀的 DNS 名称。
+* `address`: 与服务相关的虚拟 IP 地址，可以是 CIDR 前缀的形式。
+* `ports`: 和外部服务相关的端口，如果外部服务的 endpoints 是 Unix socket 地址，这里必须只有一个端口。
+* `location`: 用于指定该服务属于网格内部（MESH_INTERNAL）还是外部（MESH_EXTERNAL）。
+* `resolution`: 主机的服务发现模式，可以是 NONE、STATIC、DNS。
+* `endpoints`: 与服务相关的一个或多个端点。
+* `exportTo`: 用于控制 ServiceEntry 跨命名空间的可见性，这样就可以控制在一个命名空间下定义的资源对象是否可以被其他命名空间下的 Sidecar、Gateway 和 VirtualService 使用。目前支持两种选项，"." 表示仅应用到当前命名空间，"*" 表示应用到所有命名空间。
 
-## 使用ServiceEntry访问外部服务
+## 使用 ServiceEntry 访问外部服务
 
 Istio 提供了三种访问外部服务的方法：
 
