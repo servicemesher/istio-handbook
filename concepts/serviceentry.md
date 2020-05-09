@@ -1,13 +1,11 @@
 ---
 authors: ["sunzhaochang"]
-reviewers: ["rootsongjc"]
+reviewers: ["rootsongjc","GuangmingLuo"]
 ---
 
 # ServiceEntry
 
-## ServiceEntry 是什么
-
-Istio 支持对接 Kubernetes、Consul 等多种不同的注册中心，控制面 Pilot 启动时，会从指定的注册中心获取 Service Mesh 集群的服务信息和实例列表，并将这些信息进行处理和转换，然后通过 xDS 下发给对应的数据面，保证服务之间可以互相发现并正常访问。
+Istio 支持对接 Kubernetes、Consul 等多种不同的注册中心，控制平面 Pilot 启动时，会从指定的注册中心获取 Service Mesh 集群的服务信息和实例列表，并将这些信息进行处理和转换，然后通过 xDS 下发给对应的数据平面，保证服务之间可以互相发现并正常访问。
 
 同时，由于这些服务和实例信息都来源于服务网格内部，Istio 无法从注册中心直接获取网格外的服务，导致不利于网格内部与外部服务之间的通信和流量管理。为此，Istio 引入 ServiceEntry 实现对外通信和管理。
 
@@ -54,15 +52,15 @@ spec:
   - address: 3.3.3.3
 ```
 
-结合上面给出的示例，这里对ServiceEntry涉及的关键属性解释如下：
+结合上面给出的示例，这里对 ServiceEntry 涉及的关键属性解释如下：
 
-* hosts: 表示与该 ServiceEntry 相关的主机名，可以是带有通配符前缀的 DNS 名称。
-* address: 与服务相关的虚拟 IP 地址，可以是 CIDR 前缀的形式。
-* ports: 和外部服务相关的端口，如果外部服务的 endpoints 是 Unix socket 地址，这里必须只有一个端口。
-* location: 用于指定该服务属于网格内部（MESH_INTERNAL）还是外部（MESH_EXTERNAL）。
-* resolution: 主机的服务发现模式，可以是 NONE、STATIC、DNS。
-* endpoints: 与服务相关的一个或多个端点。
-* exportTo: 用于控制 ServiceEntry 跨命名空间的可见性，这样就可以控制在一个命名空间下定义的资源对象是否可以被其他命名空间下的 Sidecar、Gateway 和 VirtualService 使用。目前支持两种选项，"." 表示仅应用到当前命名空间，"*" 表示应用到所有命名空间。
+* "hosts": 表示与该 ServiceEntry 相关的主机名，可以是带有通配符前缀的 DNS 名称。
+* "address": 与服务相关的虚拟 IP 地址，可以是 CIDR 前缀的形式。
+* "ports": 和外部服务相关的端口，如果外部服务的 endpoints 是 Unix socket 地址，这里必须只有一个端口。
+* "location": 用于指定该服务属于网格内部（MESH_INTERNAL）还是外部（MESH_EXTERNAL）。
+* "resolution": 主机的服务发现模式，可以是 NONE、STATIC、DNS。
+* "endpoints": 与服务相关的一个或多个端点。
+* "exportTo": 用于控制 ServiceEntry 跨命名空间的可见性，这样就可以控制在一个命名空间下定义的资源对象是否可以被其他命名空间下的 Sidecar、Gateway 和 VirtualService 使用。目前支持两种选项，"." 表示仅应用到当前命名空间，"*" 表示应用到所有命名空间。
 
 ## 使用ServiceEntry访问外部服务
 
@@ -70,7 +68,7 @@ Istio 提供了三种访问外部服务的方法：
 
 1. 允许 Envoy 代理将请求传递到未在网格内配置过的任何外部服务。使用这种方法时，无法监控对外部服务的访问，也不能利用 Istio 的流量控制功能。
 2. 配置 ServiceEntry 以提供对外部服务的受控访问。这是 Istio 官方推荐使用的方法。
-3. 对于特定范围的 IP，完全绕过 Envoy 代理。仅当出于性能或其他原因无法使用边车配置外部访问时，才建议使用该配置方法。
+3. 对于特定范围的 IP，完全绕过 Envoy 代理。仅当出于性能或其他原因无法使用 sidecar 配置外部访问时，才建议使用该配置方法。
 
 这里，我们重点讨论第2种方式，也就是使用 ServiceEntry 完成对网格外部服务的受控访问。
 
@@ -84,7 +82,7 @@ Istio 提供了三种访问外部服务的方法：
 $ kubectl get configmap istio -n istio-system -o yaml | grep -o "mode: ALLOW_ANY"
 mode: ALLOW_ANY
 ```
-如果当前使用的是ALLOW_ANY模式，可以使用下面的命令切换为REGISTRY_ONLY模式:
+如果当前使用的是 ALLOW_ANY 模式，可以使用下面的命令切换为 REGISTRY_ONLY 模式:
 ```bash
 $ kubectl get configmap istio -n istio-system -o yaml | sed 's/mode: ALLOW_ANY/mode: REGISTRY_ONLY/g' | kubectl replace -n istio-system -f -
 configmap "istio" replaced
@@ -149,4 +147,4 @@ spec:
 
 ## 小结
 
-Istio 推荐使用 ServiceEntry 实现对网格外部服务的受控访问，本节围绕 ServiceEntry 的概念、属性和使用等方面进行了介绍。通过使用 ServiceEntry，可以使网格内部的服务正常发现和路由到外部服务，并在此基础上，结合 VirtualService 设置请求超时、故障注入等流量管控机制。
+Istio 推荐使用 ServiceEntry 实现对网格外部服务的受控访问，本节围绕 ServiceEntry 的概念、属性和使用等方面进行了介绍。通过使用 ServiceEntry，可以使网格内部的服务正常发现和路由到外部服务，并在此基础上，结合 VirtualService 实现请求超时、故障注入等流量管控机制。
