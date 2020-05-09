@@ -66,29 +66,29 @@ spec:
 
 Istio 提供了三种访问外部服务的方法：
 
-1. 允许 Envoy 代理将请求传递到未在网格内配置过的任何外部服务。使用这种方法时，无法监控对外部服务的访问，也不能利用 Istio 的流量控制功能。
+1. 允许 sidecar 将请求传递到未在网格内配置过的任何外部服务。使用这种方法时，无法监控对外部服务的访问，也不能利用 Istio 的流量控制功能。
 2. 配置 ServiceEntry 以提供对外部服务的受控访问。这是 Istio 官方推荐使用的方法。
-3. 对于特定范围的 IP，完全绕过 Envoy 代理。仅当出于性能或其他原因无法使用 sidecar 配置外部访问时，才建议使用该配置方法。
+3. 对于特定范围的 IP，完全绕过 sidecar。仅当出于性能或其他原因无法使用 sidecar 配置外部访问时，才建议使用该配置方法。
 
 这里，我们重点讨论第2种方式，也就是使用 ServiceEntry 完成对网格外部服务的受控访问。
 
 对于 sidecar 对外部服务的处理方式，istio 提供了两种选项: 
 
-* ALLOW_ANY: 默认值，表示 Istio 代理允许调用未知的外部服务。上面的第一种方法就使用了该配置项。
-* REGISTRY_ONLY:  Istio 代理会阻止任何没有在网格中定义的 HTTP 服务或 ServiceEntry 的主机。
+* `ALLOW_ANY`：默认值，表示 Istio 代理允许调用未知的外部服务。上面的第一种方法就使用了该配置项。
+* `REGISTRY_ONLY`：Istio 代理会阻止任何没有在网格中定义的 HTTP 服务或 ServiceEntry 的主机。
 
 可以使用下面的命令查看当前所使用的模式:
 ```bash
 $ kubectl get configmap istio -n istio-system -o yaml | grep -o "mode: ALLOW_ANY"
 mode: ALLOW_ANY
 ```
-如果当前使用的是 ALLOW_ANY 模式，可以使用下面的命令切换为 REGISTRY_ONLY 模式:
+如果当前使用的是 `ALLOW_ANY` 模式，可以使用下面的命令切换为 `REGISTRY_ONLY` 模式:
 ```bash
 $ kubectl get configmap istio -n istio-system -o yaml | sed 's/mode: ALLOW_ANY/mode: REGISTRY_ONLY/g' | kubectl replace -n istio-system -f -
 configmap "istio" replaced
 ```
 
-在 REGISTRY_ONLY 模式下，需要使用 ServiceEntry 才能完成对外部服务的访问。当创建如下的 ServiceEntry 时，服务网格内部的应用就可以正常访问 httpbin.org 服务了。
+在 `REGISTRY_ONLY` 模式下，需要使用 ServiceEntry 才能完成对外部服务的访问。当创建如下的 ServiceEntry 时，服务网格内部的应用就可以正常访问 httpbin.org 服务了。
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
@@ -126,7 +126,7 @@ spec:
         weight: 100
 ```
 
-同样的，我们也可以为 ServiceEntry 设置故障注入规则，为系统测试提供基础。下面的示例表示为所有访问 httpbin.org 服务的请求注入一个403错误。
+同样的，我们也可以为 ServiceEntry 设置故障注入规则，为系统测试提供基础。下面的示例表示为所有访问 `httpbin.org` 服务的请求注入一个403错误。
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
