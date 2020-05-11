@@ -22,15 +22,15 @@ reviewers: [""]
 
 ## 1. Service 端口命名约束
 
-istio 支持多平台，不过 Istio 和 k8s 的兼容性是最优的，不管是设计理念，核心团队还是社区， 都有一脉相承的意思。但 istio 和 k8s 的适配并非完全没有冲突, 一个典型问题就是 istio 需要 k8s service 按照协议进行端口命名([port naming](https://istio.io/docs/ops/deployment/requirements/))。
+Istio 支持多平台，不过 Istio 和 kubernetes 的兼容性是最优的，不管是设计理念，核心团队还是社区， 都有一脉相承的意思。但 istio 和 kubernetes 的适配并非完全没有冲突, 一个典型问题就是 istio 需要 kubernetes service 按照协议进行端口命名([port naming](https://istio.io/docs/ops/deployment/requirements/))。
 
 端口命名不满足约束而导致的流量异常，是使用 mesh 过程中最常见的问题，其现象是协议相关的流控规则不生效，这通常可以通过检查该 port LDS 中 filter 的类型来定位。
 
 ### 原因
 
-k8s 的网络对应用层是无感知的，k8s 的主要流量转发逻辑发生在 node 上，由 iptables/ipvs 来实现，这些规则并不关心应用层里是什么协议。
+Kubernetes 的网络对应用层是无感知的，kubernetes 的主要流量转发逻辑发生在 node 上，由 iptables/ipvs 来实现，这些规则并不关心应用层里是什么协议。
 
-istio 的核心能力是对 7层流量进行管控，但前提条件是 istio 必须知道每个受管控的服务是什么协议，istio 会根据端口协议的不同，下发不同的流控功能（envoy filter），而 k8s 资源定义里并不包括七层协议信息，所以 istio 需要用户显式提供。
+Istio 的核心能力是对 7层流量进行管控，但前提条件是 istio 必须知道每个受管控的服务是什么协议，istio 会根据端口协议的不同，下发不同的流控功能（envoy filter），而 kubernetes 资源定义里并不包括七层协议信息，所以 istio 需要用户显式提供。
 
 ![image-20200509203554310](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-123556.png-medium)
 
@@ -137,7 +137,7 @@ Envoy 接受请求流量叫做 **Downstream**，Envoy 发出请求流量叫做**
 
 ### 异常描述
 
-Sidecar 模式在kubernetes 世界很流行，但对目前的 k8s （V1.17）来说，并没有 sidecar 的概念，sidecar 容器的角色是用户主观赋予的。
+Sidecar 模式在 kubernetes 世界很流行，但对目前的 kubernetes （V1.17）来说，并没有 sidecar 的概念，sidecar 容器的角色是用户主观赋予的。
 
 对 Istio 用户来说，一个常见的困扰是：sidecar 和用户容器的启动顺序：
 
@@ -154,7 +154,7 @@ sidecar（envoy） 和用户容器的启动顺序是不确定的，如果用户�
 * 业务容器延迟几秒启动,  或者失败重试
 * 启动脚本中主动探测 envoy 是否ready，如 `127.0.0.1:15020/healthz/ready`
 
-无论哪种方案都显得很蹩脚，为了彻底解决上述痛点，从 kubernets 1.18版本开始，k8s 内置的 Sidecar 功能将确保 sidecar 在正常业务流程开始之前就启动并运行，即通过更改pod的启动生命周期，在init容器完成后启动sidecar容器，在sidecar容器就绪后启动业务容器，从启动流程上保证顺序性。而 Pod 终止阶段，只有当所有普通容器都已到达终止状态（Succeeded for  restartPolicy=OnFailure 或 Succeeded/Failed for  restartPolicy=Never），才会向sidecar 容器发送  SIGTERM 信号。
+无论哪种方案都显得很蹩脚，为了彻底解决上述痛点，从 kubernets 1.18版本开始，kubernetes 内置的 Sidecar 功能将确保 sidecar 在正常业务流程开始之前就启动并运行，即通过更改pod的启动生命周期，在init容器完成后启动sidecar容器，在sidecar容器就绪后启动业务容器，从启动流程上保证顺序性。而 Pod 终止阶段，只有当所有普通容器都已到达终止状态（Succeeded for  restartPolicy=OnFailure 或 Succeeded/Failed for  restartPolicy=Never），才会向sidecar 容器发送  SIGTERM 信号。
 
 ![image-20200302222722319](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121701.png)
 
@@ -162,13 +162,13 @@ sidecar（envoy） 和用户容器的启动顺序是不确定的，如果用户�
 
 ## 5. Ingress Gateway 和 Service 端口联动
 
-Ingress Gateway 规则不生效的一个常见原因是：Gateway 的监听端口在对应的 k8s Service 上没有开启，首先我们需要理解 Istio Ingress Gateway  和  k8s Service 的关系：
+Ingress Gateway 规则不生效的一个常见原因是：Gateway 的监听端口在对应的 kubernetes Service 上没有开启，首先我们需要理解 Istio Ingress Gateway 和 kubernetes Service 的关系：
 
 ![image-20200509204709262](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124711.png-medium)
 
 上图中，虽然 gateway 定义期望管控端口 b 和 c，但是它对应的 service （通过腾讯云CLB）只开启了端口 a 和 b，因此最终从 LB 端口 b 进来的流量才能被 istio gateway 管控。
 
-* Istio Gateway 和 k8s Service 没有直接的关联，二者都是通过 selector 去绑定 pod，实现间接关联
+* Istio Gateway 和 kubernetes Service 没有直接的关联，二者都是通过 selector 去绑定 pod，实现间接关联
 
 * Istio CRD Gateway 只实现了将用户流控规则下发到网格边缘节点，流量仍需要通过 LB 控制才能进入网格
 
@@ -294,5 +294,5 @@ Istio-proxy 中的一段 iptables:
 ### 改造建议
 
 建议应用在接入 istio 之前， 调整服务监听地址，使用 `0.0.0.0` 而不是具体 IP。
-如果业务方认为改造难度大，可以参考之前分享的一个解决方案：[服务监听pod ip 在istio中路由异常分析](http://zhonghua.io/2019/07/11/istio-xds-podip/)
+如果业务方认为改造难度大，可以参考之前分享的一个解决方案：[服务监听pod ip 在 istio 中路由异常分析](http://zhonghua.io/2019/07/11/istio-xds-podip/)
 
