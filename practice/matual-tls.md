@@ -5,21 +5,22 @@ reviewers: [""]
 
 # 双向 TLS
 
-TLS 在 web 端的使用非常广泛，针对传输的内容进行加密，能够有效的防止中间人攻击。双向TLS（Two way TLS/Mutual TLS，后文均简称 mTLS）的主要使用场景是在 B2B 和 Server-to-Server 的场景中，使得服务和服务之间能够相互鉴权。
+TLS 在 web 端的使用非常广泛，针对传输的内容进行加密，能够有效的防止中间人攻击。双向TLS（Two way TLS/Mutual TLS，后文均简称 mTLS）的主要使用场景是在 B2B 和 Server-to-Server 的场景中，以支持服务与服务。
 ![istio-official-authorization-arch](../images/authz.png)
 
 上图源引[Istio官网](https://istio.io/docs/concepts/security/authz.svg)
-，图中非常明确的表示 Istio 所希望的是在 Service Mesh 中能够使用 mTLS 进行 authorization，而在 Service Mesh 外使用 JWT+mTLS 进行 authorization。服务间身份认证是使用 mTLS，来源身份验证中则是使用 JWT。
+，图中非常明确的表示 Istio 所希望的是在网格中能够使用 mTLS 进行 authorization，而在网格外使用 JWT+mTLS 进行 authorization。服务间身份认证是使用 mTLS，来源身份验证中则是使用 JWT。
 
-本文将一一阐述 mTLS handshake 的过程，Envoy 中如何实现 handshake，以及 Istio 中在各个方面如何使用，在 Kubernetes 集群中使用有哪些注意事项，和选择 mTLS 的合适使用场景几个方面。
+我们将一一阐述 mTLS 在 Istio 中 Authentication 和 Authorization 两个方面的实践，在 Kubernetes 集群中使用有哪些注意事项，和mTLS 的使用建议两个方面。
 
-## mTLS 在 Istio 中的使用
+## mTLS 在 Istio 中进行 Authentication 和 Authorization
 
 Istio 中提供了 AuthorizationPolicy 用于对 trust domain 进行设置，能够对证书做到更加细粒度的验证。具体的一些实践我们也会在后面的章节中进行实践与探讨。
 
-### mTLS 的基本使用
+### mTLS Authentication 实践
 
-测试环境结构如图，共拥有 full legacy mtls-test 三个 namespace，对 full，mtls-test 设置为自动注入 sidecar。
+我们将构建测试环境用于验证 mTLS Authentication 是否在服务间启用，mTLS Authentication 在不同的模式下将对服务与服务之的通信有何影响。
+测试环境结构如图，共拥有 `full`，`legacy`，`mtls-test` 三个命名空间，对 `full`，`mtls-test` 设置为自动注入 sidecar。
 
 ![istio-mutual-simple-test](../images/istio-mutual-simple-test.jpg)
 
@@ -112,10 +113,24 @@ spec:
           optional: true
 ---
 ```
+### mTLS Authentication
+
+mTLS 主要负责服务与服务之间传输层面的认证，具体实现在Envoy中，在具体进行请求时，将经历如下的过程：
+1. 客户端发出的请求将被发送到客户端一测的 Envoy 。
+2. 客户端一测的 Envoy 与服务端一测的 Envoy 开始 mTLS 握手，在握手的同时，客户端一测的 Envoy 讲进行 secure naming check 的额外操作，对服务端中的 server identity (存储在证书中的 SAN 中) 进行检查，以确保其能够运行服务，该操作能够防止一些常见 HTTP/TCP 的流量劫持攻击。
+4. 在完成 Authentication 以及之后要讲到的 Authorization 之后，客户端和服务端开始建立连接进行通信。
+
+Istio 提供如下三种 mTLS Authentication 模式，在不同的场景下进行使用。
+
+- PERMISSIVE: 同时支持密文传输和明文传输，则不管是在 Istio 管理下的 Pod 还是在 Istio 管理外的 Pod，相互之间的通信畅通无阻。PERMISSIVE的主要用途是在用户migration的过程中，服务与服务之间也仍旧能够通信，例如部分 wordloads 并未注入 sidecar。对于刚接触 Istio 的用户而言非常友好，官方建议在完成迁移之后调整为STRICT模式。
+- STRICT: workloads 只支持密文传输。
+- DISABLE: 关闭Mutual TLS。从安全的角度而言，官方并不建议在没有其他安全措施的情况下使用该模式。
+
+针对此我们需要重点关注的 CRD 为 `PeerAuthentication` 和 `DestinationRule`。
 
 #### 使用默认的 PERMISSIVE 模式
 
-默认情况下， PERMISSIVE 模式能够支持明文传输，则不管是在 Istio 管理下的 Pod 还是在 Istio 管理外的 Pod，相互之间的通信畅通无阻，相关证书的内容也不需要使用者自行签发。
+默认情况下，PERMISSIVE 模式能够支持明文传输，则不管是在 Istio 管理下的 Pod 还是在 Istio 管理外的 Pod，相互之间的通信畅通无阻。PERMISSIVE 是一种过渡态，当你开始将所有的 workloads 都迁移到网格中时，可以使用PERMISSIVE 过渡态，在完成迁移工作后，可以通过 Grafana Dashboard 或者在 istio-proxy 中使用 tcpdump 来检查是否仍存在明文传输的情况。最终将模式转换为 STRICT 完成迁移。
 
 ```bash
 for from in "mtls-test" "legacy"; do for to in "mtls-test"; do echo "sleep.${from} to httpbin.${to}";kubectl exec $(kubectl get pod -l app=sleep -n ${from} -o jsonpath={.items..metadata.name}) -c sleep -n ${from} -- curl http://httpbin.${to}:8000/headers  -s  -w "response code: %{http_code}\n" | egrep -o 'URI\=spiffe.*sa/[a-z]*|response.*$';  echo -n "\n"; done; done
@@ -130,7 +145,7 @@ URI=spiffe://cluster.local/ns/full/sa/sleep
 response code: 200
 ```
 
-这里需要强调的是从 `sleep.mtls-test` 到 `httpbin.mtls-test` 这里能够找到 SPIFFE 的相关内容，SPIFFE URI 显示来自 X.509 证书的客户端标识，它表明流量是在双向 TLS 中发送的。如果流量为明文，将不会显示客户端证书。
+这里需要强调的是从 `sleep.mtls-test` 到 `httpbin.mtls-test` 这里能够找到 SPIFFE 的相关内容，SPIFFE URI 显示来自 X.509 证书的客户端标识，它表明流量是在 mTLS 中发送的。如果流量为明文，将不会显示客户端证书。
 
 #### 启用 STRICT 模式
 
@@ -159,7 +174,7 @@ spec:
 ---
 ```
 
-此时我们已经要求进入到 `httpbin.mtls-test` 的流量必须是 mTLS 模式，则 `httpbin.legacy` 没有办法获取到最终的结果，再次发送请求以验证：
+此时我们已经要求进入到 `httpbin.mtls-test` 的流量必须是密文传输，则 `httpbin.legacy` 没有办法获取到最终的结果，再次发送请求以验证：
 
 ```
 sleep.mtls-test to httpbin.mtls-test
@@ -173,50 +188,65 @@ URI=spiffe://cluster.local/ns/full/sa/sleep
 response code: 200
 ```
 
-上述的实验已经能够表明我们可以在证书的层面进行较为粗粒度的访问管理，进一步的我们对 SPIFFE 的内容开始感兴趣，我们希望针对 SAN 能够获取到更为细粒度的控制。
+#### 启用 DISABLE 模式
 
-对此，我们应该对 Istio 实现的证书有一个更进一步的了解。
+此时，我们因为种种的原因不能将 `sleep.legacy` 迁移到网格中，但仍旧希望其可以与 `httpbin.mtls-test` 进行通信，因此我们针对 `httpbin.mtls-test` 启用 DISABLE 模式
+
+```yaml
+apiVersion: "security.istio.io/v1beta1"
+kind: "PeerAuthentication"
+metadata:
+  name: "httpbin"
+  namespace: "mtls-test"
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  mtls:
+    mode: DISABLE
+---
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "DestinationRule"
+metadata:
+  name: "httpbin-mtls-test-mtls"
+spec:
+  host: httpbin.mtls-test.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+```
+
+```
+sleep.mtls-test to httpbin.mtls-test
+response code: 200
+sleep.legacy to httpbin.mtls-test
+response code: 200
+sleep.full to httpbin.mtls-test
+response code: 200
+```
+
+实验的结果上能体现相互之间的通讯是畅通的，但是没有展示 SPIFFE URI，因此所有的流量都是明文传输的。请一定注意这样的配置是非常危险的，在没有其他安全措施的情况下请避免这类情况的发生。
+
+### mTLS Authorization 
+
+Authentication 主要解决的是证明“我是谁”的问题，Authorization 则是列举出“我能做什么”，对于 mTLS 而言，则是需要回答该流量 ALLOW 还是 DENY，其中的主要依据是 Identity，通常，Trust Domain 指定身份所属的网格。针对此我们需要重点关注的 CRD 为 `AuthorizationPolicy`。
+
 Istio 在1.5版本前，会在每一个 namespace 下创建一个 `istio.default` 的 secret，存储默认的 CA 文件，并会被 mount 在 sidecar 中以供使用，但是在1.5版本中，不会再存储在 secret 中，只能通过 rpc 调用才能获取到响应的内容，内容最终会被分配在内存中，但我们可以使用 `openssl s_client` 进行访问来获得证书。
 
 ```bash
 kubectl exec <pod> -c istio-proxy -- openssl s_client -alpn istio -connect <service:port> # 获取到证书
 openssl x509 -text -noout -in server.pem # 对上一个cmd返回内容中的server.pem 进行解析
 Certificate:
-    Data:
-        Version: 3 (0x2)
-        Serial Number:
-            # Secret Content
-    Signature Algorithm: sha256WithRSAEncryption
-        Issuer: O=cluster.local
-        Validity
-            Not Before: Apr 10 03:38:12 2020 GMT
-            Not After : Jul  9 03:38:12 2020 GMT
-        Subject: 
-        Subject Public Key Info:
-            Public Key Algorithm: rsaEncryption
-                Public-Key: (2048 bit)
-                Modulus:
-                    # Secret Content
-                Exponent: 65537 (0x10001)
+  # Ignore something now is not important
         X509v3 extensions:
-            X509v3 Key Usage: critical
-                Digital Signature, Key Encipherment
-            X509v3 Extended Key Usage: 
-                TLS Web Server Authentication, TLS Web Client Authentication
-            X509v3 Basic Constraints: critical
-                CA:FALSE
             X509v3 Subject Alternative Name: critical
                 URI:spiffe://cluster.local/ns/default/sa/default
-    Signature Algorithm: sha256WithRSAEncryption
-         # Secret Content
 ```
 
-我们接下来要重点关注的就是这里所展示的 SAN
-
-### mTLS 与 Trust Domain
+我们接下来要重点关注的就是这里所展示的 SAN（Subject Alternative Name）。
 
 Turst Domain 是 Istio 1.4 版本进入 alpha 的一个功能，在我们修改 Trust Domain 时，实质上是修改了 SAN 区域的值，重新签发了新的证书(重新签发证书需要一定的时间，因此在配置之后需要等待一段时间才能生效)。
-针对此我们需要重点关注的 CRD 为 `AuthorizationPolicy`。
+
 在我们的实验中，我们将设置 `sleep.full` 不允许访问 `httpbin.mlts-test`。
 
 ```yaml
@@ -255,13 +285,13 @@ sleep.full to httpbin.mtls-test
 response code: 403
 ```
 
-我们看到当 `sleep.full` 请求 `httpbin.mtls-test` 时，此时返回403，说明其存在证书，但是证书的的 SAN 值域并不在 Trust Domain 中(配置文件类似于配置了黑名单)，因此返回403。
+我们看到当 `sleep.full` 请求 `httpbin.mtls-test` 时，此时返回403，说明其存在证书，但是证书的的 SAN 值域并不在 Trust Domain 中，因此返回403。
 
 ### mTLS 与数据库
 
 #### MongoDB 内置 mTLS
 
-数据库作为 cloud 中因其 stateful 的特性以及对于性能和安全的要求，一直存在着许许多多的问题，今天我们就以 MongoDB 为例，通过 mTLS 访问外的 MongoDB 服务。MongoDB 自身能够提供 mTLS 的服务，首先我们在 Kubernetes 首先实现 mTLS，再将 client 放入到 Service Mesh 中。
+数据库因其 stateful 的特性，在不同的情况下，需要在性能和安全方面进行平衡，我们就以 MongoDB 为例，通过 mTLS 访问网格外部 MongoDB 服务。MongoDB 自身能够提供 mTLS 的服务，首先我们在网格外实现 MongoDB mTLS，再将客户端部署在网格中。
 首先使用 openssl 自行签发证书：
 
 ```bash
@@ -278,15 +308,16 @@ cat client.key client.crt > client.pem # 合并证书与私钥
 openssl verify -CAfile ca.pem client.pem # 验证证书
 ```
 
-至此我们已经获得了三个证书，`ca.pem`作为根证书，`server.pem` 和`client.pem`分别作为server和client的证书。
-简单使用 ConfigMap 在实验中将证书 mount 进入到 Pod 中。
+至此我们已经获得了三个证书，`ca.pem`作为根证书，`server.pem` 和`client.pem`分别作为服务端和客户端的证书。
+
+简单使用 ConfigMap 在实验中将证书挂载到 Pod 中。
 
 ```bash
 kubectl create configmap -n mongo mongo-server-pem --from-file=./ssl/server.pem --from-file=./ssl/ca.pem
 kubectl create configmap -n mongo mongo-client-pem --from-file=./ssl/client.pem --from-file=./ssl/ca.pem
 ```
 
-server:
+服务端:
 
 ```yaml
 apiVersion: v1
@@ -343,7 +374,7 @@ spec:
 ---    
 ```
 
-client:
+客户端:
 
 ```yaml
 apiVersion: apps/v1
@@ -377,45 +408,35 @@ spec:
 ---
 ```
 
-之后我们在 client 中进行试验：
+之后我们在客户端中进行试验：
 
 ```bash
-root@mongo-client-548f5974f-xbxx6: mongo --tls --tlsCAFile /pem/ca.pem --tlsCertificateKeyFile /pem/client.pem --host mongo
-MongoDB shell version v4.2.6
-connecting to: MongoDB://mongo:27017/?compressors=disabled&gssapiServiceName=MongoDB
-Implicit session: session { "id" : UUID("150e352f-5635-4af2-9ad7-f37e2840ec6b") }
-MongoDB server version: 4.2.6
+root@mongo-client: mongo --tls --tlsCAFile /pem/ca.pem --tlsCertificateKeyFile /pem/client.pem --host mongo.mongo
 Welcome to the MongoDB shell.
-
-
-root@mongo-client-548f5974f-xbxx6:/ mongo  --host mongo
-MongoDB shell version v4.2.6
-connecting to: MongoDB://mongo:27017/?compressors=disabled&gssapiServiceName=MongoDB
-2020-05-02T06:19:11.562+0000 I  NETWORK  [js] DBClientConnection failed to receive message from mongo:27017 - HostUnreachable: Connection closed by peer
-2020-05-02T06:19:11.562+0000 E  QUERY    [js] Error: network error while attempting to run command 'isMaster' on host 'mongo:27017'  :
-connect@src/mongo/shell/mongo.js:341:17
-@(connect):2:6
-2020-05-02T06:19:11.565+0000 F  -        [main] exception: connect failed
-2020-05-02T06:19:11.565+0000 E  -        [main] exiting with code 1
-
-
-root@mongo-client-548f5974f-xbxx6:/ mongo --tls --tlsCAFile /pem/ca.pem --tlsCertificateKeyFile /pem/ca.pem --host mongo
-2020-05-02T06:30:25.551+0000 E  NETWORK  [main] cannot read PEM key file: /pem/ca.pem error:0909006C:PEM routines:get_name:no start line
-Failed global initialization: InvalidSSLConfiguration Can not set up PEM key file.
-
-
-root@mongo-client-548f5974f-xbxx6:/ mongo --tls --tlsCAFile /pem/client.pem --tlsCertificateKeyFile /pem/client.pem --host mongo
-MongoDB shell version v4.2.6
-connecting to: MongoDB://mongo:27017/?compressors=disabled&gssapiServiceName=MongoDB
-2020-05-02T06:30:36.144+0000 E  NETWORK  [js] SSL peer certificate validation failed: self signed certificate in certificate chain
-2020-05-02T06:30:36.145+0000 E  QUERY    [js] Error: couldn't connect to server mongo:27017, connection attempt failed: SSLHandshakeFailed: SSL peer certificate validation failed: self signed certificate in certificate chain :
-connect@src/mongo/shell/mongo.js:341:17
-@(connect):2:6
-2020-05-02T06:30:36.147+0000 F  -        [main] exception: connect failed
-2020-05-02T06:30:36.148+0000 E  -        [main] exiting with code 1
 ```
 
-上述的输出可以表明，在没有证书和证书不正确的情况下都无法连入数据库，我们能够正确使用 mTLS 模式访问MongoDB，在访问 MongoDB 上现在已经有了非常安全的保障，但是在 client 端需要开发者自行处理有关证书的事宜，这不仅仅会给开发者带来困扰，也会将证书与私钥对外暴露，如果 client 在 Service Mesh 内部，我们可以让 sidecar 来负责相关的工作。
+在mongo-client中我们使用正确的客户端证书和根证书对`mongo.mongo`尝试连接，能够正常通信。
+
+```bash
+root@mongo-client:/ mongo  --host mongo.mongo
+2020-05-02T06:19:11.562+0000 I  NETWORK  [js] DBClientConnection failed to receive message from mongo.mongo:27017 - HostUnreachable: Connection closed by peer
+```
+在尝试连接时不设置任何证书，将会在握手阶段被拒绝。
+
+```bash
+root@mongo-client:/ mongo --tls --tlsCAFile /pem/ca.pem --tlsCertificateKeyFile /pem/ca.pem --host mongo.mongo
+2020-05-02T06:30:25.551+0000 E  NETWORK  [main] cannot read PEM key file: /pem/ca.pem error:0909006C:PEM routines:get_name:no start line
+Failed global initialization: InvalidSSLConfiguration Can not set up PEM key file.
+```
+我们用根证书替代客户端证书，根证书的格式不正确导致无法完成握手。
+
+```bash
+root@mongo-client:/ mongo --tls --tlsCAFile /pem/client.pem --tlsCertificateKeyFile /pem/client.pem --host mongo.mongo
+2020-05-02T06:30:36.144+0000 E  NETWORK  [js] SSL peer certificate validation failed: self signed certificate in certificate chain
+```
+我们用客户端证书替代根证书，服务端将在握手阶段验证，最终发现客户端是自签名证书，不可被信任。
+
+上述的输出可以表明，在没有证书和证书不正确的情况下都无法连入数据库，我们能够正确使用 mTLS 模式访问MongoDB，在访问 MongoDB 上现在已经有了非常安全的保障，但是在 client 端需要开发者自行处理有关证书的事宜，这不仅仅会给开发者带来困扰，也会将证书与私钥对外暴露，如果 client 在网格内部，我们可以让 sidecar 来负责相关的工作。
 
 #### Istio mTLS 结合 MongoDB
 
@@ -498,66 +519,23 @@ sleep-666475687f-cp252          2/2     Running            0          6h23m
 因为探针的最终实施者是 kubelet，但是 kubelet 在执行探测时，并不会携带相应合法的证书，因此会被 sidecar 拒绝请求，返回一个非 2xx 的 response code，TCP 同理，因此需要在该方面上得到豁免。
 
 Istio 官方文档也给出了相应的答案，通过添加注解的方式达成豁免。
-
+修改 Deployment，在 `template.metadata` 中添加了 `sidecar.istio.io/rewriteAppHTTPProbers` 通过 rewrite 的方式保证 probe 能够正常工作。
 ```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  namespace: mtls-test
-  name: httpbin-probe
-  labels:
-    app: httpbin-probe
 spec:
-  ports:
-  - name: http
-    port: 8000
-    targetPort: 80
-  selector:
-    app: httpbin-probe
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  namespace: mtls-test
-  name: httpbin-probe
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: httpbin-probe
-      version: v1
   template:
     metadata:
-      labels:
-        app: httpbin-probe
-        version: v1
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
-    spec:
-      containers:
-      - image: docker.io/kennethreitz/httpbin
-        imagePullPolicy: IfNotPresent
-        name: httpbin
-        ports:
-        - containerPort: 80
-        livenessProbe:
-          httpGet:
-            path: /headers
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 5
----
 ```
-
-Deployment 的主要修改在 `template.metadata` 中添加了 `sidecar.istio.io/rewriteAppHTTPProbers` 通过 rewrite 的方式保证 probe 能够正常工作。
 
 ## mTLS 的使用建议
 
-在当今微服务架构盛行的情况下，服务于服务之间的调用是非常频繁的，这也是 Istio 在 Envoy 中启用 mTLS 的一个原因，但是我们在实际的使用中，就是否需要使用mTLS应当按需使用。
+微服务架构中，服务与服务之间的调用是非常频繁的，这也是 Istio 启用 mTLS 的一个原因，但是我们在实际的使用中，就是否需要使用mTLS应当按需使用。
 
-由于我们大多数用户在构建 image 的时候会选择从一些基础的镜像进行搭建，这就给了某些 hacker 可乘之机，进入到集群之中，并执行相应的代码，比如该服务为 Hack，选择了尝试 fetch 另一个内部服务 Cost 的接口 /books/cost 去获取到所有书本的成本价。Cost 此时在 Service Mesh 中，但是 Hack 并不在 Service Mesh 中，如果我们选择使用 PERMISSIVE 模式，则 Hack 的行为合法，如果使用 STRICT 模式，则 Hack 将无法访问到相应资源，返回 Status Code 503。
+大多数用户会选择从一些基础的镜像开始构建，这就给了某些不怀好意者可乘之机，使恶意代码进入到集群之中，并执行相应的代码，获取到相应敏感的信息。
+比如一个名为 Hack 的Pod被部署在网格外，其注入的恶意代码将在容器启动是尝试连接网格中的mysql数据库，如果我们选择使用 PERMISSIVE 或 DISABLE 模式，则 Hack 的行为合法，将为其创造条件对数据库密码进行破解，如果使用 STRICT 模式，则 Hack 将无法访问到相应资源，返回状态码503，从根源上阻止了其行为。
 
-除此之外，我们需要在 Security 和 Performance 两者间进行一个考虑，虽然我们可以创建更少的 connection 来避免总的握手次数（多路复用），但是对称加密解密也是非常耗时和消耗 CPU 资源的，有关性能消耗的分析，可见一些评测机构对此作出的相关评测。
+除此之外，我们需要在安全和性能两者间进行一个考虑，虽然我们可以创建更少的 连接来避免总的握手次数（多路复用），但是对称加密/解密也是非常耗时和消耗 CPU 资源的，有关性能消耗的分析，可见一些评测机构对此作出的相关评测。
 
 综上，如果是对性能较为敏感，且数据的敏感性不强，数据库也仅限集群内部访问，可以考虑使用明文传输。但如果数据敏感或业务逻辑需要安全方面的考量，建议使用 mTLS。
 
