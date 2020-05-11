@@ -1,6 +1,6 @@
 ---
 authors: ["gorda"]
-reviewers: [""]
+reviewers: ["hb-chen","ikingye"]
 ---
 
 # HTTP 流量授权
@@ -17,29 +17,29 @@ reviewers: [""]
 
 1. 开始之前，我们可以看到目前 Bookinfo 是可以正常访问的。
 
-![可正常访问的 product](../images/http-policy-2.png)
+    ![可正常访问的 product](../images/http-policy-2.png)
 
 1. 我们添加授权策略，拒绝访问 Bookinfo 所在 namespace 的所有 workload。
 
-```bash
-$ kubectl apply -f - <<EOF
-apiVersion: security.istio.io/v1beta1 
-kind: AuthorizationPolicy
-metadata:
-  name: deny-all
-  namespace: default
-spec:
-  {}
-EOF
-```
+    ```bash
+    $ kubectl apply -f - <<EOF
+    apiVersion: security.istio.io/v1beta1 
+    kind: AuthorizationPolicy
+    metadata:
+      name: deny-all
+      namespace: default
+    spec:
+      {}
+    EOF
+    ```
 
 1. 再尝试访问 Bookinfo，可以看到，已经无法访问 Bookinfo 了
 
-> 需要注意的时：如果你的页面依然可以访问，可以等待几秒钟或者多重试几次，这是因为授权策略生效略微有点延迟，后续其它策略类似。
-
-![无法访问 product](../images/http-policy-3.png)
-
-接下来，我们将根据需要，逐步添加（允许访问）授权策略。
+    > 需要注意的是：如果你的页面依然可以访问，可以等待几秒钟或者多重试几次，这是因为授权策略生效略微有点延迟，后续其它策略类似。
+    
+    ![无法访问 product](../images/http-policy-3.png)
+    
+    接下来，我们将根据需要，逐步添加允许访问的授权策略。
 
 ## HTTP 流量授权
 
@@ -67,7 +67,7 @@ Content-Type: application/json
 }
 ```
 
-这是一个 GitHub API 示例，同时也是一个 HTTP 请求，一个 HTTP 请求由三部分构成，**请求行**、**请求头** 和 **请求体**。第一行为 **请求行**，第二行至空格前的内容为 **请求头**，空行至结束为 **请求体**。从这个请求中，我可以可以获取到很多信息，例如请求的 Method、Path、Host 以及其它各种 Header 信息。
+这是一个 GitHub API 示例，同时也是一个 HTTP 请求，一个 HTTP 请求由三部分构成：**请求行**、**请求头** 和 **请求体**。第一行为 **请求行**，第二行至空格前的内容为 **请求头**，空行之后为 **请求体**。从这个请求中，你可以获取到很多信息，例如请求的 Method、Path、Host 以及其它各种 Header 信息。
 
 而 Istio 的授权策略，允许你根据 **请求行** 和 **请求头** 所提供的大部分信息，进行细粒度的授权策略控制。不仅如此，你还可以根据更多的信息（IP、Port、Namespace 等）制定授权策略，所有这些都可以在 Istio 授权策略中完成。
 
@@ -90,7 +90,7 @@ spec:
   selector:
     matchLabels:
       app: productpage
-  actin: ALLOW
+  action: ALLOW
   rules:
   - to:
     - operation:
@@ -242,7 +242,7 @@ rules 是 Istio 授权策略 **最重要** 也是最复杂的一部分，rules �
 
 > rules 为 nil 是一种特殊情况，后面我们会做特别说明。
 
-每一条 rule 又由三个字段构成，分别是：from、to 和 when。三个字段分别对应 []From、[]To 和 []When。表示对一个请求的来源、操作（或者说目的）和两者进行规则验证。
+每一条 rule 又由三个字段构成，分别是：from、to 和 when。三个字段分别对应 `[]From`、`[]To` 和 `[]When`。表示对一个请求的来源、操作（或者说目的）和两者进行规则验证。
 每个对象内置了丰富的字段，可以进行各种规则的验证。
 
 虽然 rule 稍微复杂一点，但其大部分的字段还是基于前面提到的那些信息（HTTP 请求行、HTTP 请求头、IP、Port、Namespace 等），并没有多少特别的地方。
@@ -272,6 +272,7 @@ rules:
   - operation:
       hosts: ["bilibili.com","baidu.com"]
 ---
+
 # 如果请求 host 是 bilibili.com **或** baidu.com，**且** 请求方法是 POST，则匹配该 rule
 rules:
   to:
