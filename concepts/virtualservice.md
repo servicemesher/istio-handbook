@@ -90,7 +90,7 @@ VirtualService 主机名可以是一个 IP 地址，一个 DNS 域名，或者�
 
 #### Destination
 
-路由片段的 `distination` 字段指定符合匹配条件的流量目标地址。这里不像 VirtualService 的 `hosts`，Distination 的 `host` 必须是存在于 Istio 服务注册中心的实际目标地址，否则 Envoy 不知道该将请求发送到哪里。这个目标地址可以是代理的网格服务或者作为服务入口加入的非网格服务。下面的场景中我们运行在 Kubernetes 平台上，主机名是 Kubernetes 的服务名：
+路由片段的 `distination` 字段指定符合匹配条件的流量目标地址。这里不像 VirtualService 的 `hosts`，Distination 的 `host` 必须是存在于 Istio 服务注册中心的实际目标地址，否则 Envoy 不知道该将请求发送到哪里。这个目标地址可以是代理的网格服务或者作为服务入口加入的非网格服务。下面的场景中我们运行在 Kubernetes 平台上，主机名是 Kubernetes 的服务名。
 
 ```yaml
 route:
@@ -119,6 +119,7 @@ route:
 ### 路由规则的更多内容
 
 路由规则是将特定流量子集路由到特定目标地址的强大工具。您可以在流量端口、`header` 字段、 URL 等内容上设置匹配条件。例如，下面的VirtualService 使用户发送流量到两个独立的服务，ratings and reviews， 就好像它们是 `http://bookinfo.com/` 这个更大的 VirtualService 的一部分。VirtualService 规则根据请求的 URL 和指向适当服务的请求匹配流量。
+
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -146,7 +147,7 @@ spec:
 
 您可以使用 `AND` 向同一个 `match` 块添加多个匹配条件， 或者使用 `OR` 向同一个规则添加多个 `match` 块。对于任意给定的 VirtualService ，您可以配置多条路由规则。这可以使您的路由条件在一个单独的 VirtualService 中基于业务场景的复杂度来进行相应的配置。可以在 [HTTPMatchRequest 参考](https://istio.io/docs/reference/config/networking/virtual-service/#HTTPMatchRequest)中查看匹配条件字段和他们可能的值。
 
-再者进一步使用匹配条件，您可以使用基于“权重”百分比分发流量。这在 A/B 测试和金丝雀部署中非常有用:
+再者进一步使用匹配条件，您可以使用基于“权重”百分比分发流量。这在 A/B 测试和金丝雀部署中非常有用。
 
 ```yaml
 spec:
