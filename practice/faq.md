@@ -22,7 +22,7 @@ reviewers: [""]
 
 ## 1. Service 端口命名约束
 
-Istio 支持多平台，不过 Istio 和 kubernetes 的兼容性是最优的，不管是设计理念，核心团队还是社区， 都有一脉相承的意思。但 istio 和 kubernetes 的适配并非完全没有冲突, 一个典型问题就是 istio 需要 kubernetes service 按照协议进行端口命名([port naming](https://istio.io/docs/ops/deployment/requirements/))。
+Istio 支持多平台，不过 istio 和 kubernetes 的兼容性是最优的，不管是设计理念，核心团队还是社区，都有一脉相承的意思。但 istio 和 kubernetes 的适配并非完全没有冲突，一个典型问题就是 istio 需要 kubernetes service 按照协议进行端口命名（[port naming](https://istio.io/docs/ops/deployment/requirements/)）。
 
 端口命名不满足约束而导致的流量异常，是使用 mesh 过程中最常见的问题，其现象是协议相关的流控规则不生效，这通常可以通过检查该 port LDS 中 filter 的类型来定位。
 
@@ -30,7 +30,7 @@ Istio 支持多平台，不过 Istio 和 kubernetes 的兼容性是最优的，�
 
 Kubernetes 的网络对应用层是无感知的，kubernetes 的主要流量转发逻辑发生在 node 上，由 iptables/ipvs 来实现，这些规则并不关心应用层里是什么协议。
 
-Istio 的核心能力是对 7层流量进行管控，但前提条件是 istio 必须知道每个受管控的服务是什么协议，istio 会根据端口协议的不同，下发不同的流控功能（envoy filter），而 kubernetes 资源定义里并不包括七层协议信息，所以 istio 需要用户显式提供。
+Istio 的核心能力是对 7 层流量进行管控，但前提条件是 istio 必须知道每个受管控的服务是什么协议，istio 会根据端口协议的不同，下发不同的流控功能（envoy filter），而 kubernetes 资源定义里并不包括七层协议信息，所以 istio 需要用户显式提供。
 
 ![端口命名约束](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-123556.png)
 
@@ -273,6 +273,10 @@ Istio-proxy 中的一段 iptables:
 
 ### 改造建议
 
-建议应用在接入 istio 之前， 调整服务监听地址，使用 `0.0.0.0` 而不是具体 IP。
+建议应用在接入 istio 之前，调整服务监听地址，使用 `0.0.0.0` 而不是具体 IP。
 如果业务方认为改造难度大，可以参考之前分享的一个解决方案：[服务监听pod ip 在 istio 中路由异常分析](http://zhonghua.io/2019/07/11/istio-xds-podip/)
+
+## 小结
+
+Istio 并不是单一领域的技术，它综合了诸多服务治理领域的解决方案和最佳实践。Istio 试图运用精巧的模型，去联结各种平台、观测系统和用户应用。目前的 istio 已经足够复杂，未来一定会更加复杂，这些「复杂」的目的，本意让用户能更「简单」地使用 Service Mesh 领域的最佳实践；但另一方面，我们必须要深入 Istio 的细节，对异常进行刨根问底，才能保证 Service Mesh 架构能稳定地支持终端用户和业务系统。
 
