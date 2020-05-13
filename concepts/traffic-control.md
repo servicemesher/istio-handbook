@@ -5,15 +5,13 @@ reviewers: [""]
 
 # 流量控制
 
-顾名思义，流量控制是指对系统站点流量的管控。它包括了对入站流量的控制，出站流量的控制以及在系统内部 service-to-service 类型流量的控制。我们都知道，Istio 架构在逻辑上分为 Control plane（控制平面）和 Data plane（数据平面），Control plane 负责整体管理和配置代理，而 Data plane 负责网格内所有微服务间的网络通信，同时还收集报告网络请求的遥测数据等。流量控制主要是基于 Data plane 层实现。
+顾名思义，流量控制是指对系统站点流量的管控。它包括了对入站流量，出站流量以及在系统内部 service-to-service 类型流量的控制。我们都知道，Istio 架构在逻辑上分为 Control plane（控制平面）和 Data plane（数据平面），Control plane 负责整体管理和配置代理， Data plane 负责网格内所有微服务间的网络通信，同时还收集报告网络请求的遥测数据等。流量控制则是在 Data plane 层实现。如下图所示：
 
-如下图所示：
+![Istio Architecture](../images/istio-traffic-arch.png)
 
-![Istio Architecture](D:/works/servicemesher/istio-handbook/images/istio-traffic-arch.png)
+与传统的微服务架构一样，想要实现流量的管控，首先就需要知道在一个网格中有多少 Endpoints（端点），这些 Endpoints 都属于哪些 Service ，然后将这些信息都记录到注册中心去便于实现服务发现。Istio 也有一个 Service Registry 用来存储网格内所有可以被路由的服务列表，如果您是 Kubernetes 用户，Istio 会自动从 Kubernetes 的 Etcd 中拉取可用 Service 列表并维护到自己的 Service Registry 中。
 
-与传统的微服务架构一样，想要实现流量的管控，首先就需要知道在一个网格中有多少 Endpoints（端点），这些 Endpoints 都属于哪些 Service ，然后将这些信息都记录到注册中心去便于实现服务发现。Istio 也有一个 Service Registry 用来存储网格内所有可以被路由的服务列表，如果您是 Kubernetes 用户，Istio 将会自动从 Kubernetes 的 Etcd 中拉取可用 Service 列表并维护到自己的 Service Registry 中。
-
-Istio 的流量控制是通过一系列的 CRD （Kubernetes 的自定义资源）来实现，它具体包括以下这些资源：
+Istio 的流量控制是通过一系列的 CRD （Kubernetes 的自定义资源）来实现，它包括以下这些资源：
 
 - VirtualService
 - DestinationRule
@@ -62,7 +60,7 @@ spec:
 
 以上配置表示 ：当访问 reviews 服务时，如果请求标头中存在`end-user:jason`这样的键值对则转发到 `v2` 版本的 reviews 服务子集中，其他的请求则转发到 `v3` 版本的 reviews 服务子集中。
 
-**补充：**在 Istio 1.5 中，VirtualService 资源之间是无法进行转发的，在 Istio 未来版本中规划了 VirtualService Chain 机制，也就是说，我们可以通过 delegate 配置项将一个 VirtualService 代理到另外一个 VirtualService 进行规则匹配。
+**补充：**在 Istio 1.5 中，VirtualService 资源之间是无法进行转发的，在 Istio 未来版本中规划了 VirtualService Chain 机制，也就是说，我们可以通过 delegate 配置项将一个 VirtualService 代理到另外一个 VirtualService 中进行规则匹配。
 
 ### DestinationRule
 
@@ -80,7 +78,7 @@ spec:
       simple: LEAST_CONN
 ```
 
-上面的配置中，在它的 metadata 中定义了的 `name` 叫做 `bookinfo-ratings`，这个 `name` 通常被使用在 VirtualService 的 `destination` 配置中。它定义的 `host` 为 `ratings.prod.svc.cluster.local`，表示流量将被转发到 `ratings.prod` 这个服务中去。它的路由的全局负载均衡策略是 `LEAST_CONN`（最少连接）策略。
+上面的配置中，在它的 metadata 中定义了的 `name` 叫做 `bookinfo-ratings`，这个 `name` 通常被使用在 VirtualService 的 `destination` 配置中。它定义的 `host` 为 `ratings.prod.svc.cluster.local`，表示流量将被转发到 `ratings.prod` 这个服务中去。同时指定路由的全局负载均衡策略是 `LEAST_CONN`（最少连接）策略。
 
 ### Gateway
 
@@ -142,15 +140,12 @@ spec:
 
 这个示例中，该 Gateway 被引用在`some-config-namespace`这个 Namespace 下，并使用 label `my-gateway-controller`来关联负载均衡器代理的 Pod 。它对外公开了`80`、`443`、`9443`、`9080`、`2379`端口。
 
-`80`端口附属配置的 host 为`uk.bookinfo.com`，`eu.bookinfo.com`，同时在`tls`中配置如果使用 HTTP1.1 协议访问将会被返回301，要求使用 HTTPS 访问，通过这种配置变相的禁止了对`uk.bookinfo.com`，`eu.bookinfo.com`域名的 HTTP1.1 协议的访问入口。
+- `80`端口附属配置的 host 为`uk.bookinfo.com`，`eu.bookinfo.com`，同时在`tls`中配置如果使用 HTTP1.1 协议访问将会被返回301，要求使用 HTTPS 访问，通过这种配置变相的禁止了对`uk.bookinfo.com`，`eu.bookinfo.com`域名的 HTTP1.1 协议的访问入口。
+- `443`端口为 TLS/HTTPS 访问的端口，表示接受`uk.bookinfo.com`，`eu.bookinfo.com`域名的 HTTPS 协议的访问，`protocol`属性指定了他的协议类型。在`tls`的配置中指定了他的会话模式为单向 TLS ，也指定了服务端证书和私钥的存放地址。
+- `9443`端口也是提供 TLS/HTTPS 访问，与 `443`不同的是他的认证不是指定存放证书的地址，而是通过 credentialName 名称从 Kubernetes 的证书管理中心拉取。
+- `9080`端口为一个提供简单 HTTP1.1 协议请求的端口。这里我们注意到它的hosts中配置了 `ns1/*` 与 `ns2/foo.bar.com` 这个配置项表示只允许`ns1`这个 Namespace 下的 VirtualService 绑定它以及 `ns2` 这个命名空间下配置了 `host` 为`foo.bar.com`的 VirtualService 绑定它。
 
-`443`端口为 TLS/HTTPS 访问的端口，表示接受`uk.bookinfo.com`，`eu.bookinfo.com`域名的 HTTPS 协议的访问，`protocol`属性指定了他的协议类型。在`tls`的配置中指定了他的会话模式为单向 TLS ，也指定了服务端证书和私钥的存放地址。
-
-`9443`端口也是提供 TLS/HTTPS 访问，与 `443`不同的是他的认证不是指定存放证书的地址，而是通过 credentialName 名称从 Kubernetes 的证书管理中心拉取。
-
-`9080`端口为一个提供简单 HTTP1.1 协议请求的端口。这里我们注意到它的hosts中配置了 `ns1/*` 与 `ns2/foo.bar.com` 这个配置项表示只允许`ns1`这个 Namespace 下的 VirtualService 绑定它以及 `ns2` 这个命名空间下配置了 `host` 为`foo.bar.com`的 VirtualService 绑定它。
-
-`2379`端口提供了一个`MONGO`协议的请求端口。允许所有 `host` 绑定它。
+- `2379`端口提供了一个`MONGO`协议的请求端口。允许所有 `host` 绑定它。
 
 ### ServiceEntry
 
@@ -216,7 +211,7 @@ spec:
 
 ### 总结
 
-上面简单介绍了 Istio 架构中的流量控制以及相关资源的基本概念及功能。实际上对于每一种资源，它都提供了丰富的配置项来解决各种场景下流量分发的需求。在下面的章节中，我们将详细分析各类资源的功能。
+上面简单介绍了 Istio 架构中的流量控制以及相关资源的基本概念及功能。实际上对于每一种资源，它都提供了丰富的配置项来解决各种场景下流量分发的需求。在下面的章节中，我们将详细分析各个资源的功能。
 
 ## 参考
 
