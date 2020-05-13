@@ -20,8 +20,6 @@ reviewers: [""]
 
 以上问题的测试环境是基于 istio 1.5.0。
 
----
-
 ## 1. Service 端口命名约束
 
 Istio 支持多平台，不过 Istio 和 kubernetes 的兼容性是最优的，不管是设计理念，核心团队还是社区， 都有一脉相承的意思。但 istio 和 kubernetes 的适配并非完全没有冲突, 一个典型问题就是 istio 需要 kubernetes service 按照协议进行端口命名([port naming](https://istio.io/docs/ops/deployment/requirements/))。
@@ -34,7 +32,7 @@ Kubernetes 的网络对应用层是无感知的，kubernetes 的主要流量转�
 
 Istio 的核心能力是对 7层流量进行管控，但前提条件是 istio 必须知道每个受管控的服务是什么协议，istio 会根据端口协议的不同，下发不同的流控功能（envoy filter），而 kubernetes 资源定义里并不包括七层协议信息，所以 istio 需要用户显式提供。
 
-![image-20200509203554310](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-123556.png-medium)
+![端口命名约束](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-123556.png)
 
 ### istio 的解决方案：Protocol sniffing
 
@@ -63,8 +61,6 @@ Protocol sniffing 减少了新手使用 istio 所需的配置，但是可能会�
 
 建议生产环境不使用协议嗅探, 接入 mesh 的 service 应该按照约定使用协议前缀进行命名。
 
----
-
 ## 2. 流控规则下发顺序问题
 
 ### 异常描述
@@ -75,7 +71,7 @@ Protocol sniffing 减少了新手使用 istio 所需的配置，但是可能会�
 
 当用户使用 `kubectl apply -f multiple-virtualservice-destinationrule.yaml` 时，这些对象的传播和生效先后顺序是不保证的，所谓最终一致性，比如 VirtualService 中引用了某一个 DestinationRule 定义的子版本，但是这个 DestinationRule 资源的传播和生效可能在时间上落后于 该 VirtualService 资源。
 
-![image-20200509204304669](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124308.png-medium)
+![流控规则下发顺序](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124308.png)
 
 ### 最佳实践：make before break
 
@@ -84,8 +80,6 @@ Protocol sniffing 减少了新手使用 istio 所需的配置，但是可能会�
 当新增 DestinationRule subset 时，应该先 apply DestinationRule subset，等待 subset 生效后，再 apply 引用了该 subset 的 VirtualService。
 
 当删除 DestinationRule subset 时，应该先 删除 VirtualService 中对 该 subset 的引用，等待 VirtualService 的修改生效后，在执行删除 DestinationRule subset。
-
----
 
 ## 3. 请求中断分析
 
@@ -97,7 +91,7 @@ Protocol sniffing 减少了新手使用 istio 所需的配置，但是可能会�
 
 Envoy 接受请求流量叫做 **Downstream**，Envoy 发出请求流量叫做**Upstream**。在处理Downstream 和 Upstream 过程中， 分别会涉及2个流量端点，即请求的发起端和接收端：
 
-![image-20200509204433393](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124436.png-medium)
+![envoy 流量模型](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124436.png)
 
 在这个过程中， envoy 会根据用户规则，计算出符合条件的转发目的主机集合，这个集合叫做 **UPSTREAM_CLUSTER**,  并根据负载均衡规则，从这个集合中选择一个 host 作为流量转发的接收端点，这个 host 就是 **UPSTREAM_HOST**。
 
@@ -111,29 +105,27 @@ Envoy 接受请求流量叫做 **Downstream**，Envoy 发出请求流量叫做**
 
 ### 日志分析示例
 
-![image-20200205002607125](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-02-04-162610.png)
+![日志格式](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-02-04-162610.png)
 
 通过日志重点观测 2 个信息：
 * 断点是在哪里 ？
 * 原因是什么？
 
 示例一：一次正常的 client-server 请求：
-![image-20200306114654967](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-034656.png)
+![正常请求](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-034656.png)
 可以看到 2 端日志包含相同的 request ID，因此可以将流量分析串联起来。
 
 示例二：no healthy upstream, 比如目标 deployment 健康副本数为 0
-![image-20200306114752519](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-034754.png)
+![no healthy upstream](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-034754.png)
 日志中 flag「UH」表示 upstream cluster 中没有健康的 host。
 
 示例三：No route configured , 比如 DestinationRule 缺乏对应的 subset
-![image-20200306114840748](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-034959.png)
+![No route configured](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-034959.png)
 日志中 flag「NR」表示找不到路由。
 
 示例四，Upstream connection failure，比如服务未正常监听端口。
-![image-20200306115052433](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-035054.png)
+![Upstream connection failure](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-035054.png)
 日志中 flag「UF」表示 Upstream 连接失败，据此可以判断出流量断点位置。
-
-----
 
 ## 4. sidecar 和 user container 启动顺序
 
@@ -147,7 +139,7 @@ sidecar（envoy） 和用户容器的启动顺序是不确定的，如果用户�
 
 在 Pod 终止阶段，也会有类似的异常，根源仍然是 sidecar 和普通容器的生命周期的不确定性。
 
-![image-20200509204609571](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124611.png-small)
+![启动顺序异常](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124611.png)
 
 ### 解决方案
 
@@ -158,15 +150,13 @@ sidecar（envoy） 和用户容器的启动顺序是不确定的，如果用户�
 
 无论哪种方案都显得很蹩脚，为了彻底解决上述痛点，从 kubernets 1.18版本开始，kubernetes 内置的 Sidecar 功能将确保 sidecar 在正常业务流程开始之前就启动并运行，即通过更改pod的启动生命周期，在init容器完成后启动sidecar容器，在sidecar容器就绪后启动业务容器，从启动流程上保证顺序性。而 Pod 终止阶段，只有当所有普通容器都已到达终止状态（Succeeded for  restartPolicy=OnFailure 或 Succeeded/Failed for  restartPolicy=Never），才会向sidecar 容器发送  SIGTERM 信号。
 
-![image-20200302222722319](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121701.png)
-
----
+![Sidecar 容器类型](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121701.png)
 
 ## 5. Ingress Gateway 和 Service 端口联动
 
 Ingress Gateway 规则不生效的一个常见原因是：Gateway 的监听端口在对应的 kubernetes Service 上没有开启，首先我们需要理解 Istio Ingress Gateway 和 kubernetes Service 的关系：
 
-![image-20200509204709262](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124711.png-medium)
+![端口联动](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124711.png)
 
 上图中，虽然 gateway 定义期望管控端口 b 和 c，但是它对应的 service （通过腾讯云CLB）只开启了端口 a 和 b，因此最终从 LB 端口 b 进来的流量才能被 istio gateway 管控。
 
@@ -175,8 +165,6 @@ Ingress Gateway 规则不生效的一个常见原因是：Gateway 的监听端�
 * Istio CRD Gateway 只实现了将用户流控规则下发到网格边缘节点，流量仍需要通过 LB 控制才能进入网格
 
 * 腾讯云 tke mesh 实现了 Gateway-Service 定义中的 Port 动态联动，让用户聚焦在网格内的配置。
-
----
 
 ## 6. VirtualService 作用域
 
@@ -190,11 +178,9 @@ VirtualService 的属性`gateways`用于指定 VirtualService 的生效范围：
 
 一个常见的问题是以上的第三种情况，VirtualService 最开始作用于网关内部，后续要将其规则扩展到边缘网关上，用户往往只会添加具体 gateway name，而遗漏 `mesh`:
 
-![image-20200509205004810](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-125006.png-medium)
+![Gateway 默认值](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-125006.png)
 
 Istio 自动给`VirtualService.gateways`设置默认值， 本意是为了简化用户的配置，但是往往会导致用户应用不当，一个 feature 一不小心会被用成了 bug。
-
----
 
 ## 7. VirtualService 不支持 host fragment
 
@@ -215,14 +201,12 @@ VirtualService 不能很好支持 host 规则分片，使得团队的维护职�
 
 ### Istio 解决方案：VirtualService chaining（plan in 1.6）
 
-![image-20200302155254725](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121147.png)
+![VirtualService chaining](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121147.png)
 
 Istio 计划在 1.6 中支持 VirtualService 代理链：
 
 * VirtualService 支持分片定义 + 代理链
 * 支持团队对同一 host 的 VirtualService 进行灵活分片，比如按照 SecOps/Netops/Business 特性分离，各团队维护各种独立的 VirtualService
-
----
 
 ## 8. 全链路跟踪并非完全透明接入
 
@@ -234,37 +218,31 @@ Istio 计划在 1.6 中支持 VirtualService 代理链：
 
 service mesh 遥测系统中，对调用链跟踪的实现，并非完全的零入侵，需要用户业务作出少量的修改才能支持，具体地，在用户发出（http/grpc） RPC 时， 需要主动将上游请求中存在的 `B3 trace headers`写入下游 RPC 请求头中，这些 headers 包括：
 
-![image-20200302185310822](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121304.png)
+![B3 trace headers](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121304.png)
 
 有部分用户难以理解：既然 inbound 流量和 outbound 流量已经完全被拦截到 envoy，envoy 可以实现完全的流量管控和修改，为什么还需要应用显示第传递 headers？
 
-![image-20200509205133689](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-125136.png-big)
+![为什么需要传递 headers？](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-125136.png)
 
 对于 envoy 来说，inbound 请求和 outbound 请求完全是独立的，envoy 无法感知请求之间的关联。实际上这些请求到底有无上下级关联，完全由应用自己决定。
 
 举一个特殊的业务场景，如果 Pod X 接收到 请求 A，触发的业务逻辑是：每隔 10 秒 发送一个请求到 Pod Y，如 B1，B2，B3，那么这些扇出的请求 Bx（x=1,2,3...），和请求 A 是什么关系？业务可能有不同的决策：认为 A 是 Bx 的父请求，或者认为 Bx 是独立的顶层请求。
 
-![image-20200302202701324](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121422.png-small)
-
----
+![请求扇出](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121422.png)
 
 ## 9. mTLS 导致连接中断
 
 在开启 istio mTLS 的用户场景中，访问出现 `connection termination` 是一个高频的异常：
-
-![image-20200212123932832](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-02-12-060832.png)
-
+![mTLS 异常](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-02-12-060832.png)
 这个异常的原因和 DestinationRule 中的 mTLS 配置有关，是 istio 中一个不健壮的接口设计。
 
 * 当通过 MeshPolicy 开启全局 mTLS， 如果网格中没有定义其他的 DestinationRule，mTLS 正常运行
 * 如果后续网格中新增了 DestinationRule，而 DestinationRule 中可以覆盖子版本的 mTLS 值(默认是不开启！), 用户在使用 DestinationRule 时，往往很少去关注 mTLS 属性（留空）。最终导致增 DestinationRule 后 mTLS 变成了不开启，导致`connection termination`
 * 为了修复以上问题，用户不得不在所有 DestinationRule 中增加 mTLS 属性并设置为开启
 
-![image-20200306115334378](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-035336.png)
+![DestinationRule 中的 mTLS](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-035336.png)
 
 这种 istio mtls 用户接口极度不友好，虽然 mtls 默认做到了全局透明， 业务感知不到 mtls 的存在， 但是一旦业务定义了 DestinationRule，DestinationRule 就必须要知道当前 mtls 是否开启，并作出调整。试想 mtls 配置交由安全团队负责，而业务团队负责各自的 DestinationRule，团队间的耦合会非常严重。
-
----
 
 ## 10. 用户服务监听地址限制
 
@@ -277,7 +255,7 @@ service mesh 遥测系统中，对调用链跟踪的实现，并非完全的零�
 ### 原因分析
 
 Istio-proxy 中的一段 iptables:
-![image-20200309181829198](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-09-101830.png)
+![Istio-proxy iptables](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-09-101830.png)
 其中，`ISTIO_IN_REDIRECT` 是 virtualInbound, 端口 15006；`ISTIO_REDIRECT` 是 virtualOutbound，端口 15001。
 
 关键点是规则二：如果destination不是127.0.0.1/32,  转给15006(virtualInbound, envoy监听)，这里导致了对 pod ip 的流量始终会回到 envoy。
@@ -291,7 +269,7 @@ Istio-proxy 中的一段 iptables:
 
 该规则是希望在这里起作用: 假设当前Pod a属于service A, Pod 中用户容器通过服务名访问服务A, envoy中负载均衡逻辑将这次访问转发到了当前的pod ip, istio 希望这种场景服务端仍然有流量管控能力. 如图示:
 
-![image-20200509205357257](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-125359.png-small)
+![用户服务监听地址限制](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-125359.png)
 
 ### 改造建议
 
