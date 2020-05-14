@@ -11,7 +11,7 @@ reviewers: ["hb-chen","ikingye"]
 
 ## 缺省行为
 
-授权策略 action 的缺省行为是 **ALLOW**。对于没有配置任何授权策略的网格，Istio 是允许所有请求的。从安全的角度考虑，这种策略存在一定的安全隐患，我们应该尽量阻止未知和不可信的访问请求，特别是来自于网格外的访问请求。
+对于没有配置任何授权策略的网格，Istio 是允许所有请求的。从安全的角度考虑，这存在一定的安全隐患，我们应该尽量阻止未知和不可信的访问请求，特别是来自于网格外的访问请求。
 
 一个简单的方法是：拒绝所有请求，再根据需要，逐步添加允许访问策略。
 
@@ -19,7 +19,7 @@ reviewers: ["hb-chen","ikingye"]
 
     ![可正常访问的 product](../images/http-policy-2.png)
 
-1. 我们添加授权策略，拒绝访问 Bookinfo 所在 namespace 的所有 workload。
+1. 我们添加授权策略，拒绝访问 Bookinfo 所在 namespace 所有的未配置 ALLOW 策略的 workload。
 
     ```bash
     $ kubectl apply -f - <<EOF
@@ -43,41 +43,17 @@ reviewers: ["hb-chen","ikingye"]
 
 ## HTTP 流量授权
 
-```http
-PATCH /repos/servicemesher/istio-handbook/issues/126 HTTP/1.1
-Host: api.github.com
-Accept: application/vnd.github.inertia-preview+json
-Authorization: {{person_token}}
-Content-Type: application/json
-
-{
-  "title": "HTTP 流量授权",
-  "body": "This article is waiting to be claimed.",
-  "assignees": [
-    "gorda"
-  ],
-  "milestone": 1,
-  "state": "open",
-  "labels": [
-    "area/practice",
-    "kind/page",
-    "release/v0.3",
-    "status/waiting-for-pr"
-  ]
-}
-```
-
-这是一个 GitHub API 示例，同时也是一个 HTTP 请求，一个 HTTP 请求由三部分构成：**请求行**、**请求头** 和 **请求体**。第一行为 **请求行**，第二行至空格前的内容为 **请求头**，空行之后为 **请求体**。从这个请求中，你可以获取到很多信息，例如请求的 Method、Path、Host 以及其它各种 Header 信息。
+一个 HTTP 请求由三部分构成：**请求行**、**请求头** 和 **请求体**。我们可以从中获取到很多信息，例如请求的 Method、Path、Host 以及其它各种 Header 信息。
 
 而 Istio 的授权策略，允许你根据 **请求行** 和 **请求头** 所提供的大部分信息，进行细粒度的授权策略控制。不仅如此，你还可以根据更多的信息（IP、Port、Namespace 等）制定授权策略，所有这些都可以在 Istio 授权策略中完成。
 
-## productpage 页面
+### productpage 页面
 
 现在，让我们通过 Bookinfo 示例来体验一下授权策略。一个 product 访问流程的拓扑大致如下：
 
 ![简易拓扑](../images/http-policy-1.svg)
 
-在前面我们拒绝了所有的访问请求，现在，我们将配置授权策略，允许访问 productpage：
+在前面，我们配置了默认拒绝所有的访问请求，现在，我们将添加授权策略，允许访问 productpage：
 
 ```bash
 $ kubectl apply -f - <<EOF
@@ -100,7 +76,7 @@ EOF
 
 现在，Istio 允许所有对 productpage 的 GET 请求了，尝试访问 productpage 页面，不出意外的话，我们又可以看到它了。
 
-## 下一个页面
+### 异常页面
 
 如果你善于观察，你会发现页面存在部分的异常：
 
@@ -190,7 +166,7 @@ rules:
 
 ![恢复正常的 productpage](../images/http-policy-6.png)
 
-## 授权策略结构
+### 授权策略结构
 
 在动手尝试过上文中的授权策略后，我们再来理解一下授权策略的结构。一个授权策略的结构大致如下：
 
@@ -214,14 +190,17 @@ spec:
         methods: ["GET"]
 ```
 
-如本文开始提到的那样，授权策略一般由三部分构成：selector、action、rules。多条授权策略可能会匹配到同一个 workload，此时多条授权策略按如下规则进行匹配：
+如本文开始提到的那样，授权策略一般由三部分构成：selector、action、rules。多条授权策略可能会匹配到同一个 workload，此时多条授权策略按如下步骤进行匹配：
 
-1. 如果请求匹配了任意一条 DENY 策略，则拒绝请求，不再进行后续匹配。
-1. 如果请求没有匹配到任何 ALLOW 策略，则允许请求，不再进行后续匹配。
-1. 如果请求匹配到任何 ALLOW 策略，则允许请求，不再进行后续匹配。
+1. 如果请求匹配了任意一条 DENY 策略，则拒绝请求。
+1. 如果请求的目标 workload 没有配置任何 ALLOW 策略，则允许请求。
+1. 如果请求匹配到任何 ALLOW 策略，则允许请求。
 1. 拒绝请求。
 
-### selector
+> 对于没有配置任何 ALLOW 策略的 workload（步骤 2），会允许请求，这就是我们看到的默认 ALLOW 效果。
+> 对于配置了 ALLOW 授权策略的 workload，则要求匹配某一条授权策略（步骤 3），否则会拒绝请求（步骤 4）。
+
+#### selector
 
 selector 筛选执行策略的目标，一条授权策略只有一个 selector。
 
@@ -229,7 +208,7 @@ selector 与 metadata.namespace 是配合使用的，表示筛选某个 namespac
 
 > 需要注意的是：如果将 metadata.namespace 指定为 `istio-system`（也就是 Istio 的根 namespace），表示该策略对网格内的所有 namespace 生效，而不仅仅只是在 `istio-system` 中生效。
 
-### action
+#### action
 
 策略行为，只有两个值，ALLOW 和 DENY，一条授权策略只有一个 action。
 
@@ -237,11 +216,9 @@ selector 与 metadata.namespace 是配合使用的，表示筛选某个 namespac
 
 > 需要注意的是：action 字段的值是区别大小写的，也就是说，不支持 allow 和 deny。
 
-### rules
+#### rules
 
 rules 是 Istio 授权策略 **最重要** 也是最复杂的一部分，rules 可以由多条 rule 构成。
-
-> rules 为 nil 是一种特殊情况，后面我们会做特别说明。
 
 每一条 rule 又由三个字段构成，分别是：from、to 和 when。三个字段分别对应 `[]From`、`[]To` 和 `[]When`。表示对一个请求的来源、操作（或者说目的）和两者进行规则验证。
 每个对象内置了丰富的字段，可以进行各种规则的验证。
@@ -334,20 +311,14 @@ when 资源有三个依赖双向 TLS 的字段：
 
 ## 授权策略的特殊情况
 
-这里有一些特殊情况需要注意。
+我们先回顾一下策略匹配步骤：
 
-### 错误的策略 
+1. 如果请求匹配了任意一条 DENY 策略，则拒绝请求。
+1. 如果请求的目标 workload 没有配置任何 ALLOW 策略，则允许请求。
+1. 如果请求匹配到任何 ALLOW 策略，则允许请求。
+1. 拒绝请求。
 
-在 apply 以下两种策略 时会直接返回错误提示。
-
-- sepc 为 nil
-- action 为 DENY，且 rule 为 nil
-
-### 特殊的授权策略
-
-> action 为 nil（或 ALLOW），且 rules 为 nil 的授权策略是一条特殊的授权策略。
-
-我们先来看一下这条策略：
+我们来看一下这条授权策略：
 
 ```yaml
 apiVersion: security.istio.io/v1beta1 
@@ -359,63 +330,9 @@ spec:
   {}
 ```
 
-相当于其 selector、action、rules 均为 nil。
+在这条特殊策略中，步骤 1、2、3 都不会触发，除非你配置了其它授权策略，否则就会触发步骤 4 拒绝请求，即实现了默认 DENY 的效果。
 
-经过前面的学习，我们知道，selector 为 nil 表示匹配 namespace 下的所有 workload。action 为 nil 表示 ALLOW。
-
-但我们并没有讲到 rules 为 nil，是什么效果。同学们可以猜测一下其效果是什么，匹配任何请求？不匹配任何请求？
-
-答案是：该 rules 不会匹配任何请求，这不是一条 DENY 策略，但会带有 DENY 效果。
-
-> 官方文档原文是：If not set, the match will never occur. This is equivalent to setting a default of deny for the target workloads.
-
-这看起来很奇怪，但事实上，这条策略是我们在本文开始时应用的第一条策略，并且我们已经验证过其效果了，它确实会拒绝所有的请求。
-
-在这条特殊策略中，策略匹配的结果会有所不同：
-
-1. 如果请求匹配了任意一条 DENY 策略，则拒绝请求，不再进行后续匹配。
-1. 如果请求没有匹配到任何 ALLOW 策略，则允许请求，不再进行后续匹配（但是，特殊策略 **不符合** 该规则）。
-1. 如果请求匹配到任何 ALLOW 策略，则允许请求，不再进行后续匹配。
-1. 拒绝请求。
-
-> 如果没有配置这条特殊策略，第二条规则和第三条规则会匹配所有的请求，第四条规则永远不会被触发，即实现缺省 ALLOW 的效果。
-> 配置特殊策略后，第二条规则会失效，如果不满足第三条规则，就会触发第四条规则，即实现缺省 DENY 的效果。
-
-为 workload 配置默认的拒绝策略时，这种用法会很有用，正如本文开始时应用的第一条策略那样。
-
-特殊策略的条件是：action 为 nil（或 ALLOW），且 rules 为 nil。
-
-所以下面这条策略依然算作是特殊策略，只是其仅作用于 details。
-
-```yaml
-apiVersion: security.istio.io/v1beta1 
-kind: AuthorizationPolicy
-metadata:
-  name: deny-details
-  namespace: default
-spec:
-  selector:
-    matchLabels:
-      app: details
-  action: ALLOW
-```
-
-最后，注意区分上面那条策略和下面这条策略的不同之处，下面这条策略是一条正常的授权策略：
-
-```yaml
-apiVersion: security.istio.io/v1beta1 
-kind: AuthorizationPolicy
-metadata:
-  name: allow-details
-  namespace: default
-spec:
-  selector:
-    matchLabels:
-      app: details
-  action: ALLOW
-  rules:
-  - {}
-```
+为 workload 配置默认的 DENY 时，这种用法会很有用，正如本文开始时应用的第一条策略那样。
 
 ## 清理
 
