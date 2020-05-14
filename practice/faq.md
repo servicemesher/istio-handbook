@@ -267,7 +267,21 @@ Envoy 访问日志中可以看到 "UC" 错误标识：
 * 如果后续网格中新增了 DestinationRule，而 DestinationRule 中可以覆盖子版本的 mTLS 值(默认是不开启！), 用户在使用 DestinationRule 时，往往很少去关注 mTLS 属性（留空）。最终导致增 DestinationRule 后 mTLS 变成了不开启，导致`connection termination`
 * 为了修复以上问题，用户不得不在所有 DestinationRule 中增加 mTLS 属性并设置为开启
 
-![DestinationRule 中的 mTLS](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-035336.png)
+```
+apiVersion: networking.istio.io/vlalpha3
+kind: DestinationRule
+metadata:
+  name: hello
+spec:
+  host: helloworld
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+   subsets:
+     - name: vl
+       labels:
+         version: vl
+```
 
 这种 istio mtls 用户接口极度不友好，虽然 mtls 默认做到了全局透明， 业务感知不到 mtls 的存在， 但是一旦业务定义了 DestinationRule，DestinationRule 就必须要知道当前 mtls 是否开启，并作出调整。试想 mtls 配置交由安全团队负责，而业务团队负责各自的 DestinationRule，团队间的耦合会非常严重。
 
@@ -282,7 +296,18 @@ Envoy 访问日志中可以看到 "UC" 错误标识：
 ### 原因分析
 
 Istio-proxy 中的一段 iptables:
-![Istio-proxy iptables](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-09-101830.png)
+
+```
+   Chain ISTIO_OUTPUT {1 references)
+   target      port  opt source       destination
+#1 RETURN      all   —- 127.0.0.6     anywhere
+#2 ISTIO_IN_REDIRECT all -— anywhere  !localhost
+#3 RETURN      all   -— anywhere      anywhere  owner UID match istio-proxy
+#4 RETURN      all   -— anywhere      anywhere  owner GID match istio-proxy
+#5 RETURN      all   -— anywhere      localhost
+#6 ISTIO_REDIRECT all -— anywhere     anywhere
+```
+
 其中，`ISTIO_IN_REDIRECT` 是 virtualInbound, 端口 15006；`ISTIO_REDIRECT` 是 virtualOutbound，端口 15001。
 
 关键点是规则二：如果destination不是127.0.0.1/32,  转给15006(virtualInbound, envoy监听)，这里导致了对 pod ip 的流量始终会回到 envoy。
