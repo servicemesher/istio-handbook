@@ -22,9 +22,11 @@ Istio 中提供了 AuthorizationPolicy 用于对 trust domain 进行设置，能
 
 ![实验环境部署一览](../images/istio-mutual-simple-test.jpg)
 
-### mTLS 身份认证实验
+### 使用 mTLS 实现服务间身份认证
 
-### mTLS 身份认证
+为验证 mTLS 实现服务间身份认证，我们将在网格外（`legacy`）和网格内（`mtls-test` 和 `full`）使用 sleep 向 httpbin 发起通信，配置不同的模式，观察不同的返回结果来体验 mTLS 服务间身份认证。
+
+#### mTLS 身份认证原理与模式简介
 
 mTLS 主要负责服务与服务之间传输层面的认证，具体实现在 sidecar 中，在具体进行请求时，将经历如下的过程：
 1. 客户端发出的请求将被发送到客户端 sidecar 。
@@ -36,6 +38,7 @@ Istio 提供如下三种 mTLS 身份认证 模式，在不同的场景下进行�
 - PERMISSIVE: 同时支持密文传输和明文传输，则不管是在 Istio 管理下的 Pod 还是在 Istio 管理外的 Pod，相互之间的通信畅通无阻。PERMISSIVE 模式的主要用途是在用户迁移的过程中，服务与服务之间也仍旧能够通信，例如部分 workload 并未注入 sidecar。对于刚接触 Istio 的用户而言非常友好，官方建议在完成迁移之后调整为 STRICT 模式。
 - STRICT: workload 只支持密文传输。
 - DISABLE: 关闭 Mutual TLS。从安全的角度而言，官方并不建议在没有其他安全措施的情况下使用该模式。
+- UNSET: 具体的策略将从父级配置中继承（命名空间或网格层面），如果父级没有进行相应的配置，则使用 PERMISSIVE 模式。
 
 针对此我们需要重点关注的 CRD 为 `PeerAuthentication` 和 `DestinationRule`。`PeerAuthentication` 将会定义流量在 sidecar 之间如何进行传输。 `DestinationRule` 将定义在发生路由之后对于流量的相应策略，我们主要关注其中的 `TLSSettings`，需要与 `PeerAuthentication` 两者配合进行设置。
 
@@ -84,7 +87,6 @@ spec:
       app: httpbin
   mtls:
     mode: STRICT
----
 ```
 
 此时我们已经要求进入到 `httpbin.mtls-test` 的流量必须是密文传输，则 `httpbin.legacy` 没有办法获取到最终的结果，再次发送请求以验证：
@@ -140,7 +142,11 @@ response code: 200
 
 实验的结果上能体现相互之间的通讯是畅通的，但是没有展示 SPIFFE URI，因此所有的流量都是明文传输的。请一定注意这样的配置是非常危险的，在没有其他安全措施的情况下请避免这类情况的发生。
 
-### mTLS 授权 
+### 使用 mTLS 实现服务间授权
+
+为验证 mTLS 实现服务间授权，我们将沿用相关的测测试环境，主要验证在网格内部的进行通信时，如何使用服务间授权来进一步细粒度保护相应服务。
+
+#### mTLS 服务间授权原理
 
 身份认证主要解决的是证明“我是谁”的问题，授权则是列举出“我能做什么”，对于 mTLS 而言，则是需要回答该流量 ALLOW 还是 DENY，其中的主要依据是 Identity，通常，Trust Domain 指定身份所属的网格。
 
@@ -162,8 +168,9 @@ Certificate:
 
 Trust Domain 是 Istio 1.4 版本进入 alpha 的一个功能，在我们修改 Trust Domain 时，实质上是修改了 SAN 区域的值，重新签发了新的证书(重新签发证书需要一定的时间，因此在配置之后需要等待一段时间才能生效)。
 
-在我们的实验中，我们将设置 `sleep.full` 不允许访问 `httpbin.mlts-test`。
+#### 使用授权策略拒绝请求
 
+在我们的实验中，我们将拒绝 `sleep.full` 访问 `httpbin.mlts-test` 的任何 GET 请求。
 ```yaml
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
@@ -184,7 +191,6 @@ spec:
   selector:
     matchLabels:
       app: httpbin
----
 ```
 
 我们再次进行测试，最终的结果如下：
@@ -200,9 +206,9 @@ sleep.full to httpbin.mtls-test
 response code: 403
 ```
 
-我们看到当 `sleep.full` 请求 `httpbin.mtls-test` 时，此时返回403，说明其存在证书，但是证书的的 SAN 值域并不在 Trust Domain 中，因此返回403。
+我们看到当 `sleep.full` 请求 `httpbin.mtls-test` 时，此时返回403，说明其存在证书，但是证书的的 SAN 值域并不在 Trust Domain 中，因此返回403以表示访问权限不足。
 
-### mTLS 与网格外部服务
+### 使用 mTLS 与网格外部服务通信
 
 在许多情况下，服务网格中的微服务序并不是应用程序的全部。有时，网格内部的微服务需要使用在服务网格外部的服务，在网格外部署服务，有如下几种原由：
 1. 相关服务是第三方服务，无法被直接迁移到服务网格中。
@@ -211,9 +217,11 @@ response code: 403
 
 我们仍旧希望能够享受服务网格带来的 mTLS 的便利，来使整个系统更加安全。本节就以 MongoDB 为例，首先实现 MongoDB 内置 mTLS，之后将服务端迁移到网格内部，通过 mTLS 访问网格外部 MongoDB 服务。
 
-#### MongoDB 内置 mTLS
+#### 使用 MongoDB 内置 mTLS 创建安全连接
 
 MongoDB 自身能够提供 mTLS 的服务，可以通过签发相应的证书来完成 mTLS的配置。
+
+##### 使用 openssl 签发证书
 
 首先使用 openssl 自行签发证书：
 
@@ -232,6 +240,8 @@ openssl verify -CAfile ca.pem client.pem # 验证证书
 ```
 
 至此我们已经获得了三个证书，`ca.pem`作为根证书，`server.pem` 和`client.pem`分别作为服务端和客户端的证书。
+
+##### 使用 ConfigMap 部署 MongoDB 客户端和服务端
 
 创建 `ConfigMap` 以供挂载在客户端和服务端。
 
@@ -294,7 +304,6 @@ spec:
         - name: ssl
           configMap:
             name: mongo-server-pem  
----    
 ```
 
 服务端中我们挂载了 `mongo-server-pem` 的 `ConfigMap` 用于启动 mongod，要求 mongod 在建立连接时，必须使用 mTLS 建立连接。
@@ -330,12 +339,11 @@ spec:
         - name: ssl
           configMap:
             name: mongo-client-pem
----
 ```
 
 类似的，客户端也通过 `ConfigMap` 将客户端证书和根证书挂载到客户端容器中，以供后序客户端对服务端进行访问。
 
-之后我们在客户端中进行实验实验：
+##### 客户端进行访问实验
 
 ```bash
 root@mongo-client: mongo --tls --tlsCAFile /pem/ca.pem --tlsCertificateKeyFile /pem/client.pem --host mongo.mongo
