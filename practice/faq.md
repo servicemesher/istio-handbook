@@ -233,7 +233,34 @@ service mesh 遥测系统中，对调用链跟踪的实现，并非完全的零�
 ## 9. mTLS 导致连接中断
 
 在开启 istio mTLS 的用户场景中，访问出现 `connection termination` 是一个高频的异常：
-![mTLS 异常](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-02-12-060832.png)
+
+```
+# curl helloworld:4000/hello -i
+HTTP/1.1 503 Service Unavailable
+
+upstream connect error or disconnect/reset before headers
+reset reason: connection termination
+```
+Envoy 访问日志中可以看到 "UC" 错误标识：
+```
+{
+  "upstrean_local_address": "-",
+  "duration": "0",
+  "downstrean_local_address": "172.16.254.233:4000",
+  "route_name": "-",
+  "response_codo": "503",
+  "user_agent": "curl/7.64.0",
+  "response_flags": "UC",
+  "start_time": "2020-02-12T04:30:21.628Z",
+  "method": "GET",
+  "request.id": "e116814a-e689-9d26-81eb-5455fal09571",
+  "upstream_host": "172.16.0.15:5000",
+  "upstream_cluster": "outbound|4000|vl|helloworld.default.svc.cluster.local"
+    ......
+}
+
+```
+
 这个异常的原因和 DestinationRule 中的 mTLS 配置有关，是 istio 中一个不健壮的接口设计。
 
 * 当通过 MeshPolicy 开启全局 mTLS， 如果网格中没有定义其他的 DestinationRule，mTLS 正常运行
