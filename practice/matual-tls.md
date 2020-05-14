@@ -42,7 +42,9 @@ Istio 提供如下三种 mTLS 身份认证 模式，在不同的场景下进行�
 
 针对此我们需要重点关注的 CRD 为 `PeerAuthentication` 和 `DestinationRule`。`PeerAuthentication` 将会定义流量在 sidecar 之间如何进行传输。 `DestinationRule` 将定义在发生路由之后对于流量的相应策略，我们主要关注其中的 `TLSSettings`，需要与 `PeerAuthentication` 两者配合进行设置。
 
-#### 使用默认的 PERMISSIVE 模式
+实验将从默认的 PERMISSIVE 模式开始，转变为 STRICT 模式，最终对于部分的服务启用 DISABLE 模式，通过观察其返回内容，判断是否使用密文传输，从而熟悉在不同模式下的行为模式。
+
+#### 使用默认 PERMISSIVE 模式
 
 默认情况下，PERMISSIVE 模式能够支持明文传输，则不管是在 Istio 管理下的 Pod 还是在 Istio 管理外的 Pod，相互之间的通信畅通无阻。PERMISSIVE 是一种过渡态，当你开始将所有的 workload 都迁移到网格中时，可以使用 PERMISSIVE 过渡态，在完成迁移工作后，可以通过 Grafana Dashboard 或者在 istio-proxy 中使用 tcpdump 来检查是否仍存在明文传输的情况。最终将模式转换为 STRICT 完成迁移。
 
@@ -215,7 +217,7 @@ response code: 403
 2. 从性能方面进行考量，认为相关服务不适合加入到网格中。
 3. 由于行政管理方面的原因，需要使用到其他团队的服务，但对方团队并没有服务网格的相关背景。
 
-我们仍旧希望能够享受服务网格带来的 mTLS 的便利，来使整个系统更加安全。本节就以 MongoDB 为例，首先实现 MongoDB 内置 mTLS，之后将服务端迁移到网格内部，通过 mTLS 访问网格外部 MongoDB 服务。
+我们仍旧希望能够享受服务网格带来的 mTLS 的便利，来使整个系统更加安全。本节就以 MongoDB 为例，首先实现 MongoDB 内置 mTLS，之后将服务端迁移到网格内部，在网格内通过 mTLS 访问网格外部 MongoDB 服务。
 
 #### 使用 MongoDB 内置 mTLS 创建安全连接
 
