@@ -1,6 +1,6 @@
 ---
 authors: ["zhongfox"]
-reviewers: [""]
+reviewers: ["rootsongjc"]
 ---
 
 # 常见问题
@@ -10,7 +10,7 @@ reviewers: [""]
 1. Service 端口命名约束
 2. 流控规则下发顺序问题
 3. 请求中断分析
-4. sidecar 和 user container 启动顺序
+4. Sidecar 和 user container 启动顺序
 5. Ingress Gateway 和 Service 端口联动
 6. VirtualService 作用域
 7. VirtualService 不支持 host fragment
@@ -32,7 +32,7 @@ Kubernetes 的网络对应用层是无感知的，kubernetes 的主要流量转�
 
 Istio 的核心能力是对 7 层流量进行管控，但前提条件是 istio 必须知道每个受管控的服务是什么协议，istio 会根据端口协议的不同，下发不同的流控功能（envoy filter），而 kubernetes 资源定义里并不包括七层协议信息，所以 istio 需要用户显式提供。
 
-![端口命名约束](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-123556.png)
+![端口命名约束](../images/faq-port-naming.png)
 
 ### istio 的解决方案：Protocol sniffing
 
@@ -71,7 +71,7 @@ Protocol sniffing 减少了新手使用 istio 所需的配置，但是可能会�
 
 当用户使用 `kubectl apply -f multiple-virtualservice-destinationrule.yaml` 时，这些对象的传播和生效先后顺序是不保证的，所谓最终一致性，比如 VirtualService 中引用了某一个 DestinationRule 定义的子版本，但是这个 DestinationRule 资源的传播和生效可能在时间上落后于 该 VirtualService 资源。
 
-![流控规则下发顺序](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124308.png)
+![流控规则下发顺序](../images/faq-xds-order.png)
 
 ### 最佳实践：make before break
 
@@ -91,7 +91,7 @@ Protocol sniffing 减少了新手使用 istio 所需的配置，但是可能会�
 
 Envoy 接受请求流量叫做 **Downstream**，Envoy 发出请求流量叫做**Upstream**。在处理Downstream 和 Upstream 过程中， 分别会涉及2个流量端点，即请求的发起端和接收端：
 
-![envoy 流量模型](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124436.png)
+![envoy 流量模型](../images/faq-envoy-model.png)
 
 在这个过程中， envoy 会根据用户规则，计算出符合条件的转发目的主机集合，这个集合叫做 **UPSTREAM_CLUSTER**,  并根据负载均衡规则，从这个集合中选择一个 host 作为流量转发的接收端点，这个 host 就是 **UPSTREAM_HOST**。
 
@@ -105,26 +105,26 @@ Envoy 接受请求流量叫做 **Downstream**，Envoy 发出请求流量叫做**
 
 ### 日志分析示例
 
-![日志格式](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-02-04-162610.png)
+![日志格式](../images/faq-envoy-log.png)
 
 通过日志重点观测 2 个信息：
 * 断点是在哪里 ？
 * 原因是什么？
 
 示例一：一次正常的 client-server 请求：
-![正常请求](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-034656.png)
+![正常请求](../images/faq-log-ok.png)
 可以看到 2 端日志包含相同的 request ID，因此可以将流量分析串联起来。
 
 示例二：no healthy upstream, 比如目标 deployment 健康副本数为 0
-![no healthy upstream](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-034754.png)
+![no healthy upstream](../images/faq-log-uh.png)
 日志中 flag「UH」表示 upstream cluster 中没有健康的 host。
 
 示例三：No route configured , 比如 DestinationRule 缺乏对应的 subset
-![No route configured](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-034959.png)
+![No route configured](../images/faq-log-nr.png)
 日志中 flag「NR」表示找不到路由。
 
 示例四，Upstream connection failure，比如服务未正常监听端口。
-![Upstream connection failure](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-06-035054.png)
+![Upstream connection failure](../images/fqa-log-uf.png)
 日志中 flag「UF」表示 Upstream 连接失败，据此可以判断出流量断点位置。
 
 ## 4. sidecar 和 user container 启动顺序
@@ -139,7 +139,7 @@ sidecar（envoy） 和用户容器的启动顺序是不确定的，如果用户�
 
 在 Pod 终止阶段，也会有类似的异常，根源仍然是 sidecar 和普通容器的生命周期的不确定性。
 
-![启动顺序异常](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124611.png)
+![启动顺序异常](../images/faq-sidecar-order.png)
 
 ### 解决方案
 
@@ -148,15 +148,15 @@ sidecar（envoy） 和用户容器的启动顺序是不确定的，如果用户�
 * 业务容器延迟几秒启动,  或者失败重试
 * 启动脚本中主动探测 envoy 是否ready，如 `127.0.0.1:15020/healthz/ready`
 
-无论哪种方案都显得很蹩脚，为了彻底解决上述痛点，从 kubernets 1.18版本开始，kubernetes 内置的 Sidecar 功能将确保 sidecar 在正常业务流程开始之前就启动并运行，即通过更改pod的启动生命周期，在init容器完成后启动sidecar容器，在sidecar容器就绪后启动业务容器，从启动流程上保证顺序性。而 Pod 终止阶段，只有当所有普通容器都已到达终止状态（Succeeded for  restartPolicy=OnFailure 或 Succeeded/Failed for  restartPolicy=Never），才会向sidecar 容器发送  SIGTERM 信号。
+无论哪种方案都显得很蹩脚，为了彻底解决上述痛点，从 kubernetes 1.18版本开始，kubernetes 内置的 Sidecar 功能将确保 sidecar 在正常业务流程开始之前就启动并运行，即通过更改pod的启动生命周期，在init容器完成后启动sidecar容器，在sidecar容器就绪后启动业务容器，从启动流程上保证顺序性。而 Pod 终止阶段，只有当所有普通容器都已到达终止状态（Succeeded for  restartPolicy=OnFailure 或 Succeeded/Failed for  restartPolicy=Never），才会向sidecar 容器发送  SIGTERM 信号。
 
-![Sidecar 容器类型](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121701.png)
+![Sidecar 容器类型](../images/faq-sidecar-type.png)
 
 ## 5. Ingress Gateway 和 Service 端口联动
 
 Ingress Gateway 规则不生效的一个常见原因是：Gateway 的监听端口在对应的 kubernetes Service 上没有开启，首先我们需要理解 Istio Ingress Gateway 和 kubernetes Service 的关系：
 
-![端口联动](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-124711.png)
+![端口联动](../images/faq-gateway-port.png)
 
 上图中，虽然 gateway 定义期望管控端口 b 和 c，但是它对应的 service （通过腾讯云CLB）只开启了端口 a 和 b，因此最终从 LB 端口 b 进来的流量才能被 istio gateway 管控。
 
@@ -178,7 +178,7 @@ VirtualService 的属性`gateways`用于指定 VirtualService 的生效范围：
 
 一个常见的问题是以上的第三种情况，VirtualService 最开始作用于网关内部，后续要将其规则扩展到边缘网关上，用户往往只会添加具体 gateway name，而遗漏 `mesh`:
 
-![Gateway 默认值](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-125006.png)
+![Gateway 默认值](../images/faq-default-gateway.png)
 
 Istio 自动给`VirtualService.gateways`设置默认值， 本意是为了简化用户的配置，但是往往会导致用户应用不当，一个 feature 一不小心会被用成了 bug。
 
@@ -201,7 +201,7 @@ VirtualService 不能很好支持 host 规则分片，使得团队的维护职�
 
 ### Istio 解决方案：VirtualService chaining（plan in 1.6）
 
-![VirtualService chaining](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121147.png)
+![VirtualService chaining](../images/faq-vs-chaining.png)
 
 Istio 计划在 1.6 中支持 VirtualService 代理链：
 
@@ -218,23 +218,23 @@ Istio 计划在 1.6 中支持 VirtualService 代理链：
 
 service mesh 遥测系统中，对调用链跟踪的实现，并非完全的零入侵，需要用户业务作出少量的修改才能支持，具体地，在用户发出（http/grpc） RPC 时， 需要主动将上游请求中存在的 `B3 trace headers`写入下游 RPC 请求头中，这些 headers 包括：
 
-![B3 trace headers](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121304.png)
+![B3 trace headers](../images/faq-b3-headers.png)
 
 有部分用户难以理解：既然 inbound 流量和 outbound 流量已经完全被拦截到 envoy，envoy 可以实现完全的流量管控和修改，为什么还需要应用显示第传递 headers？
 
-![为什么需要传递 headers？](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-125136.png)
+![为什么需要传递 headers？](../images/faq-tracing.png)
 
 对于 envoy 来说，inbound 请求和 outbound 请求完全是独立的，envoy 无法感知请求之间的关联。实际上这些请求到底有无上下级关联，完全由应用自己决定。
 
 举一个特殊的业务场景，如果 Pod X 接收到 请求 A，触发的业务逻辑是：每隔 10 秒 发送一个请求到 Pod Y，如 B1，B2，B3，那么这些扇出的请求 Bx（x=1,2,3...），和请求 A 是什么关系？业务可能有不同的决策：认为 A 是 Bx 的父请求，或者认为 Bx 是独立的顶层请求。
 
-![请求扇出](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-03-04-121422.png)
+![请求扇出](../images/faq-request-fanout.png)
 
 ## 9. mTLS 导致连接中断
 
 在开启 istio mTLS 的用户场景中，访问出现 `connection termination` 是一个高频的异常：
 
-```
+```sh
 # curl helloworld:4000/hello -i
 HTTP/1.1 503 Service Unavailable
 
@@ -242,7 +242,7 @@ upstream connect error or disconnect/reset before headers
 reset reason: connection termination
 ```
 Envoy 访问日志中可以看到 "UC" 错误标识：
-```
+```json
 {
   "upstrean_local_address": "-",
   "duration": "0",
@@ -267,7 +267,7 @@ Envoy 访问日志中可以看到 "UC" 错误标识：
 * 如果后续网格中新增了 DestinationRule，而 DestinationRule 中可以覆盖子版本的 mTLS 值(默认是不开启！), 用户在使用 DestinationRule 时，往往很少去关注 mTLS 属性（留空）。最终导致增 DestinationRule 后 mTLS 变成了不开启，导致`connection termination`
 * 为了修复以上问题，用户不得不在所有 DestinationRule 中增加 mTLS 属性并设置为开启
 
-```
+```yaml
 apiVersion: networking.istio.io/vlalpha3
 kind: DestinationRule
 metadata:
@@ -297,15 +297,15 @@ spec:
 
 Istio-proxy 中的一段 iptables:
 
-```
+```sh
    Chain ISTIO_OUTPUT {1 references)
    target      port  opt source       destination
-#1 RETURN      all   —- 127.0.0.6     anywhere
-#2 ISTIO_IN_REDIRECT all -— anywhere  !localhost
-#3 RETURN      all   -— anywhere      anywhere  owner UID match istio-proxy
-#4 RETURN      all   -— anywhere      anywhere  owner GID match istio-proxy
-#5 RETURN      all   -— anywhere      localhost
-#6 ISTIO_REDIRECT all -— anywhere     anywhere
+1. RETURN      all   —- 127.0.0.6     anywhere
+2. ISTIO_IN_REDIRECT all -— anywhere  !localhost
+3. RETURN      all   -— anywhere      anywhere  owner UID match istio-proxy
+4. RETURN      all   -— anywhere      anywhere  owner GID match istio-proxy
+5. RETURN      all   -— anywhere      localhost
+6. ISTIO_REDIRECT all -— anywhere     anywhere
 ```
 
 其中，`ISTIO_IN_REDIRECT` 是 virtualInbound, 端口 15006；`ISTIO_REDIRECT` 是 virtualOutbound，端口 15001。
@@ -314,14 +314,14 @@ Istio-proxy 中的一段 iptables:
 
 对该规则的解释：
 
-```
-# Redirect app calls back to itself via Envoy when using the service VIP or endpoint
-# address, e.g. appN => Envoy (client) => Envoy (server) => appN.
+```sh
+Redirect app calls back to itself via Envoy when using the service VIP or endpoint
+address, e.g. appN => Envoy (client) => Envoy (server) => appN.
 ```
 
 该规则是希望在这里起作用: 假设当前Pod a属于service A, Pod 中用户容器通过服务名访问服务A, envoy中负载均衡逻辑将这次访问转发到了当前的pod ip, istio 希望这种场景服务端仍然有流量管控能力. 如图示:
 
-![用户服务监听地址限制](https://zhongfox-blogimage-1256048497.cos.ap-guangzhou.myqcloud.com/2020-05-09-125359.png)
+![用户服务监听地址限制](../images/faq-app-port.png)
 
 ### 改造建议
 
