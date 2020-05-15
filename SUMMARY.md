@@ -20,11 +20,13 @@
     - [Galley](concepts/galley.md)
   - [数据平面](concepts/data-plane.md)
     - [Sidecar 注入及透明流量劫持](concepts/sidecar-injection.md)
+    - [Sidecar 流量路由机制分析](concepts/sidecar-traffic-route.md)
     - [Envoy](concepts/envoy.md)
     - [MOSN](concepts/mosn.md)
 - [核心功能](concepts/core-features.md)
   - [流量控制](concepts/traffic-control.md)
     - [路由](concepts/route.md)
+      - [Sidecar](concepts/sidecar.md)
       - [VirtualService](concepts/virtualservice.md)
       - [DestinationRule](concepts/destinationrule.md)
       - [ServiceEntry](concepts/serviceentry.md)
@@ -110,6 +112,8 @@
 - [故障排查](practice/troubleshooting.md)
   - [常见问题](practice/faq.md)
   - [诊断工具](practice/diagnostic-tools.md)
+    - [istioctl 命令行工具](practice/istioctl-cmd-tool.md)
+    - [ControlZ 自检工具](practice/controlz-tool.md)
 
 ## 生态扩展
 
