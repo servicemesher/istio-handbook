@@ -5,44 +5,43 @@ reviewers: ["rootsongjc"]
 
 # 常见问题
 
-本章节总结使用 istio 常见的若干异常：
+本章节总结使用 Istio 常见的若干异常：
 
 1. Service 端口命名约束
-2. 流控规则下发顺序问题
-3. 请求中断分析
-4. Sidecar 和 user container 启动顺序
-5. Ingress Gateway 和 Service 端口联动
-6. VirtualService 作用域
-7. VirtualService 不支持 host fragment
-8. 全链路跟踪并非完全透明接入
-9. mTLS 导致连接中断
-10. 用户服务监听地址限制
+1. 流控规则下发顺序问题
+1 请求中断分析
+1. Sidecar 和 user container 启动顺序
+1. Ingress Gateway 和 Service 端口联动
+1. VirtualService 作用域
+1. VirtualService 不支持 host fragment
+1. 全链路跟踪并非完全透明接入
+1 mTLS 导致连接中断
+1. 用户服务监听地址限制
 
-以上问题的测试环境是基于 istio 1.5.0。
+以上问题的测试环境是基于 Istio 1.5.0。
 
 ## 1. Service 端口命名约束
 
-Istio 支持多平台，不过 istio 和 kubernetes 的兼容性是最优的，不管是设计理念，核心团队还是社区，都有一脉相承的意思。但 istio 和 kubernetes 的适配并非完全没有冲突，一个典型问题就是 istio 需要 kubernetes service 按照协议进行端口命名（[port naming](https://istio.io/docs/ops/deployment/requirements/)）。
+Istio 支持多平台，不过 Istio 和 Kubernetes 的兼容性是最优的，不管是设计理念，核心团队还是社区，都有一脉相承的意思。但 Istio 和 Kubernetes 的适配并非完全没有冲突，一个典型问题就是 Istio 需要 Kubernetes service 按照协议进行端口命名（[port naming](https://istio.io/docs/ops/deployment/requirements/)）。
 
 端口命名不满足约束而导致的流量异常，是使用 mesh 过程中最常见的问题，其现象是协议相关的流控规则不生效，这通常可以通过检查该 port LDS 中 filter 的类型来定位。
 
 ### 原因
 
-Kubernetes 的网络对应用层是无感知的，kubernetes 的主要流量转发逻辑发生在 node 上，由 iptables/ipvs 来实现，这些规则并不关心应用层里是什么协议。
+Kubernetes 的网络对应用层是无感知的，Kubernetes 的主要流量转发逻辑发生在 node 上，由 iptables/ipvs 来实现，这些规则并不关心应用层里是什么协议。
 
-Istio 的核心能力是对 7 层流量进行管控，但前提条件是 istio 必须知道每个受管控的服务是什么协议，istio 会根据端口协议的不同，下发不同的流控功能（envoy filter），而 kubernetes 资源定义里并不包括七层协议信息，所以 istio 需要用户显式提供。
+Istio 的核心能力是对 7 层流量进行管控，但前提条件是 Istio 必须知道每个受管控的服务是什么协议，istio 会根据端口协议的不同，下发不同的流控功能（envoy filter），而 Kubernetes 资源定义里并不包括七层协议信息，所以 Istio 需要用户显式提供。
 
 ![端口命名约束](../images/faq-port-naming.png)
 
 ### istio 的解决方案：Protocol sniffing
 
 协议嗅探概要：
-* 检测 TLS `CLIENT_HELLO` 提取 SNI、ALPN、NPN 等信息
 
+* 检测 TLS `CLIENT_HELLO` 提取 SNI、ALPN、NPN 等信息
 * 基于常见协议的已知典型结构，尝试检测应用层 plaintext 内容
   a. 基于[HTTP2 spec: Connection Preface](https://http2.github.io/http2-spec/#ConnectionHeader)，判断是否为 HTTP/2
   b. 基于 HTTP  header 结构，判断是否是 HTTP/1.x
-
 * 过程中会设置超时控制和检测包大小限制， 默认按照协议 TCP 处理
 
 ### 最佳实践
@@ -51,13 +50,10 @@ Protocol sniffing 减少了新手使用 istio 所需的配置，但是可能会�
 
 一些嗅探失效的例子：
 
-* 客户端和服务端使用着某类非标准的七层协议，客户端和服务端都可以正确解析，但是不能确保 istio 自动嗅探逻辑认可这类非标准协议。比如对于 http 协议，标准的换行分隔是用 CRLF （`0x0d 0x0a`）, 但是大部分 http 类库会使用并认可 LF （`0x0a`）作为分隔。
-
-* 某些自定义私有协议，数据流的起始格式和 http 报文格式类似，但是后续数据流是自定义格式：
-
-  未开启嗅探时：数据流按照 L4 TCP 进行路由，符合用户期望。
-
-  如果开启嗅探：数据流最开始会被认定为 L7 http 协议，但是后续数据不符合 http 格式，流量将被中断。
+- 客户端和服务端使用着某类非标准的七层协议，客户端和服务端都可以正确解析，但是不能确保 istio 自动嗅探逻辑认可这类非标准协议。比如对于 http 协议，标准的换行分隔是用 CRLF （`0x0d 0x0a`）, 但是大部分 http 类库会使用并认可 LF （`0x0a`）作为分隔。
+- 某些自定义私有协议，数据流的起始格式和 http 报文格式类似，但是后续数据流是自定义格式：
+  - 未开启嗅探时：数据流按照 L4 TCP 进行路由，符合用户期望。
+  - 如果开启嗅探：数据流最开始会被认定为 L7 http 协议，但是后续数据不符合 http 格式，流量将被中断。
 
 建议生产环境不使用协议嗅探, 接入 mesh 的 service 应该按照约定使用协议前缀进行命名。
 
@@ -87,7 +83,7 @@ Protocol sniffing 减少了新手使用 istio 所需的配置，但是可能会�
 
 这是使用 mesh 最常见的困境，在微服务中引入 envoy 作为代理后，当流量访问和预期行为不符时，用户很难快速确定问题是出在哪个环节。客户端收到的异常响应，诸如 403、404、503 或者连接中断等，可能是链路中任一 sidecar 执行流量管控的结果， 但也有可能是来自某个服务的合理逻辑响应。
 
-### envoy 流量模型
+### Envoy 流量模型
 
 Envoy 接受请求流量叫做 **Downstream**，Envoy 发出请求流量叫做**Upstream**。在处理Downstream 和 Upstream 过程中， 分别会涉及2个流量端点，即请求的发起端和接收端：
 
@@ -108,6 +104,7 @@ Envoy 接受请求流量叫做 **Downstream**，Envoy 发出请求流量叫做**
 ![日志格式](../images/faq-envoy-log.png)
 
 通过日志重点观测 2 个信息：
+
 * 断点是在哪里 ？
 * 原因是什么？
 
@@ -160,10 +157,8 @@ Ingress Gateway 规则不生效的一个常见原因是：Gateway 的监听端�
 
 上图中，虽然 gateway 定义期望管控端口 b 和 c，但是它对应的 service （通过腾讯云CLB）只开启了端口 a 和 b，因此最终从 LB 端口 b 进来的流量才能被 istio gateway 管控。
 
-* Istio Gateway 和 kubernetes Service 没有直接的关联，二者都是通过 selector 去绑定 pod，实现间接关联
-
-* Istio CRD Gateway 只实现了将用户流控规则下发到网格边缘节点，流量仍需要通过 LB 控制才能进入网格
-
+* Istio Gateway 和 kubernetes Service 没有直接的关联，二者都是通过 selector 去绑定 pod，实现间接关联。
+* Istio CRD Gateway 只实现了将用户流控规则下发到网格边缘节点，流量仍需要通过 LB 控制才能进入网格。
 * 腾讯云 tke mesh 实现了 Gateway-Service 定义中的 Port 动态联动，让用户聚焦在网格内的配置。
 
 ## 6. VirtualService 作用域
@@ -172,9 +167,9 @@ VirtualService 包含了大部分 outbound 端的流量规则，它既可以应�
 
 VirtualService 的属性`gateways`用于指定 VirtualService 的生效范围：
 
-* 如果 `VirtualService.gateways`为空，则 istio 为其赋默认值 `mesh`, 代表生效范围为网格内部
-* 如果希望 VirtualService 应用到具体边缘网关上，则需要显示为其赋值：`gateway-name1,gateway-name2...`
-* 如果希望 VirtualService 同时应用到网格内部和边缘网关上，则需要显示地把`mesh`值加入`VirtualService.gateways`， 如 `mesh,gateway-name1,gateway-name2...`
+* 如果 `VirtualService.gateways`为空，则 istio 为其赋默认值 `mesh`, 代表生效范围为网格内部。
+* 如果希望 VirtualService 应用到具体边缘网关上，则需要显示为其赋值：`gateway-name1,gateway-name2...`。
+* 如果希望 VirtualService 同时应用到网格内部和边缘网关上，则需要显示地把`mesh`值加入`VirtualService.gateways`， 如 `mesh,gateway-name1,gateway-name2...`。
 
 一个常见的问题是以上的第三种情况，VirtualService 最开始作用于网关内部，后续要将其规则扩展到边缘网关上，用户往往只会添加具体 gateway name，而遗漏 `mesh`:
 
@@ -190,10 +185,11 @@ Istio 自动给`VirtualService.gateways`设置默认值， 本意是为了简化
 
 ### 背景：
 
-* VirtualService 里的规则，按照 host 进行聚合
-* 随着业务的增长，VirtualService 的内容会快速增长，一个 host 的流控规则，可能会由不同的团队分布维护。如安全规则和业务规则分开，不同业务按照子 path 分开
+* VirtualService 里的规则，按照 host 进行聚合。
+* 随着业务的增长，VirtualService 的内容会快速增长，一个 host 的流控规则，可能会由不同的团队分布维护。如安全规则和业务规则分开，不同业务按照子 path 分开。
 
 目前 istio 对 cross-resource VirtualService 的支持情况：
+
 * 在网格边缘（gateway），同一个 host 的流控规则，支持分布到多个 VirtualService 对象中，istio 自动聚合，但依赖定义顺序以及用户自行避免冲突。
 * 在网格内部（for sidecar），同一个 host 的流控规则，不支持分布到多个 VirtualService 对象中，如果同一个 host 存在多个 VirtualService，只有第一个 VirtualService 生效，且没有冲突检测。
 
@@ -234,14 +230,16 @@ service mesh 遥测系统中，对调用链跟踪的实现，并非完全的零�
 
 在开启 istio mTLS 的用户场景中，访问出现 `connection termination` 是一个高频的异常：
 
-```sh
+```bash
 # curl helloworld:4000/hello -i
 HTTP/1.1 503 Service Unavailable
 
 upstream connect error or disconnect/reset before headers
 reset reason: connection termination
 ```
+
 Envoy 访问日志中可以看到 "UC" 错误标识：
+
 ```json
 {
   "upstrean_local_address": "-",
@@ -258,7 +256,6 @@ Envoy 访问日志中可以看到 "UC" 错误标识：
   "upstream_cluster": "outbound|4000|vl|helloworld.default.svc.cluster.local"
     ......
 }
-
 ```
 
 这个异常的原因和 DestinationRule 中的 mTLS 配置有关，是 istio 中一个不健壮的接口设计。
@@ -295,9 +292,9 @@ spec:
 
 ### 原因分析
 
-Istio-proxy 中的一段 iptables:
+`istio-proxy` 中的一段 iptables:
 
-```sh
+```bash
    Chain ISTIO_OUTPUT {1 references)
    target      port  opt source       destination
 1. RETURN      all   —- 127.0.0.6     anywhere
@@ -314,7 +311,7 @@ Istio-proxy 中的一段 iptables:
 
 对该规则的解释：
 
-```sh
+```bash
 Redirect app calls back to itself via Envoy when using the service VIP or endpoint
 address, e.g. appN => Envoy (client) => Envoy (server) => appN.
 ```
@@ -331,4 +328,3 @@ address, e.g. appN => Envoy (client) => Envoy (server) => appN.
 ## 小结
 
 Istio 并不是单一领域的技术，它综合了诸多服务治理领域的解决方案和最佳实践。Istio 试图运用精巧的模型，去联结各种平台、观测系统和用户应用。目前的 istio 已经足够复杂，未来一定会更加复杂，这些「复杂」的目的，本意让用户能更「简单」地使用 Service Mesh 领域的最佳实践；但另一方面，我们必须要深入 Istio 的细节，对异常进行刨根问底，才能保证 Service Mesh 架构能稳定地支持终端用户和业务系统。
-
