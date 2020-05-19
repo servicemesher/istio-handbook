@@ -3,7 +3,9 @@ authors: ["tx19980520"]
 reviewers: [""]
 ---
 
-# 双向 TLS
+# 请求认证
+
+## 双向 TLS
 
 TLS 在 web 端的使用非常广泛，针对传输的内容进行加密，能够有效的防止中间人攻击。双向TLS（Two way TLS/Mutual TLS，后文均简称 mTLS）的主要使用场景是在 B2B 和 Server-to-Server 的场景中，以支持服务与服务之间身份认证与授权。
 ![istio-official-authorization-arch](../images/authz.png)
@@ -13,7 +15,7 @@ TLS 在 web 端的使用非常广泛，针对传输的内容进行加密，能�
 
 我们将一一阐述 mTLS 在 Istio 中身份认证和授权两个方面的实验，在 Kubernetes 集群中使用有哪些注意事项，和 mTLS 的使用建议两个方面。
 
-## mTLS 在 Istio 中进行身份认证和授权
+### mTLS 在 Istio 中进行身份认证和授权
 
 Istio 中提供了 AuthorizationPolicy 用于对 trust domain 进行设置，能够对证书做到更加细粒度的验证。具体的一些实验我们也会在后面的章节中进行实验与探讨。
 
@@ -22,11 +24,11 @@ Istio 中提供了 AuthorizationPolicy 用于对 trust domain 进行设置，能
 
 ![实验环境部署一览](../images/istio-mutual-simple-test.jpg)
 
-### 使用 mTLS 实现服务间身份认证
+#### 使用 mTLS 实现服务间身份认证
 
 为验证 mTLS 实现服务间身份认证，我们将在网格外（`legacy`）和网格内（`mtls-test` 和 `full`）使用 sleep 向 httpbin 发起通信，配置不同的模式，观察不同的返回结果来体验 mTLS 服务间身份认证。
 
-#### mTLS 身份认证原理与模式简介
+##### mTLS 身份认证原理与模式简介
 
 mTLS 主要负责服务与服务之间传输层面的认证，具体实现在 sidecar 中，在具体进行请求时，将经历如下的过程：
 1. 客户端发出的请求将被发送到客户端 sidecar 。
@@ -44,7 +46,7 @@ Istio 提供如下三种 mTLS 身份认证 模式，在不同的场景下进行�
 
 实验将从默认的 PERMISSIVE 模式开始，转变为 STRICT 模式，最终对于部分的服务启用 DISABLE 模式，通过观察其返回内容，判断是否使用密文传输，从而熟悉在不同模式下的行为模式。
 
-#### 使用默认 PERMISSIVE 模式
+##### 使用默认 PERMISSIVE 模式
 
 默认情况下，PERMISSIVE 模式能够支持明文传输，则不管是在 Istio 管理下的 Pod 还是在 Istio 管理外的 Pod，相互之间的通信畅通无阻。PERMISSIVE 是一种过渡态，当你开始将所有的 workload 都迁移到网格中时，可以使用 PERMISSIVE 过渡态，在完成迁移工作后，可以通过 Grafana Dashboard 或者在 istio-proxy 中使用 tcpdump 来检查是否仍存在明文传输的情况。最终将模式转换为 STRICT 完成迁移。
 
@@ -65,7 +67,7 @@ response code: 200
 
 从输出内容可以发现 `sleep.mtls-test` 到 `httpbin.mtls-test` 能够找到 SPIFFE 的相关内容，SPIFFE URI 显示来自 X.509 证书的客户端标识，它表明流量是在 mTLS 中发送的。如果流量为明文，将不会显示客户端证书。可以验证 PERMISSIVE 模式既能支持明文传输，又能支持密文传输。
 
-#### 启用 STRICT 模式
+##### 启用 STRICT 模式
 
 ```yaml
 apiVersion: "networking.istio.io/v1alpha3"
@@ -105,7 +107,7 @@ URI=spiffe://cluster.local/ns/full/sa/sleep
 response code: 200
 ```
 
-#### 启用 DISABLE 模式
+##### 启用 DISABLE 模式
 
 此时，我们因为种种的原因不能将 `sleep.legacy` 迁移到网格中，但仍旧希望其可以与 `httpbin.mtls-test` 进行通信，因此我们针对 `httpbin.mtls-test` 启用 DISABLE 模式
 
@@ -144,11 +146,11 @@ response code: 200
 
 实验的结果上能体现相互之间的通讯是畅通的，但是没有展示 SPIFFE URI，因此所有的流量都是明文传输的。请一定注意这样的配置是非常危险的，在没有其他安全措施的情况下请避免这类情况的发生。
 
-### 使用 mTLS 实现服务间授权
+#### 使用 mTLS 实现服务间授权
 
 为验证 mTLS 实现服务间授权，我们将沿用相关的测测试环境，主要验证在网格内部的进行通信时，如何使用服务间授权来进一步细粒度保护相应服务。
 
-#### mTLS 服务间授权原理
+##### mTLS 服务间授权原理
 
 身份认证主要解决的是证明“我是谁”的问题，授权则是列举出“我能做什么”，对于 mTLS 而言，则是需要回答该流量 ALLOW 还是 DENY，其中的主要依据是 Identity，通常，Trust Domain 指定身份所属的网格。
 
@@ -170,7 +172,7 @@ Certificate:
 
 Trust Domain 是 Istio 1.4 版本进入 alpha 的一个功能，在我们修改 Trust Domain 时，实质上是修改了 SAN 区域的值，重新签发了新的证书(重新签发证书需要一定的时间，因此在配置之后需要等待一段时间才能生效)。
 
-#### 使用授权策略拒绝请求
+##### 使用授权策略拒绝请求
 
 在我们的实验中，我们将拒绝 `sleep.full` 访问 `httpbin.mlts-test` 的任何 GET 请求。
 ```yaml
@@ -210,7 +212,7 @@ response code: 403
 
 我们看到当 `sleep.full` 请求 `httpbin.mtls-test` 时，此时返回403，说明其存在证书，但是证书的的 SAN 值域并不在 Trust Domain 中，因此返回403以表示访问权限不足。
 
-### 使用 mTLS 与网格外部服务通信
+#### 使用 mTLS 与网格外部服务通信
 
 在许多情况下，服务网格中的微服务序并不是应用程序的全部。有时，网格内部的微服务需要使用在服务网格外部的服务，在网格外部署服务，有如下几种原由：
 1. 相关服务是第三方服务，无法被直接迁移到服务网格中。
@@ -219,11 +221,11 @@ response code: 403
 
 我们仍旧希望能够享受服务网格带来的 mTLS 的便利，来使整个系统更加安全。本节就以 MongoDB 为例，首先实现 MongoDB 内置 mTLS，之后将服务端迁移到网格内部，在网格内通过 mTLS 访问网格外部 MongoDB 服务。
 
-#### 使用 MongoDB 内置 mTLS 创建安全连接
+##### 使用 MongoDB 内置 mTLS 创建安全连接
 
 MongoDB 自身能够提供 mTLS 的服务，可以通过签发相应的证书来完成 mTLS的配置。
 
-##### 使用 openssl 签发证书
+###### 使用 openssl 签发证书
 
 首先使用 openssl 自行签发证书：
 
@@ -345,7 +347,7 @@ spec:
 
 类似的，客户端也通过 `ConfigMap` 将客户端证书和根证书挂载到客户端容器中，以供后序客户端对服务端进行访问。
 
-##### 客户端进行访问实验
+###### 客户端进行访问实验
 
 ```bash
 root@mongo-client: mongo --tls --tlsCAFile /pem/ca.pem --tlsCertificateKeyFile /pem/client.pem --host mongo.mongo
@@ -378,7 +380,7 @@ root@mongo-client:/ mongo --tls --tlsCAFile /pem/client.pem --tlsCertificateKeyF
 
 上述的输出可以表明，在没有证书和证书不正确的情况下都无法连入数据库，我们能够正确使用 mTLS 模式访问 MongoDB，在访问 MongoDB 上现在已经有了非常安全的保障，但是在客户端需要开发者自行处理有关证书的事宜，这不仅仅会给开发者带来困扰，也会将证书与私钥对外暴露，如果客户端在网格内部，我们可以让 sidecar 来负责相关的工作。
 
-#### Istio mTLS 结合 MongoDB
+##### Istio mTLS 结合 MongoDB
 
 我们主要针对客户端进行改造，将其部署在网格中，并让 istio-proxy 进行 mTLS 的相关处理。
 
@@ -442,7 +444,7 @@ Welcome to the MongoDB shell.
 
 可以看到这次我们在创建连接时并没有使用设置相应 TLS 的内容，这就是因为将 TLS 层的内容前移到了 istio-proxy 中。
 
-### mTLS 与 Kubernetes 探针
+#### mTLS 与 Kubernetes 探针
 
 我们常在 Kubernetes 集群中使用探针，用于检测服务的健康状态，而这样的探针，往往是一个 HTTP 请求，那么在我们使用探针时，如果开启 mTLS STRICT 模式，则会出现探针报错的情况，但实际上我们的服务应该是可以正常运行的。
 
@@ -467,7 +469,7 @@ spec:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
 ```
 
-## mTLS 的使用建议
+### mTLS 的使用建议
 
 微服务架构中，服务与服务之间的调用是非常频繁的，这也是 Istio 启用 mTLS 的一个原因，但是我们在实际的使用中，我们需要从安全和性能两者综合考虑。
 
