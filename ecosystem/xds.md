@@ -119,12 +119,12 @@ nonce: A
 
 如果更新被成功应用，version_info将如图所示置为X：
 
-![xds-ack](../images/xds-ack.png)
+![xds-ack](../images/xds-ack.svg)
 
 #### NACK
 如果Envoy拒绝了配置更新X，那么会返回具体的error_detail以及之前的版本号，下图中为空：
 
-![xds-nack](../images/xds-nack.png)
+![xds-nack](../images/xds-nack.svg)
 
 对于xDS客户端来说，每当收到DiscoveryResponse时都应该进行ACK或NACK。ACK标识成功的配置更新，并且包含来自DiscoveryResponse的version_info，而NACK标识失败的配置更新，并且包含之前的version_info。只有NACK应该有error_detail字段。
 
@@ -154,11 +154,11 @@ nonce: A
 
 在下面第一个例子中，客户端收到第一个更新并且返回ACK，而第二次更新失败返回了NACK，之后xDS客户端自发请求'wc'资源：
 
-![xds-incremental](../images/xds-incremental.png)
+![xds-incremental](../images/xds-incremental.svg)
 
 在网络重连以后，因为并没有对之前的状态进行保存，增量xDS客户端需要向服务器告知它已拥有的资源从而避免重复发送：
 
-![xds-incremental-reconnect](../images/xds-incremental-reconnect.png)
+![xds-incremental-reconnect](../images/xds-incremental-reconnect.svg)
 
 ### 最终一致性
 
