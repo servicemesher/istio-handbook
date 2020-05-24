@@ -1,5 +1,5 @@
 ---
-authors: [""]
+authors: ["mlycore"]
 reviewers: [""]
 ---
 
@@ -14,12 +14,13 @@ xDS协议是“X Discovery Service”的简写，这里的“X”表示它不是
 ## xDS协议简介
 
 在Pilot和Envoy通信的场景中，xDS协议是基于gRPC实现的传输协议，即Envoy通过gRPC流式订阅Pilot的资源配置，Pilot按照CDS-EDS-LDS-RDS的顺序串行分发配置。
-![Pilot-Envoy]()
+
+![xds-pilot-envoy-arch](../images/xds-pilot-envoy.png)
 
 图中的ADS将xDS所有的协议都聚合到一起，即上文提到的CDS、EDS、LDS和RDS等，Envoy通过这些API可以动态地从Pilot获取对Cluster（集群）、Endpoint（集群成员）、Listener（监听器）和Route（路由）等资源的配置。下表整理了主要的xDS API：
 
-|:-:|:-:|:-:|
 |Concept|全称|描述|
+|:-:|:-:|:-:|
 |LDS|Listener Discovery Service|监听器发现服务|
 |RDS|Route Discovery Service|路由发现服务|
 |CDS|Cluster Discovery Service|集群发现服务|
@@ -58,17 +59,34 @@ EDS，CDS等每个独立的服务都对应了不同的gRPC服务名称。对于�
 ## xDS协议的基本流程
 
 作为Pilot和Envoy之间通信协议的xDS，它可以通过两种方式实现：gRPC和REST、无论哪种方法都是通过xDS API发送 DiscoveryRequest 请求，然后解析响应 DiscoveryResponse 中包含的配置信息并动态加载。
-![envoy-pilot]()
+
+![xds-envoy-pilot-flow](../images/xds-envoy-pilot-flow.png)
 
 ### DiscoveryRequest
 
 DiscoveryRequest是结构化的请求，它为某个Envoy请求包含了某些xDS API的一组版本化配置资源。相关字段展示如下表：
-[table1]()
+
+|属性名|类型|作用|
+|:-:|:-:|:-:|
+|VersionInfo|string|成功加载的资源版本号，首次为空|
+|Node|*core.Node|发起请求的节点信息，如位置信息等元数据|
+|ResourceNames|[]string|请求的资源名称列表，为空表示订阅所有的资源|
+|TypeUrl|string|资源类型|
+|ResponseNonce|string|ACK/NACK特定的response|
+|ErrorDetail|*rpc.Status|代理加载配置失败，ACK为空|
+
 
 ### DiscoveryResponse
 
 类似于DiscoveryRequest，DiscoveryResponse的相关字段如下表：
-[table2]()]
+
+|属性名|类型|作用|
+|:-:|:-:|:-:|
+|VersionInfo|string|Pilot响应版本号|
+|Resources|[]types.Any|序列化资源，可表示任意类型的资源|
+|TypeUrl|string|资源类型|
+|Nonce|string|基于gRPC的订阅使用，nonce提供了一种在随后的DiscoveryRequest中明确ACK特定DiscoveryResponse的方法|
+
 
 ### ACK/NACK
 
@@ -100,11 +118,13 @@ nonce: A
 #### ACK
 
 如果更新被成功应用，version_info将如图所示置为X：
-![ack]()
+
+![xds-ack](../images/xds-ack.png)
 
 #### NACK
 如果Envoy拒绝了配置更新X，那么会返回具体的error_detail以及之前的版本号，下图中为空：
-![nack]()
+
+![xds-nack](../images/xds-nack.png)
 
 对于xDS客户端来说，每当收到DiscoveryResponse时都应该进行ACK或NACK。ACK标识成功的配置更新，并且包含来自DiscoveryResponse的version_info，而NACK标识失败的配置更新，并且包含之前的version_info。只有NACK应该有error_detail字段。
 
@@ -133,10 +153,12 @@ nonce: A
 * 在动态添加或移除资源时客户端自动发来的DeltaDiscoveryRequest，此场景中必须忽略response_nonce字段
 
 在下面第一个例子中，客户端收到第一个更新并且返回ACK，而第二次更新失败返回了NACK，之后xDS客户端自发请求'wc'资源：
-![first]()
+
+![xds-incremental](../images/xds-incremental.png)
 
 在网络重连以后，因为并没有对之前的状态进行保存，增量xDS客户端需要向服务器告知它已拥有的资源从而避免重复发送：
-![second]()
+
+![xds-incremental-reconnect](../images/xds-incremental-reconnect.png)
 
 ### 最终一致性
 
