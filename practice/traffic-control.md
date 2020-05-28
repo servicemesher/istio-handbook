@@ -82,7 +82,7 @@ spec:
 
 ### Gateway
 
-Gateway 是 Istio 中对流量控制的第一层服务资源，它定义了所有的流量入站或者出站的HTTP/TCP连接负载均衡器操作。它描述了一组对外公开的端口、协议、负载均衡、以及 SNI 配置。Istio 默认的 Gateway 使用 IngressController 负载均衡器来代理流量。它的一个简单示例如下：
+Gateway 是 Istio 中对流量控制的第一层服务资源，它定义了所有的流量入站或者出站的HTTP/TCP连接负载均衡器操作。它描述了一组对外公开的端口、协议、负载均衡、以及 SNI 配置。Istio 默认的 Gateway 使用 istio-ingressgateway 负载均衡器来代理流量，而 istio-ingressgateway 的本质是一个 Envoy 代理。它的一个简单示例如下：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
