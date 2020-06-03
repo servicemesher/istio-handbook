@@ -64,7 +64,7 @@ spec:
 
 ### DestinationRule
 
-DestinationRule 是 Istio 中定义的另外一个比较重要的资源， 它通常和 `VirtualService` 一起使用，来确定请求应该访问哪一个服务，同时也来控制负载均衡的调配，负责对具体的端点中的 Envoy 代理进行连接，并且提供异常点检测，健康检测，熔断控制等。下面是一个简单的示例：
+DestinationRule 是 Istio 中定义的另外一个比较重要的资源，它定义了某个 Kubernetes 的 Service 对外提供服务的策略及规则，这包括负载均衡策略、异常点检测、熔断控制、访问连接池等。负载均衡策略支持简单的负载策略（ROUND_ROBIN、LEAST_CONN、RANDOM、PASSTHROUGH）、一致性 Hash 策略和区域性负载均衡策略。异常点检测配置在服务连续返回了5xx的错误时进行及时的熔断保护，避免引起雪崩效应。DestinationRule 也可以同 VirtualService 配合使用实现对同源服务不同子集服务的访问配置。下面是一个简单的示例：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
