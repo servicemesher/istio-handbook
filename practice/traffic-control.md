@@ -60,11 +60,11 @@ spec:
 
 以上配置表示 ：当访问 reviews 服务时，如果请求标头中存在`end-user:jason`这样的键值对则转发到 `v2` 版本的 reviews 服务子集中，其他的请求则转发到 `v3` 版本的 reviews 服务子集中。
 
-**补充：**在 Istio 1.5 中，VirtualService 资源之间是无法进行转发的，在 Istio 未来版本中规划了 VirtualService Chain 机制，也就是说，我们可以通过 delegate 配置项将一个 VirtualService 代理到另外一个 VirtualService 中进行规则匹配。
+**补充：**在 Istio 1.5 中，VirtualService 资源之间是无法进行转发的，在 Istio 1.6版本中规划了 VirtualService Chain 机制，也就是说，我们可以通过 delegate 配置项将一个 VirtualService 代理到另外一个 VirtualService 中进行规则匹配。
 
 ### DestinationRule
 
-DestinationRule 是 Istio 中定义的另外一个比较重要的资源，它定义了某个 Kubernetes 的 Service 对外提供服务的策略及规则，这包括负载均衡策略、异常点检测、熔断控制、访问连接池等。负载均衡策略支持简单的负载策略（ROUND_ROBIN、LEAST_CONN、RANDOM、PASSTHROUGH）、一致性 Hash 策略和区域性负载均衡策略。异常点检测配置在服务连续返回了5xx的错误时进行及时的熔断保护，避免引起雪崩效应。DestinationRule 也可以同 VirtualService 配合使用实现对同源服务不同子集服务的访问配置。下面是一个简单的示例：
+DestinationRule 是 Istio 中定义的另外一个比较重要的资源，它定义了网格中某个 Service 对外提供服务的策略及规则，这包括负载均衡策略、异常点检测、熔断控制、访问连接池等。负载均衡策略支持简单的负载策略（ROUND_ROBIN、LEAST_CONN、RANDOM、PASSTHROUGH）、一致性 Hash 策略和区域性负载均衡策略。异常点检测配置在服务连续返回了5xx的错误时进行及时的熔断保护，避免引起雪崩效应。DestinationRule 也可以同 VirtualService 配合使用实现对同源服务不同子集服务的访问配置。下面是一个简单的示例：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -82,7 +82,7 @@ spec:
 
 ### Gateway
 
-Gateway 是 Istio 中对流量控制的第一层服务资源，它定义了所有的流量入站或者出站的HTTP/TCP连接负载均衡器操作。它描述了一组对外公开的端口、协议、负载均衡、以及 SNI 配置。Istio Gateway 包括 Ingress Gateway 与 Egress Gateway。Ingress Gateway 使用 istio-ingressgateway 负载均衡器来代理流量，而 istio-ingressgateway 的本质是一个 Envoy 代理。它的一个简单示例如下：
+Gateway 是 Istio 中对流量控制的第一层服务资源，它定义了所有HTTP/TCP流量进入网格或者从网格中出站的统一入口和出口。它描述了一组对外公开的端口、协议、负载均衡、以及 SNI 配置。Istio Gateway 包括 Ingress Gateway 与 Egress Gateway。Ingress Gateway 使用 istio-ingressgateway 负载均衡器来代理流量，而 istio-ingressgateway 的本质是一个 Envoy 代理。它的一个简单示例如下：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -207,7 +207,7 @@ spec:
 在 ServiceEntry 测试时，很多同学会发现，即使不用配置 ServiceEntry，也能正常的访问外部域名，这是因为 global.outboundTrafficPolicy.mode 配置了默认值为 ALLOW_ANY 。它有两个值：
 
 - ALLOW_ANY： Istio 代理允许调用未知的服务。
-- REGISTRY_ONLY： Istio 代理会阻止任何没有在网格中定义的 HTTP 服务或 service entry 的主机。
+- REGISTRY_ONLY： Istio 代理会阻止任何没有在网格中定义的 HTTP 服务或 ServiceEntry 的主机。
 
 使用以下命令来查看该配置项：
 
