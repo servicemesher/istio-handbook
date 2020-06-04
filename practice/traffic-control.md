@@ -82,7 +82,7 @@ spec:
 
 ### Gateway
 
-Gateway 是 Istio 中对流量控制的第一层服务资源，它定义了所有的流量入站或者出站的HTTP/TCP连接负载均衡器操作。它描述了一组对外公开的端口、协议、负载均衡、以及 SNI 配置。Istio 默认的 Gateway 使用 istio-ingressgateway 负载均衡器来代理流量，而 istio-ingressgateway 的本质是一个 Envoy 代理。它的一个简单示例如下：
+Gateway 是 Istio 中对流量控制的第一层服务资源，它定义了所有的流量入站或者出站的HTTP/TCP连接负载均衡器操作。它描述了一组对外公开的端口、协议、负载均衡、以及 SNI 配置。Istio Gateway 包括 Ingress Gateway 与 Egress Gateway。Ingress Gateway 使用 istio-ingressgateway 负载均衡器来代理流量，而 istio-ingressgateway 的本质是一个 Envoy 代理。它的一个简单示例如下：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -143,9 +143,42 @@ spec:
 - `80`端口附属配置的 host 为`uk.bookinfo.com`，`eu.bookinfo.com`，同时在`tls`中配置如果使用 HTTP1.1 协议访问将会被返回301，要求使用 HTTPS 访问，通过这种配置变相的禁止了对`uk.bookinfo.com`，`eu.bookinfo.com`域名的 HTTP1.1 协议的访问入口。
 - `443`端口为 TLS/HTTPS 访问的端口，表示接受`uk.bookinfo.com`，`eu.bookinfo.com`域名的 HTTPS 协议的访问，`protocol`属性指定了他的协议类型。在`tls`的配置中指定了他的会话模式为单向 TLS ，也指定了服务端证书和私钥的存放地址。
 - `9443`端口也是提供 TLS/HTTPS 访问，与 `443`不同的是他的认证不是指定存放证书的地址，而是通过 credentialName 名称从 Kubernetes 的证书管理中心拉取。
-- `9080`端口为一个提供简单 HTTP1.1 协议请求的端口。这里我们注意到它的hosts中配置了 `ns1/*` 与 `ns2/foo.bar.com` 这个配置项表示只允许`ns1`这个 Namespace 下的 VirtualService 绑定它以及 `ns2` 这个命名空间下配置了 `host` 为`foo.bar.com`的 VirtualService 绑定它。
-
+- `9080`端口为一个提供简单 HTTP1.1 协议请求的端口。这里我们注意到它的hosts中配置了 `ns1/*` 与 `ns2/foo.bar.com` 这个配置项表示只允许`ns1`这个 Namespace 下的 VirtualService 绑定它以及 `ns2` 这个命名空间下配置了 `host` 为`foo.bar.com` 的 VirtualService 绑定它。
 - `2379`端口提供了一个`MONGO`协议的请求端口。允许所有 `host` 绑定它。
+
+Egress Gateway 提供了对网格的出口流量进行统一管控的功能，在安装 Istio 时默认是不开启的。可以使用以下命令查看是否开启。
+
+```shell
+kubectl get pod -l istio=egressgateway -n istio-system
+```
+
+ 若没有开启，使用以下命令添加。
+
+```
+istioctl manifest apply --set values.global.istioNamespace=istio-system \
+    --set values.gateways.istio-egressgateway.enabled=true
+```
+
+Egress Gateway 的一个简单示例如下：
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-egressgateway
+spec:
+  selector:
+    istio: egressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - edition.cnn.com
+```
+
+可以看出，与 Ingress Gateway 不同，Egress Gateway 使用有 istio: egressgateway 标签的 Pod 来代理流量，实际上这也是一个 Envoy 代理。当网格内部需要访问 edition.cnn.com 这个地址时，流量将会统一先转发到 Egress Gateway 上，再由 Egress Gateway 将流量转发到 edition.cnn.com 上。
 
 ### ServiceEntry
 
