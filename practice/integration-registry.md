@@ -45,21 +45,7 @@ Pilot 的入口函数是 pilot/cmd/pilot-discovery/main.go 中的 main 方法。
 
 ## 第三方服务注册表集成
 
-### Consul 集成
-
-鉴于和 Kubernetes 的紧密关系，Istio 在最初只重点关注了 Kubernetes 服务注册的集成。虽然在 Istio 最初的版本中也有 Consul 和 Eureka 的适配代码，但这些代码基本只是处于原型验证的节点，存在较多的故障和性能问题。
-
-由于在项目中采用了 Consul 作为自研服务注册的后端存储，我们在和 Istio 进行集成时对 Consul 的适配进行了大量测试和研究，并解决了一些功能和性能效率方面的问题。这些 Consul 适配的问题解决后已经合入了 Istio 版本中，参见这些 PR：
-* [Use watching instead of polling to get update from Consul catalog #17881](https://github.com/istio/istio/pull/17881)
-* [Fix: Consul high CPU usage (#15509) #15510](https://github.com/istio/istio/pull/15510)
-* [Avoid unnecessary service change events(#11971) #12148](https://github.com/istio/istio/pull/12148)
-* [Use ServiceMeta to convey the protocol and other service properties #9713](https://github.com/istio/istio/pull/9713)
-
-这些问题处理后，Consul 注册表的集成已经基本可用。要将 Consul 接入到 Pilot 中， 只需要在 pilot-discovery 的启动命令中通过这两个参数指定 registry 类型和 consul 的连接地址即可： ```--registries Consul```   ```--consulserverURL http://$consul-ip:$port```。
-
-### 其他服务注册表的集成
-
-虽然在 1.0 中还有 Eureka 的适配代码框架，但在 Istio 后面的版本完全删除了 Eureka 适配的相关代码。除了 Kubernetes 和 Consul 之外，原生 Istio 代码不支持其他服务注册表。 但我们可以采用以下三种方式将其集成到 Istio 的方式。
+除 Kubernetes 和 Consul 之外，原生 Istio 代码不支持其他服务注册表。 但通过前面对 Pilot 服务模型源码的分析，我们可以得出以下三种将其他服务注册表集成到 Istio 的方式。
 ![](/images/service-registry-integration.svg)
 图3 集成第三方服务注册表的三种方式
 
@@ -93,7 +79,7 @@ configSources:
 
 ## 小结
 
-本节分析了 Istio 和第三方服务注册表集成的几种可能的方式，包括自定义的 Service Registry 适配代码，自定义 MCP Server 和采用一个独立服务向 API Server 写入 ServiceEntry 和 WorkloadEntry 三种方法。有需要的读者可以根据项目的实际情况选择采用哪一种方法。由于第一种和第二种方法目前都存在一些问题，建议先采用第三种方式，待 Istio 对 Galley 和 MCP 的改造彻底完成后再考虑向第二种方式迁移。
+本节分析了 Istio 和第三方服务注册表集成的几种可能的方式。如果你使用的是 Consul，可以通过配置参数设置 Consul 的连接地址，将 Consul 集成到 Istio 中。 对于其他的服务注册表，有以下三种可选的集成方案： 自定义的 Service Registry 适配代码，自定义 MCP Server，或者采用一个独立服务向 API Server 写入 ServiceEntry 和 WorkloadEntry。 有需要的读者可以根据项目的实际情况选择采用哪一种方法。由于第一种和第二种方法目前都存在一些问题，建议先采用第三种方式，待 Istio 对 Galley 和 MCP 的改造彻底完成后再考虑向第二种方式迁移。
 
 # 参考文档
 
