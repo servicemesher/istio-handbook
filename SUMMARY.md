@@ -68,7 +68,7 @@
   - [集成传统微服务框架](practice/integration-traditional-microservices.md)
     - [Spring Cloud](practice/spring-cloud.md)
     - [Dubbo](practice/dubbo.md)
-  - [集成注册中心配置中心](practice/integration-registry.md)
+  - [集成服务注册中心](practice/integration-registry.md)
     - [Consul](practice/consul.md)
     - [Nacos](practice/nacos.md)
     - [Apollo](practice/apollo.md)
