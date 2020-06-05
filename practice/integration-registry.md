@@ -1,6 +1,6 @@
 ---
 authors: ["zhaohuabing"]
-reviewers: [""]
+reviewers: ["GuangmingLuo"]
 ---
 
 # 集成服务注册中心
@@ -34,14 +34,14 @@ Pilot 的入口函数是 pilot/cmd/pilot-discovery/main.go 中的 main 方法。
 	* Kubernetes：使用 Kubernetes 来作为配置数据的存储，该方式的直接依附于 Kubernetes 强大的 CRD 机制来存储配置数据，简单方便，是 Istio 缺省使用的配置存储方案。
 	* Memory：一个在内存中的 Config Controller 实现，可以监控一个文件目录，加载该目录中的 yaml 文件中定义的 Istio API 配置对象，该方式主要用于测试。
 	* MCP：通过 [MCP(Mesh Configuration Protocol)](https://github.com/istio/api/tree/master/mcp) 协议，可以接入一个到多个 MCP Server。Pilot 从 MCP server 中获取网格的配置数据，包括 ServiceEntry 和 WorkloadEntry 定义的服务数据，以及 VirtualService，DestinationRule 等路由规则等其他配置。Istio 中有一个 Galley 组件，该组件实现为一个 MCP Server，从 Kubernetes API Server 中获取配置数据，然后通过 MCP 协议提供给 Pilot。
-* **Service Controller**：负责接入各种 Service Registry，从 Service Registry 同步需要在网格中进行管理的服务，目前Istio支持的Service Registry包括：
+* **Service Controller**：负责接入各种 Service Registry，从 Service Registry 同步需要在网格中进行管理的服务，目前 Istio 支持的 Service Registry 包括：
 	* Kubernetes：对接 Kubernetes Registry，可以将 Kubernetes 的 Service 和 Endpoint 采集到 Istio 中。
-	* Consul： 对接Consul Catalog，将注册到 Consul 中的服务数据采集到 Istio 中。
+	* Consul： 对接 Consul Catalog，将注册到 Consul 中的服务数据采集到 Istio 中。
 	* External Service Discovery：该 Service Registry 比较特殊，后端并未对接到一个服务注册表，而是会监听 Config Controller 的配置变化消息，从 Config Controller 中获取 ServiceEntry 和 WorkloadEntry 资源，然后以 Service Registry 的形式提供给 Service Controller。
 * **Discovery Service**：将服务模型和控制面配置转换为数据面标准数据格式，通过 xDS 接口下发给数据面的代理。主要包含下述逻辑：
-	* 启动GRPC Server并接收来自Envoy端的连接请求。
-	* 接收Envoy端的xDS请求，从Config Controller和Service Controller中获取配置和服务信息，生成响应消息发送给Envoy。
-	* 监听来自Config Controller的配置变化消息和来自Service Controller的服务变化消息，并将配置和服务变化内容通过xDS接口推送到Envoy。
+	* 启动 GRPC Server 并接收来自 Envoy 端的连接请求。
+	* 接收 Envoy 端的 xDS 请求，从 Config Controller 和 Service Controller 中获取配置和服务信息，生成响应消息发送给 Envoy。
+	* 监听来自 Config Controller 的配置变化消息和来自 Service Controller 的服务变化消息，并将配置和服务变化内容通过 xDS 接口推送到 Envoy。
 
 ## 第三方服务注册表集成
 
@@ -51,13 +51,13 @@ Pilot 的入口函数是 pilot/cmd/pilot-discovery/main.go 中的 main 方法。
 
 上图中分别用红、绿、三种颜色标识了这三种不同的集成方式。
 
-#### 自定义 Service Registry 适配器
+### 自定义 Service Registry 适配器
 
 如图3中红色箭头所示，我们可以编写一个自定义的适配器来集成第三方服务注册表。该自定义适配器从第三方服务注册表中获取服务和服务实例，转换为 Pilot 内部的标准模型，集成到 Service Controller 中。自定义适配器需要实现 ```serviceregistry.Instance``` 接口。该方式的原理和 Consul Service Registry 的适配是类似的，可以参照 Consul Service Registry 的适配代码进行编写。
 
 实施该方案需要熟悉 Pilot 内部服务模型和 Service Registry 适配相关 Istio 源码，并且需要将自定义适配器代码和 Pilot 代码一起编译生成定制的 Pilotd 二进制执行文件。该方案的问题是和 Istio 代码耦合较强，后续 Istio 版本升级时可能需要修改适配器代码并重新编译。
 
-#### 自定义 MCP Server
+### 自定义 MCP Server
 
 这种集成方式的业务流程参见图3中的蓝色箭头。该方案需要编写自定义的 MCP Server 从第三方注册表中获取服务和服务实例，然后转换为 ServiceEntry 和 WorkloadEntry 资源，通过 MCP 协议提供给 Pilot 中的 MCP config Controller。
 
@@ -73,7 +73,7 @@ configSources:
 
 除此以外，根据 Istio 社区中的这个 [MCP over XDS](https://docs.google.com/document/d/1lHjUzDY-4hxElWN7g6pz-_Ws7yIPt62tmX3iGs_uLyI/edit#heading=h.xw1gqgyqs5b) proposal，社区正在讨论使用 XDSv3/UDPA 代替目前的 MCP 协议来传输配置数据，因此 MCP server 和 Pilot 的通信机制在 1.7 版本中很可能变化。
 
-#### 向 API Server 写入 ServiceEntry 和 WorkloadEntry
+### 向 API Server 写入 ServiceEntry 和 WorkloadEntry
 
 该集成方式的业务流程如图3中绿色箭头所示。我们只需要编写一个独立的服务，该服务从第三方法服务注册表中获取服务和服务实例数据，然后转换为 Istio 的 ServiceEntry 和 WorkloadEntry 资源，通过 K8s API Server 的接口写入到 API Server 中。 Pilot 中自带的 Kube Config Controller 会监听 K8s API Server 中和 Istio 相关的资源对象的变化，并将 ServiceEntry 和 WorkloadEntry 转换为 Piolt 的内部服务模型。
 
