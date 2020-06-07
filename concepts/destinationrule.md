@@ -1,6 +1,0 @@
----
-authors: [""]
-reviewers: [""]
----
-
-# DestinationRule

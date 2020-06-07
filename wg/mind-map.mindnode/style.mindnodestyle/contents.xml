@@ -13,7 +13,7 @@
 			<key>borderStrokeStyle</key>
 			<dict>
 				<key>color</key>
-				<string>{1.000000, 0.372549, 0.411765, 1.000000}</string>
+				<string>{0.392157, 0.784314, 0.803922, 1.000000}</string>
 				<key>dash</key>
 				<integer>0</integer>
 				<key>width</key>
@@ -27,7 +27,7 @@
 		<key>strokeStyle</key>
 		<dict>
 			<key>color</key>
-			<string>{1.000000, 0.372549, 0.411765, 1.000000}</string>
+			<string>{0.392157, 0.784314, 0.803922, 1.000000}</string>
 			<key>dash</key>
 			<integer>0</integer>
 			<key>width</key>
@@ -46,10 +46,6 @@
 			<key>fontSize</key>
 			<real>20</real>
 			<key>italic</key>
-			<false/>
-			<key>strikethrough</key>
-			<false/>
-			<key>underline</key>
 			<false/>
 		</dict>
 	</dict>
@@ -88,10 +84,6 @@
 				<key>fontSize</key>
 				<real>14</real>
 				<key>italic</key>
-				<false/>
-				<key>strikethrough</key>
-				<false/>
-				<key>underline</key>
 				<false/>
 			</dict>
 		</dict>
