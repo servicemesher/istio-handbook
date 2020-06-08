@@ -5,7 +5,7 @@ reviewers: ["zhaohuabing"]
 
 # 流量控制
 
-顾名思义，流量控制是指对系统站点流量的管控。它包括了对入站流量，出站流量以及在系统内部 service-to-service 类型流量的控制。我们都知道，Istio 架构在逻辑上分为 Control plane（控制平面）和 Data plane（数据平面），Control plane 负责整体管理和配置代理， Data plane 负责网格内所有微服务间的网络通信，同时还收集报告网络请求的遥测数据等。流量控制则是在 Data plane 层实现。如下图所示：
+顾名思义，流量控制是指对系统流量的管控。它包括了对网格入口的流量、网格出口的流量以及在网格内部微服务间相互调用流量的控制。我们都知道，Istio 架构在逻辑上分为 Control plane（控制平面）和 Data plane（数据平面），Control plane 负责整体管理和配置代理， Data plane 负责网格内所有微服务间的网络通信，同时还收集报告网络请求的遥测数据等。流量控制则是在 Data plane 层实现。如下图所示：
 
 ![Istio Architecture](../images/istio-traffic-arch.png)
 
@@ -82,7 +82,7 @@ spec:
 
 ### Gateway
 
-Gateway 是 Istio 中对流量控制的第一层服务资源，它定义了所有HTTP/TCP流量进入网格或者从网格中出站的统一入口和出口。它描述了一组对外公开的端口、协议、负载均衡、以及 SNI 配置。Istio Gateway 包括 Ingress Gateway 与 Egress Gateway。Ingress Gateway 使用 istio-ingressgateway 负载均衡器来代理流量，而 istio-ingressgateway 的本质是一个 Envoy 代理。它的一个简单示例如下：
+Gateway 定义了所有HTTP/TCP流量进入网格或者从网格中出站的统一入口和出口。它描述了一组对外公开的端口、协议、负载均衡、以及 SNI 配置。Istio Gateway 包括 Ingress Gateway 与 Egress Gateway，分别用来配置网格的入口流量与出口流量。Ingress Gateway 使用 istio-ingressgateway 负载均衡器来代理流量，而 istio-ingressgateway 的本质是一个 Envoy 代理。它的一个简单示例如下：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -138,7 +138,7 @@ spec:
     - "*"
 ```
 
-这个示例中，该 Gateway 被引用在`some-config-namespace`这个 Namespace 下，并使用 label `my-gateway-controller`来关联负载均衡器代理的 Pod 。它对外公开了`80`、`443`、`9443`、`9080`、`2379`端口。
+这个示例中，该 Gateway 被引用在`some-config-namespace`这个 Namespace 下，并使用 label `my-gateway-controller`来关联部署网络代理的 Pod 。它对外公开了`80`、`443`、`9443`、`9080`、`2379`端口。
 
 - `80`端口附属配置的 host 为`uk.bookinfo.com`，`eu.bookinfo.com`，同时在`tls`中配置如果使用 HTTP1.1 协议访问将会被返回301，要求使用 HTTPS 访问，通过这种配置变相的禁止了对`uk.bookinfo.com`，`eu.bookinfo.com`域名的 HTTP1.1 协议的访问入口。
 - `443`端口为 TLS/HTTPS 访问的端口，表示接受`uk.bookinfo.com`，`eu.bookinfo.com`域名的 HTTPS 协议的访问，`protocol`属性指定了他的协议类型。在`tls`的配置中指定了他的会话模式为单向 TLS ，也指定了服务端证书和私钥的存放地址。
@@ -182,7 +182,7 @@ spec:
 
 ### ServiceEntry
 
-ServiceEntry 允许将 Istio 网格外的服务注册到网格内部 Istio 的注册表中去，这样在 Istio 内部就可以对外部服务进行管理，把它当做 Istio 内部的服务操作。包括服务发现，路由控制等，在 ServiceEntry 中可以配置 `hosts`，`vips`，`ports`，`protocols`，`endpoints`等。它的一个简单示例如下：
+ServiceEntry 可以将网格外的服务注册到 Istio 的注册表中去，这样就可以把外部服务当做网格内部的服务一样进行管理和操作。包括服务发现、路由控制等，在 ServiceEntry 中可以配置 `hosts`，`vips`，`ports`，`protocols`，`endpoints`等。它的一个简单示例如下：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -202,7 +202,7 @@ spec:
   resolution: DNS
 ```
 
-这个示例定义了在网格内部使用 HTTPS 协议访问外部的几个服务的配置。通过上面配置，网格内部的服务就可以把`api.dropboxapi.com`，`www.googleapis.com`,`www.googleapis.com`这几个外部的服务当做网格内部服务去访问了。`MESH_EXTERNAL` 表示是网格外服务。
+这个示例定义了在网格内部使用 HTTPS 协议访问外部的几个服务的配置。通过上面配置，网格内部的服务就可以把`api.dropboxapi.com`，`www.googleapis.com`,`www.googleapis.com`这几个外部的服务当做网格内部服务去访问了。`MESH_EXTERNAL` 表示是网格外服务，该参数会影响到服务间调用的 mTLS 认证、策略执行等。
 
 在 ServiceEntry 测试时，很多同学会发现，即使不用配置 ServiceEntry，也能正常的访问外部域名，这是因为 global.outboundTrafficPolicy.mode 配置了默认值为 ALLOW_ANY 。它有两个值：
 
@@ -225,7 +225,7 @@ $ kubectl get configmap istio -n istio-system -o yaml  \
 
 ### Sidecar
 
-在默认的情况下，Istio 中所有Pod中的 Envoy 代理都是可以被寻址的。然而在某些场景下，我们为了做资源隔离，希望只访问某些 Namespace 下的资源。这个时候，我们就可以使用 Sidecar 配置来实现。下面是一个简单的实例：
+在默认的情况下，Istio 中所有Pod中的 Envoy 代理都是可以被寻址的。然而在某些场景下，我们为了做资源隔离，希望只访问某些 Namespace 下的资源。这个时候，我们就可以使用 Sidecar 配置来实现。下面是一个简单的示例：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -240,7 +240,7 @@ spec:
     - "istio-system/*"
 ```
 
-该示例就规定了在命名空间为 bookinfo 下的所有资源仅可以访问本命名空间下的资源以及 istio-system 命名空间下的资源。
+该示例就规定了在命名空间为 bookinfo 下的所有服务仅可以访问本命名空间下的服务以及 istio-system 命名空间下的服务。
 
 ### 总结
 
