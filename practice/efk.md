@@ -4,7 +4,7 @@ reviewers: ["rootsongjc","GuangmingLuo","malphi"]
 ---
 
 # EFK
-EFK 指的是由 Elasticsearch + Fluentd + Kibana 组成的日志采集、存储、展示为一体的日志解决方案，简称 "EFK Stack"， 是目前官方推荐的日志采集方案，我认为也是目前 Kubernetes 生态日志收集的最佳实践。
+EFK 指的是由 Elasticsearch + Fluentd + Kibana 组成的日志采集、存储、展示为一体的日志解决方案，简称 "EFK Stack"， 是目前 Kubernetes 生态日志收集比较推荐的方案。
 ## Elasticsearch
 Elasticsearch 是一个分布式、RESTful 风格的搜索和数据分析引擎，官网对他的定义为：
 
@@ -43,7 +43,7 @@ Dokcer 默认的日志驱动是 `json-file`，该驱动将来自容器的 `stdou
 ![EFK 日志收集架构](../images/efk-stack.png)
 
 ## 环境准备
-在开始之前，请确认已经按照 3.1.1 章节正确安装了 Istio。
+在开始之前，请确认已经按照本书正确安装了 Istio。
 部署 `sleep` 示例应用程序用来发送 `curl` 请求测试。如果启用了 sidecar 自动注入（为命名空间配置了 label:istio-injection=enabled），进入 istio 安装目录，运行命令部署示例应用：
 ```
 $ kubectl apply -f samples/sleep/sleep.yaml
@@ -500,7 +500,7 @@ deployment "kibana" created
 ```
 $ kubectl exec -it $(kubectl get pod -l app=sleep -o jsonpath='{.items[0].metadata.name}') -c sleep -- curl -v httpbin:8000/status/418
 ```
-> 如果你已经按照 3.1.3 章节部署了 `Bookinfo` 示例，你也可以直接通过浏览器访问 /productpage 页面也可以产生访问日志。
+> 如果你已经按照本书部署了 `Bookinfo` 示例，你也可以直接通过浏览器访问 /productpage 页面也可以产生访问日志。
 
 2. 设置 Kibana 的端口转发：
 ```
