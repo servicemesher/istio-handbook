@@ -543,17 +543,10 @@ kubectl get ds -n logging   # there should be no result
 ```
 
 ## 参考
-[Getting Envoy's Access Logs](https://archive.istio.io/v1.5/docs/tasks/observability/logs/access-log/)
-
-[Logging with Mixer and Fluentd](https://archive.istio.io/v1.5/docs/tasks/observability/mixer/logs/fluentd/)
-
-[Elasticsearch Add-On](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/fluentd-elasticsearch)
-
-[Kibana 用户手册](https://www.elastic.co/guide/cn/kibana/current/introduction.html)
-
-[elastic-stack](https://www.elastic.co/cn/elastic-stack)
-
-[fluentd](https://www.fluentd.org/)
-
-
-[在 Kubernetes 上搭建 EFK 日志收集系统](https://www.qikqiak.com/post/install-efk-stack-on-k8s/)
+* [Getting Envoy's Access Logs](https://archive.istio.io/v1.5/docs/tasks/observability/logs/access-log/)
+* [Logging with Mixer and Fluentd](https://archive.istio.io/v1.5/docs/tasks/observability/mixer/logs/fluentd/)
+* [Elasticsearch Add-On](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/fluentd-elasticsearch)
+* [Kibana 用户手册](https://www.elastic.co/guide/cn/kibana/current/introduction.html)
+* [elastic-stack](https://www.elastic.co/cn/elastic-stack)
+* [fluentd](https://www.fluentd.org/)
+* [在 Kubernetes 上搭建 EFK 日志收集系统](https://www.qikqiak.com/post/install-efk-stack-on-k8s/)
