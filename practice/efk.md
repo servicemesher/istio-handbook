@@ -408,9 +408,9 @@ metadata:
           configMap:
             name: fluentd-es-config
   ```
-* 这里声明了两个 `hostPath` 类型的数据卷，路径为日志存储的路径。
-* 将宿主机的 `/var/log` 和 `/var/lib/docker/containers` 挂载到了 Fluentd Pod 内便于 Fluentd 收集日志。
-* 同时将之前配置的 ConfigMap `fluentd-es-config` 作为配置文件挂载到 Pod 的 `/etc/fluent/config.d` 目录，此目录下将生成两个文件：`forward.input.conf` 和 `output.conf` 用作 Fluentd 的配置。
+  * 这里声明了两个 `hostPath` 类型的数据卷，路径为日志存储的路径。
+  * 将宿主机的 `/var/log` 和 `/var/lib/docker/containers` 挂载到了 Fluentd Pod 内便于 Fluentd 收集日志。
+  * 同时将之前配置的 ConfigMap `fluentd-es-config` 作为配置文件挂载到 Pod 的 `/etc/fluent/config.d` 目录，此目录下将生成两个文件：`forward.input.conf` 和 `output.conf` 用作 Fluentd 的配置。
 
 
 ### 部署 Kibana
@@ -472,7 +472,7 @@ metadata:
             name: ui
             protocol: TCP
   ```
-这里将环境变量 `ELASTICSEARCH_URL` 设置为之前部署的 Elasticsearch Service 和端口 `elasticsearch:9200` 。
+  * 这里将环境变量 `ELASTICSEARCH_URL` 设置为之前部署的 Elasticsearch Service 和端口 `elasticsearch:9200` 。
 
 为了方便，你可以将以上代码合并在一个文件内，不同的资源之间使用 `---` 分隔，合并后文件命名为：logging-stack.yaml，执行命令创建所有资源：
 ```
@@ -517,24 +517,24 @@ deployment "kibana" created
 ## 清理
 结束了本章的体验之后，你可以执行以下命令进行清理：
 1. 删除 `sleep` 和 `httpbin`
-```
-$ kubectl delete -f samples/sleep/sleep.yaml
-$ kubectl delete -f samples/httpbin/httpbin.yaml
-```
+  ```
+  $ kubectl delete -f samples/sleep/sleep.yaml
+  $ kubectl delete -f samples/httpbin/httpbin.yaml
+  ```
 
 2. 删除 `EFK`
-```
-kubectl delete -f logging-stack.yaml
-```
+  ```
+  kubectl delete -f logging-stack.yaml
+  ```
 
 3. 确认应用已经停止并删除
-```
-kubectl get pods | grep sleep   # there should be no result
-kubectl get pods | grep httpbin   # there should be no result
-kubectl get pods -n logging   # there should be no result
-kubectl get svc -n logging   # there should be no result
-kubectl get ds -n logging   # there should be no result
-```
+  ```
+  kubectl get pods | grep sleep   # there should be no result
+  kubectl get pods | grep httpbin   # there should be no result
+  kubectl get pods -n logging   # there should be no result
+  kubectl get svc -n logging   # there should be no result
+  kubectl get ds -n logging   # there should be no result
+  ```
 
 ## 参考
 * [Getting Envoy's Access Logs](https://archive.istio.io/v1.5/docs/tasks/observability/logs/access-log/)
