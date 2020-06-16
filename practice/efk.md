@@ -5,12 +5,9 @@ reviewers: ["rootsongjc","GuangmingLuo","malphi"]
 
 # EFK
 EFK 指的是由 Elasticsearch + Fluentd + Kibana 组成的日志采集、存储、展示为一体的日志解决方案，简称 "EFK Stack"， 是目前 Kubernetes 生态日志收集比较推荐的方案。
+
 ## Elasticsearch
-Elasticsearch 是一个分布式、RESTful 风格的搜索和数据分析引擎，官网对他的定义为：
-
->  Elasticsearch is a distributed, RESTful search and analytics engine capable of solving a growing number of use cases.
-
-Elasticsearch 是用 JAVA 开发的，基于 `Apache License 2.0` 开源协议，也是目前最受欢迎的企业级搜索引擎。
+Elasticsearch 是一个分布式、RESTful 风格的搜索和数据分析引擎。使用 JAVA 开发并基于 `Apache License 2.0` 开源协议，也是目前最受欢迎的企业级搜索引擎。
 
 ## Fluentd
 在传统的日志实践中，我们需要用各种不同的手段进行日志的收集和处理（例如 shell 脚本）。Fluentd 的出现，使得不同类型、不同来源的日志都可以通过 Fluentd 来进行统一的日志聚合和处理，同时发送到后端进行存储，并实现了较小资源消耗以及高性能。
@@ -22,8 +19,6 @@ Elasticsearch 是用 JAVA 开发的，基于 `Apache License 2.0` 开源协议�
 
 官网的定义更加准确：
 > Kibana 是一款开源的数据分析和可视化平台，它是 Elastic Stack 成员之一，设计用于和 Elasticsearch 协作。您可以使用 Kibana 对 Elasticsearch 索引中的数据进行搜索、查看、交互操作。您可以很方便的利用图表、表格及地图对数据进行多元化的分析和呈现。
-
-
 
 ## 采集原理
 Dokcer 默认的日志驱动是 `json-file`，该驱动将来自容器的 `stdout` 和 `stderr` 日志都统一以 json 的形式存储到 Node 节点的 `/var/lib/docker/containers/<container-id>/<container-id>-json.log` 目录结构内。
@@ -38,7 +33,6 @@ Dokcer 默认的日志驱动是 `json-file`，该驱动将来自容器的 `stdou
 从 Istio 1.5 开始，旧版本的 Mixer 已被废弃，对应的功能已迁移至 Envoy。使用原来的 Mixer handler 直接上报遥测数据至 Fluentd 的方案已不再推荐。
 
 所以我们将方案调整为：开启 Envoy 的访问日志输出到 `stdout` ，以 DaemonSet 的方式在每一台集群节点部署 Fluentd ，并将日志目录挂载至 Fluentd Pod，实现对 Envoy 访问日志的采集。
-
 
 ![EFK 日志收集架构](../images/efk-stack.png)
 
@@ -192,6 +186,8 @@ metadata:
   name: logging
 ```
 
+接下来，部署 Elasticsearch 服务。
+
 1. 部署 Elasticsearch Service：
 ```
 # Elasticsearch Service
@@ -259,7 +255,6 @@ spec:
       - name: elasticsearch
         emptyDir: {}
 ```
-
 * sidecar.istio.io/inject=false 标识此服务无需 sidecar 注入
 
 请注意，本次实践使用 Deployment 类型创建 Elasticsearch 服务，并且创建了 `emptyDir` 类型的数据卷，当 Pod 从 Node 移除时，`emptyDir` 内的数据将会被删除。
@@ -510,7 +505,6 @@ $ kubectl -n logging port-forward $(kubectl -n logging get pod -l app=kibana -o 
 
 3. 使用浏览器打开：`http://localhost:5601/`，在首页 `index pattern` 输入框输入 `logstash-*`，点击 "Next step"
 ![创建 Kibana Index](../images/setup-index.png)
-
 
 4. 现在，Kibana 已经能够查询到刚才的访问日志了。
 ![Kibana 日志展示](../images/kibana-query-log.png)
