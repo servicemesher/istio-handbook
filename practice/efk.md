@@ -189,73 +189,73 @@ metadata:
 接下来，部署 Elasticsearch 服务。
 
 1. 部署 Elasticsearch Service：
-```
-# Elasticsearch Service
-apiVersion: v1
-kind: Service
-metadata:
-  name: elasticsearch
-  namespace: logging
-  labels:
-    app: elasticsearch
-spec:
-  ports:
-  - port: 9200
-    protocol: TCP
-    targetPort: db
-  selector:
-    app: elasticsearch
-```
+  ```
+  # Elasticsearch Service
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: elasticsearch
+    namespace: logging
+    labels:
+      app: elasticsearch
+  spec:
+    ports:
+    - port: 9200
+      protocol: TCP
+      targetPort: db
+    selector:
+      app: elasticsearch
+  ```
 
 2. 部署 Elasticsearch Deployment：
-```
-# Elasticsearch Deployment
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: elasticsearch
-  namespace: logging
-  labels:
-    app: elasticsearch
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
+  ```
+  # Elasticsearch Deployment
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: elasticsearch
+    namespace: logging
+    labels:
       app: elasticsearch
-  template:
-    metadata:
-      labels:
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
         app: elasticsearch
-      annotations:
-        sidecar.istio.io/inject: "false"
-    spec:
-      containers:
-      - image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.1.1
-        name: elasticsearch
-        resources:
-          # need more cpu upon initialization, therefore burstable class
-          limits:
-            cpu: 1000m
-          requests:
-            cpu: 100m
-        env:
-          - name: discovery.type
-            value: single-node
-        ports:
-        - containerPort: 9200
-          name: db
-          protocol: TCP
-        - containerPort: 9300
-          name: transport
-          protocol: TCP
-        volumeMounts:
+    template:
+      metadata:
+        labels:
+          app: elasticsearch
+        annotations:
+          sidecar.istio.io/inject: "false"
+      spec:
+        containers:
+        - image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.1.1
+          name: elasticsearch
+          resources:
+            # need more cpu upon initialization, therefore burstable class
+            limits:
+              cpu: 1000m
+            requests:
+              cpu: 100m
+          env:
+            - name: discovery.type
+              value: single-node
+          ports:
+          - containerPort: 9200
+            name: db
+            protocol: TCP
+          - containerPort: 9300
+            name: transport
+            protocol: TCP
+          volumeMounts:
+          - name: elasticsearch
+            mountPath: /data
+        volumes:
         - name: elasticsearch
-          mountPath: /data
-      volumes:
-      - name: elasticsearch
-        emptyDir: {}
-```
-* sidecar.istio.io/inject=false 标识此服务无需 sidecar 注入
+          emptyDir: {}
+  ```
+  * sidecar.istio.io/inject=false 标识此服务无需 sidecar 注入
 
 请注意，本次实践使用 Deployment 类型创建 Elasticsearch 服务，并且创建了 `emptyDir` 类型的数据卷，当 Pod 从 Node 移除时，`emptyDir` 内的数据将会被删除。
 
@@ -263,151 +263,151 @@ spec:
 
 ### 部署 Fluentd
 1. 部署 Fluentd Service：
-```
-# Fluentd Service
-apiVersion: v1
-kind: Service
-metadata:
-  name: fluentd-es
-  namespace: logging
-  labels:
-    app: fluentd-es
-spec:
-  ports:
-  - name: fluentd-tcp
-    port: 24224
-    protocol: TCP
-    targetPort: 24224
-  - name: fluentd-udp
-    port: 24224
-    protocol: UDP
-    targetPort: 24224
-  selector:
-    app: fluentd-es
-```
+  ```
+  # Fluentd Service
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: fluentd-es
+    namespace: logging
+    labels:
+      app: fluentd-es
+  spec:
+    ports:
+    - name: fluentd-tcp
+      port: 24224
+      protocol: TCP
+      targetPort: 24224
+    - name: fluentd-udp
+      port: 24224
+      protocol: UDP
+      targetPort: 24224
+    selector:
+      app: fluentd-es
+  ```
 
 2. 生成 Fluentd ConfigMap：
-```
-# Fluentd ConfigMap, contains config files.
-kind: ConfigMap
-apiVersion: v1
-data:
-  forward.input.conf: |-
-    # Takes the messages sent over TCP
-    <source>
-      @id fluentd-containers.log
-      @type tail
-      path /var/log/containers/*.log
-      pos_file /var/log/es-containers.log.pos
-      time_format %Y-%m-%dT%H:%M:%S.%NZ
-      tag raw.kubernetes.*
-      format json
-      read_from_head false
-    </source>
-    <filter **>
-      @id filter_concat
-      @type concat
-      key message
-      multiline_end_regexp /\n$/
-      separator ""
-    </filter>
-    <filter **>
-      @type parser
-      format json # apache2, nginx, etc...
-      key_name log
-      reserve_data false
-    </filter>
-  output.conf: |-
-    <match **>
-       type elasticsearch
-       log_level info
-       include_tag_key true
-       host elasticsearch
-       port 9200
-       logstash_format true
-       # Set the chunk limits.
-       buffer_chunk_limit 2M
-       buffer_queue_limit 8
-       flush_interval 5s
-       # Never wait longer than 5 minutes between retries.
-       max_retry_wait 30
-       # Disable the limit on the number of retries (retry forever).
-       disable_retry_limit
-       # Use multiple threads for processing.
-       num_threads 2
-    </match>
-metadata:
-  name: fluentd-es-config
-  namespace: logging
-```
-**forward.input.conf：**
-* id：日志的唯一标识。
-* type：tail 代表从上次的读取位置不断 tail 读取数据。
-* path：采集日志的位置，这里采集了该目录下所有的日志，如果只需要采集 Envoy 的日志，可以将 path 修改为 `/var/log/containers/*istio-proxy*.log`
-* pos_file：检查点记录文件，用于恢复日志收集。
-* filter：对 Log 内容重新进行处理，以便将日志内容以 key 和 value 的形式发送到 elasticsearch。
-* concat：这里使用 `concat` 插件对多行日志进行处理。
-* reserve_data：发送日志时，仅保留处理后的日志，不保留原日志信息。
+  ```
+  # Fluentd ConfigMap, contains config files.
+  kind: ConfigMap
+  apiVersion: v1
+  data:
+    forward.input.conf: |-
+      # Takes the messages sent over TCP
+      <source>
+        @id fluentd-containers.log
+        @type tail
+        path /var/log/containers/*.log
+        pos_file /var/log/es-containers.log.pos
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+        tag raw.kubernetes.*
+        format json
+        read_from_head false
+      </source>
+      <filter **>
+        @id filter_concat
+        @type concat
+        key message
+        multiline_end_regexp /\n$/
+        separator ""
+      </filter>
+      <filter **>
+        @type parser
+        format json # apache2, nginx, etc...
+        key_name log
+        reserve_data false
+      </filter>
+    output.conf: |-
+      <match **>
+        type elasticsearch
+        log_level info
+        include_tag_key true
+        host elasticsearch
+        port 9200
+        logstash_format true
+        # Set the chunk limits.
+        buffer_chunk_limit 2M
+        buffer_queue_limit 8
+        flush_interval 5s
+        # Never wait longer than 5 minutes between retries.
+        max_retry_wait 30
+        # Disable the limit on the number of retries (retry forever).
+        disable_retry_limit
+        # Use multiple threads for processing.
+        num_threads 2
+      </match>
+  metadata:
+    name: fluentd-es-config
+    namespace: logging
+  ```
+  **forward.input.conf：**
+  * id：日志的唯一标识。
+  * type：tail 代表从上次的读取位置不断 tail 读取数据。
+  * path：采集日志的位置，这里采集了该目录下所有的日志，如果只需要采集 Envoy 的日志，可以将 path 修改为 `/var/log/containers/*istio-proxy*.log`
+  * pos_file：检查点记录文件，用于恢复日志收集。
+  * filter：对 Log 内容重新进行处理，以便将日志内容以 key 和 value 的形式发送到 elasticsearch。
+  * concat：这里使用 `concat` 插件对多行日志进行处理。
+  * reserve_data：发送日志时，仅保留处理后的日志，不保留原日志信息。
 
-**output.conf:**
-* match：** 代表发送所有的日志到 Elasticsearch。
-* type：插件标识，这里配置成 elasticsearch。
-* host/port：配置部署的 elasticsearch 服务的地址和端口。
-* logstash_format：是否以 logstash 格式转发日志数据。
-* buffer：当日志数据发送到目标方失败的时进行缓存，同时也有助于降低磁盘 IO。
+  **output.conf:**
+  * match：** 代表发送所有的日志到 Elasticsearch。
+  * type：插件标识，这里配置成 elasticsearch。
+  * host/port：配置部署的 elasticsearch 服务的地址和端口。
+  * logstash_format：是否以 logstash 格式转发日志数据。
+  * buffer：当日志数据发送到目标方失败的时进行缓存，同时也有助于降低磁盘 IO。
 
 3. 使用 DaemonSet 方式创建 Fluentd 服务：
-```
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: fluentd-es
-  namespace: logging
-  labels:
-    app: fluentd-es
-spec:
-  selector:
-    matchLabels:
+  ```
+  apiVersion: apps/v1
+  kind: DaemonSet
+  metadata:
+    name: fluentd-es
+    namespace: logging
+    labels:
       app: fluentd-es
-  template:
-    metadata:
-      labels:
+  spec:
+    selector:
+      matchLabels:
         app: fluentd-es
-      annotations:
-        sidecar.istio.io/inject: "false"
-    spec:
-      containers:
-      - name: fluentd-es
-        image: quay.io/fluentd_elasticsearch/fluentd:v3.0.2
-        env:
-        - name: FLUENTD_ARGS
-          value: --no-supervisor -q
-        resources:
-          limits:
-            memory: 500Mi
-          requests:
-            cpu: 100m
-            memory: 200Mi
-        volumeMounts:
+    template:
+      metadata:
+        labels:
+          app: fluentd-es
+        annotations:
+          sidecar.istio.io/inject: "false"
+      spec:
+        containers:
+        - name: fluentd-es
+          image: quay.io/fluentd_elasticsearch/fluentd:v3.0.2
+          env:
+          - name: FLUENTD_ARGS
+            value: --no-supervisor -q
+          resources:
+            limits:
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          volumeMounts:
+          - name: varlog
+            mountPath: /var/log
+          - name: varlibdockercontainers
+            mountPath: /var/lib/docker/containers
+            readOnly: true
+          - name: config-volume
+            mountPath: /etc/fluent/config.d
+        terminationGracePeriodSeconds: 30
+        volumes:
         - name: varlog
-          mountPath: /var/log
+          hostPath:
+            path: /var/log
         - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
-          readOnly: true
+          hostPath:
+            path: /var/lib/docker/containers
         - name: config-volume
-          mountPath: /etc/fluent/config.d
-      terminationGracePeriodSeconds: 30
-      volumes:
-      - name: varlog
-        hostPath:
-          path: /var/log
-      - name: varlibdockercontainers
-        hostPath:
-          path: /var/lib/docker/containers
-      - name: config-volume
-        configMap:
-          name: fluentd-es-config
-```
+          configMap:
+            name: fluentd-es-config
+  ```
 * 这里声明了两个 `hostPath` 类型的数据卷，路径为日志存储的路径。
 * 将宿主机的 `/var/log` 和 `/var/lib/docker/containers` 挂载到了 Fluentd Pod 内便于 Fluentd 收集日志。
 * 同时将之前配置的 ConfigMap `fluentd-es-config` 作为配置文件挂载到 Pod 的 `/etc/fluent/config.d` 目录，此目录下将生成两个文件：`forward.input.conf` 和 `output.conf` 用作 Fluentd 的配置。
@@ -415,63 +415,63 @@ spec:
 
 ### 部署 Kibana
 1. 创建 Kibana Service：
-```
-# Kibana Service
-apiVersion: v1
-kind: Service
-metadata:
-  name: kibana
-  namespace: logging
-  labels:
-    app: kibana
-spec:
-  ports:
-  - port: 5601
-    protocol: TCP
-    targetPort: ui
-  selector:
-    app: kibana
-```
+  ```
+  # Kibana Service
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: kibana
+    namespace: logging
+    labels:
+      app: kibana
+  spec:
+    ports:
+    - port: 5601
+      protocol: TCP
+      targetPort: ui
+    selector:
+      app: kibana
+  ```
 
 2. 部署 Kibana Deployment
-```
-# Kibana Deployment
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: kibana
-  namespace: logging
-  labels:
-    app: kibana
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
+  ```
+  # Kibana Deployment
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: kibana
+    namespace: logging
+    labels:
       app: kibana
-  template:
-    metadata:
-      labels:
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
         app: kibana
-      annotations:
-        sidecar.istio.io/inject: "false"
-    spec:
-      containers:
-      - name: kibana
-        image: docker.elastic.co/kibana/kibana-oss:6.1.1
-        resources:
-          # need more cpu upon initialization, therefore burstable class
-          limits:
-            cpu: 1000m
-          requests:
-            cpu: 100m
-        env:
-          - name: ELASTICSEARCH_URL
-            value: http://elasticsearch:9200
-        ports:
-        - containerPort: 5601
-          name: ui
-          protocol: TCP
-```
+    template:
+      metadata:
+        labels:
+          app: kibana
+        annotations:
+          sidecar.istio.io/inject: "false"
+      spec:
+        containers:
+        - name: kibana
+          image: docker.elastic.co/kibana/kibana-oss:6.1.1
+          resources:
+            # need more cpu upon initialization, therefore burstable class
+            limits:
+              cpu: 1000m
+            requests:
+              cpu: 100m
+          env:
+            - name: ELASTICSEARCH_URL
+              value: http://elasticsearch:9200
+          ports:
+          - containerPort: 5601
+            name: ui
+            protocol: TCP
+  ```
 这里将环境变量 `ELASTICSEARCH_URL` 设置为之前部署的 Elasticsearch Service 和端口 `elasticsearch:9200` 。
 
 为了方便，你可以将以上代码合并在一个文件内，不同的资源之间使用 `---` 分隔，合并后文件命名为：logging-stack.yaml，执行命令创建所有资源：
@@ -492,22 +492,22 @@ deployment "kibana" created
 现在，已经成功部署了 `EFK` ，接下来进行验证。
 
 1. 执行命令产生访问日志：
-```
-$ kubectl exec -it $(kubectl get pod -l app=sleep -o jsonpath='{.items[0].metadata.name}') -c sleep -- curl -v httpbin:8000/status/418
-```
-> 如果你已经按照本书部署了 `Bookinfo` 示例，你也可以直接通过浏览器访问 /productpage 页面也可以产生访问日志。
+  ```
+  $ kubectl exec -it $(kubectl get pod -l app=sleep -o jsonpath='{.items[0].metadata.name}') -c sleep -- curl -v httpbin:8000/status/418
+  ```
+  > 如果你已经按照本书部署了 `Bookinfo` 示例，你也可以直接通过浏览器访问 /productpage 页面也可以产生访问日志。
 
 2. 设置 Kibana 的端口转发：
-```
-$ kubectl -n logging port-forward $(kubectl -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
-```
-* 此命令将 Kibaba Pod 的 `5601` 端口转发到 `localhost:5601` ，`&` 代表后台运行。
+  ```
+  $ kubectl -n logging port-forward $(kubectl -n logging get pod -l app=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+  ```
+  * 此命令将 Kibaba Pod 的 `5601` 端口转发到 `localhost:5601` ，`&` 代表后台运行。
 
 3. 使用浏览器打开：`http://localhost:5601/`，在首页 `index pattern` 输入框输入 `logstash-*`，点击 "Next step"
-![创建 Kibana Index](../images/setup-index.png)
+  ![创建 Kibana Index](../images/setup-index.png)
 
 4. 现在，Kibana 已经能够查询到刚才的访问日志了。
-![Kibana 日志展示](../images/kibana-query-log.png)
+  ![Kibana 日志展示](../images/kibana-query-log.png)
 
 ## 生产建议
 由于篇幅原因，本文对 `Fluentd` 并没有做非常细致的配置。如果用于生产环境，读者可以前往 Kubernetes 官方 github 仓库找到完整的 `EFK` 配置来进行部署：
