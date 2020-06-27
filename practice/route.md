@@ -437,6 +437,4 @@ spec:
 - [istio.io / Concepts / Traffic Management](https://istio.io/docs/concepts/traffic-management/)
 - [用 Istio 实现金丝雀部署](https://istio.io/zh/blog/2017/0.1-canary/)
 - [HTTPMatchRequest 参考](https://istio.io/docs/reference/config/networking/virtual-service/#HTTPMatchRequest)
-- [Introducing the Istio v1alpha3 routing API](https://istio.io/blog/2018/v1alpha3-routing/)
-- [Istio中的服务和流量的抽象模型](https://mp.weixin.qq.com/s/-6XiHWj9yE_VkOPsPl4Idw)
 - [Istio的流量管理(概念)(istio 系列二)](https://www.cnblogs.com/charlieroro/p/12869477.html)
