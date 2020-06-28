@@ -71,7 +71,7 @@
   - [集成服务注册中心](practice/integration-registry.md)
     - [Consul](practice/consul.md)
     - [Nacos](practice/nacos.md)
-    - [Eureka](practice/eureka.md)
+    - [Apollo](practice/apollo.md)
   - [对接 API 网关](practice/integration-api-gateway.md)
     - [Envoy](practice/envoy.md)
     - [Kong](practice/kong.md)
