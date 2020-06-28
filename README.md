@@ -13,6 +13,16 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 - 提交建议、勘误、参与撰写：<https://github.com/servicemesher/istio-handbook>
 - 在线阅读：<https://www.servicemesher.com/istio-handbook>
 
+## 快速开始
+
+请访问 ServiceMesher 托管在 [katacoda](https://katacoda.com/istio-handbook) 上的课程。无需手动搭建 Kubernetes 集群，仅需 20 分钟即可快速试用 Istio 1.5 并运行 [Bookinfo](https://istio.io/zh/docs/examples/bookinfo/) 示例，完全免费。
+
+<p align="center">
+<a href="https://katacoda.com/istio-handbook">
+<img src="images/katacoda-logo.png" alt="katacoda" />
+</a>
+</p>
+
 ## 关于本书
 
 本书基于 Istio 1.5 版本编写，起源于 [rootsongjc/istio-handbook](https://github.com/rootsongjc/istio-handbook) 及 ServiceMesher 社区创作的 [Istio 知识图谱](https://github.com/servicemesher/istio-knowledge-map)。
@@ -24,6 +34,23 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 </p>
 
 本书概念图，封面图片[上海静安寺夜景](https://jimmysongio.tuchong.com/24318231/)，[Jimmy Song](https://jimmysong.io) 摄。
+
+## 本书作者
+
+
+| 头像 | GitHub | 姓名 | 头像 | GitHub | 姓名 |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| ![](https://avatars2.githubusercontent.com/u/3328185?s=60&v=4) | [rootsongjc](https://github.com/rootsongjc) | 宋净超 | ![](https://avatars2.githubusercontent.com/u/1321762?s=60&v=4) | [zhaohuabing](https://github.com/zhaohuabing) | 赵化冰 |
+| ![](https://avatars1.githubusercontent.com/u/24563928?s=60&v=4) | [sunny0826](https://github.com/sunny0826) | 郭旭东 | ![](https://avatars3.githubusercontent.com/u/16001996?s=60&v=4) | [GuangmingLuo](https://github.com/GuangmingLuo) | 罗广明 |
+| ![](https://avatars1.githubusercontent.com/u/1208287?s=60&v=4) | [malphi](https://github.com/malphi) | 马若飞 | ![](https://avatars0.githubusercontent.com/u/8215757?s=60&v=4) | [wangfakang](https://github.com/wangfakang) | 王发康 |
+| ![](https://avatars3.githubusercontent.com/u/42396612?s=60&v=4) | [tony-Ma-yami](https://github.com/tony-Ma-yami) | 马博 | ![](https://avatars3.githubusercontent.com/u/730866?s=60&v=4) | [hb-chen](https://github.com/hb-chen) | 陈洪波 |
+| ![](https://avatars1.githubusercontent.com/u/13655991?s=60&v=4) | [dangpf](https://github.com/dangpf) | 党鹏飞 | ![](https://avatars2.githubusercontent.com/u/5086059?s=60&v=4) | [violetgo](https://github.com/violetgo) | 高威 |
+| ![](https://avatars1.githubusercontent.com/u/7353685?s=60&v=4) | [wuti1609](https://github.com/wuti1609) | 马越 | ![](https://avatars0.githubusercontent.com/u/26428832?s=60&v=4) | [Lovnx](https://github.com/Lovnx) | 叶志远 |
+| ![](https://avatars1.githubusercontent.com/u/17958623?s=60&v=4) | [AsCat](https://github.com/AsCat) | 翁扬慧 | ![](https://avatars3.githubusercontent.com/u/18298595?s=60&v=4) | [linda01232003](https://github.com/linda01232003) | 崔晓晴 |
+| ![](https://avatars3.githubusercontent.com/u/12389633?s=60&v=4) | [wbpcode](https://github.com/wbpcode) | 王佰平 |![](https://avatars0.githubusercontent.com/u/13050217?s=60&v=4) | [sunzhaochang](https://github.com/sunzhaochang) | 孙召昌 |
+| ![](https://avatars2.githubusercontent.com/u/463772?s=60&v=4) | [zhongfox](https://github.com/zhongfox) | 钟华 | ![](https://avatars2.githubusercontent.com/u/29272249?s=60&v=4) | [tx19980520](https://github.com/tx19980520) | 谭骁 |
+
+**[认领章节](wg/process.md)并提交 PR，成功合并后即可成为作者，期待你的加入。**
 
 ## 版权许可
 
