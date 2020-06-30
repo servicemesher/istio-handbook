@@ -49,6 +49,7 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 | ![](https://avatars1.githubusercontent.com/u/17958623?s=60&v=4) | [AsCat](https://github.com/AsCat) | 翁扬慧 | ![](https://avatars3.githubusercontent.com/u/18298595?s=60&v=4) | [linda01232003](https://github.com/linda01232003) | 崔晓晴 |
 | ![](https://avatars3.githubusercontent.com/u/12389633?s=60&v=4) | [wbpcode](https://github.com/wbpcode) | 王佰平 |![](https://avatars0.githubusercontent.com/u/13050217?s=60&v=4) | [sunzhaochang](https://github.com/sunzhaochang) | 孙召昌 |
 | ![](https://avatars2.githubusercontent.com/u/463772?s=60&v=4) | [zhongfox](https://github.com/zhongfox) | 钟华 | ![](https://avatars2.githubusercontent.com/u/29272249?s=60&v=4) | [tx19980520](https://github.com/tx19980520) | 谭骁 |
+| ![](https://avatars2.githubusercontent.com/u/8142348?s=60&v=4) | [lyzhang1999](https://github.com/lyzhang1999) | 王炜 | ![](https://avatars3.githubusercontent.com/u/22499672?s=60&v=4) | [Liu-HongYe](https://github.com/Liu-HongYe) | 刘洪晔 |
 
 **[认领章节](wg/process.md)并提交 PR，成功合并后即可成为作者，期待你的加入。**
 
