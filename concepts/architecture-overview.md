@@ -1,10 +1,9 @@
-
+---
 authors: ["linda01232003，AsCat"]
 reviewers: ["rootsongjc "]
-
+---
 
 # 架构解析
-
 
 前文中讲述了 Service Mesh 的基本概念以及 Service Mesh 与 Kubernetes 的关联关系，并且对其进行了对比，同时也提到了 Istio 是一个功能丰富的 Service Mesh 的解决方案。
 
