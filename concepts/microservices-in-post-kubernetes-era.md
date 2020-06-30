@@ -13,7 +13,7 @@ reviewers: ["Guangmingluo"]
 1. Kubernetes、xDS 协议（[Envoy](https://github.com/envoyproxy/envoy)、[MOSN](https://github.com/mosn/mosn) 等）与 Istio 之间又是什么关系？
 1. 到底该不该上 Service Mesh？
 
-这一节我们将试图带您梳理清楚 Kubernetes、xDS 协议以及 Istio Service Mesh 之间的内在联系。此外，本节还将介绍 Kubernetes 中的负载均衡方式，xDS 协议对于 Service Mesh 的意义以及为什么说及时有了 Kubernetes 还需要 Istio。
+这一节我们将试图带您梳理清楚 Kubernetes、xDS 协议以及 Istio Service Mesh 之间的内在联系。此外，本节还将介绍 Kubernetes 中的负载均衡方式，xDS 协议对于 Service Mesh 的意义以及为什么说即使有了 Kubernetes 还需要 Istio。
 
 使用 Service Mesh 并不是说与 Kubernetes 决裂，而是水到渠成的事情。Kubernetes 的本质是通过声明式配置对应用进行生命周期管理，而 Service Mesh 的本质是提供应用间的流量和安全性管理以及可观察性。假如你已经使用 Kubernetes 构建了稳定的微服务平台，那么如何设置服务间调用的负载均衡和流量控制？
 
