@@ -1,22 +1,17 @@
 ---
 authors: ["sunzhaochang","ycliu912"]
-reviewers: ["rootsongjc","GuangmingLuo","ikingye","tony-Ma-yami","malphi"]
+reviewers: ["rootsongjc","GuangmingLuo","ikingye","tony-Ma-yami","malphi"，“wangfakang”]
 ---
 
 # 路由
 
-Istio 的流量路由规则可以让您很容易的控制服务之间的流量和 API 调用。Istio在服务层面提供了断路器，超时，重试等功能，通过这些功能可以简单地实现A/B测试，金丝雀发布，基于百分比的流量分割等，此外还提供了开箱即用的故障恢复功能，用于增加应用的健壮性，以应对服务故障或网络故障。这些功能都可以通过istio的流量管理API，在istio中添加流量配置来实现。
+Istio 的流量路由规则可以让您很容易的控制服务之间的流量和 API 调用。Istio 在服务层面提供了断路器，超时，重试等功能，通过这些功能可以简单地实现 A/B 测试，金丝雀发布，基于百分比的流量分割等，此外还提供了开箱即用的故障恢复功能，用于增加应用的健壮性，以应对服务故障或网络故障。这些功能都可以通过 Istio 的流量管理 API 添加流量配置来实现。
 
-跟其他istio配置一样，流量管理API也使用CRD指定。本小节主要介绍下面几个典型的流量管理API资源，以及这些API的功能和使用示例。
+跟其他 Istio 配置一样，流量管理 API 也使用 CRD 指定。本小节主要介绍下面几个典型的流量管理 API 资源，以及这些 API 的功能和使用示例。
 
 ## VirtualService
 
-VirtualService (虚拟服务) 在增强 Istio 流量管理的灵活性和有效性方面，发挥着至关重要的作用。本小节主要从概念，功能，示例三个方面说明。
-
-
-### 概念
-
-[VirtualService](/docs/reference/config/networking/virtual-service/#VirtualService) 由一组路由规则组成，用于对服务实体（在 Kubernetes 中对应为 Pod）进行寻址。如果有流量命中了某条路由规则，就会将其发送到对应的服务或者服务的一个版本/子集。
+VirtualService (虚拟服务) 在增强 Istio 流量管理的灵活性和有效性方面，发挥着至关重要的作用。[VirtualService](/docs/reference/config/networking/virtual-service/#VirtualService) 由一组路由规则组成，用于对服务实体（在 Kubernetes 中对应为 Pod）进行寻址。如果有流量命中了某条路由规则，就会将其发送到对应的服务或者服务的一个版本/子集。
 
 VirtualService 描述了用户可寻址目标到网格内实际工作负载之间的映射。可寻址的目标服务使用 `hosts` 字段来指定，而网格内的实际负载由每个 `route` 配置项中的 `distination` 字段指定，您将在本节的示例中看到详细的配置说明。
 
@@ -178,17 +173,17 @@ spec:
   
 ## DestinationRule
 
-Destination rule 是istio流量路由功能的重要组成部分。一个 Virtual service 可以看作是如何将流量分发的给定的目的地，然后调用 Destination rule 来配置分发到该目的地的流量。Destination rule 在 Virtual service的路由规则之后起作用(即在virtual service的math->route-destination之后起作用，此时流量已经分发到真实的service上)，应用于真实的目的地。
+Destination rule 是 Istio 流量路由功能的重要组成部分。一个 Virtual service 可以看作是如何将流量分发到给定的目标地址，然后调用 Destination rule 来配置分发到该目标地址的流量。Destination rule 在 Virtual service 的路由规则之后起作用(即在 Virtual service 的 `match` -> `route` -> `destination` 之后起作用，此时流量已经分发到真实的 service 上)，应用于真实的目标地址。
 
 特别地，可以使用 Destination rule 来指定命名的服务子集，例如根据版本对服务的实例进行分组，然后通过 Virtual service 的路由规则中的服务子集将控制流量分发到不同服务的实例中。
 
 Destination rule 允许在调用完整的目标服务或特定的服务子集(如倾向使用的负载均衡模型，TLS 安全模型或断路器)时自定义 Envoy 流量策略。
 
-Istio 默认会使用轮询策略，此外 Istio 也支持如下负载均衡模型，可以在Destination rule 中使用这些模型，将请求分发的特定的服务或服务子集。
+Istio 默认会使用轮询策略，此外 Istio 也支持如下负载均衡模型，可以在 Destination rule 中使用这些模型，将请求分发到特定的服务或服务子集。
 
 - Random：将请求转发到一个随机的实例上
 - Weighted：按照指定的百分比将请求转发到实例上
-- Weighted：按照指定的百分比将请求转发到实例上
+- Least requests：将请求转发到具有最少请求数目的实例上
 
 # DestinationRule 示例
 
@@ -205,21 +200,21 @@ spec:
     loadBalancer:
       simple: RANDOM
   subsets:        
-  - name: v1  #subset1，将流量转发到具有标签version:v1的deployment对应的服务上
+  - name: v1  #subset1，将流量转发到具有标签 version:v1 的 deployment 对应的服务上
     labels:
       version: v1
-  - name: v2  #subset2，将流量转发到具有标签version:v2的deployment对应的服务上,指定负载均衡为轮询
+  - name: v2  #subset2，将流量转发到具有标签 version:v2 的 deployment 对应的服务上,指定负载均衡为轮询
     labels:
       version: v2
     trafficPolicy:
       loadBalancer:
         simple: ROUND_ROBIN
-  - name: v3   #subset3，将流量转发到具有标签version:v3的deployment对应的服务上
+  - name: v3   #subset3，将流量转发到具有标签 version:v3 的 deployment 对应的服务上
     labels:
       version: v3
 ```
 
-每个子集由一个或多个 `labels` 定义，对应 kubernetes 中的对象(如pod)的key/value 对。这些标签定义在k ubernetes 服务的 deployment 的metadata 中，用于标识不同的版本。
+每个子集由一个或多个 `labels` 定义，对应 Kubernetes 中的对象(如 pod )的 key/value 对。这些标签定义在 Kubernetes 服务的 deployment 的 metadata 中，用于标识不同的版本。
 
 除了定义子集外，Destination rule 还定义了该目的地中所有子集的默认流量策略，以及仅覆盖该子集的特定策略。默认的策略定义在 `subset` 字段之上，为 `v1` 和 `v3` 子集设置了随机负载均衡策略，在 `v2` 策略中使用了轮询负载均衡。
 
@@ -227,11 +222,11 @@ spec:
 
 Gateway 用于管理进出网格的流量，指定可以进入或离开网格的流量。Gateway 配置应用于网格边缘的独立的 Envoy 代理上，而不是服务负载的 Envoy 代理上。
 
-与其他控制进入系统的流量的机制(如kubernetes ingress API)不同，Istio gateway 允许利用 Istio 的流量路由的强大功能和灵活性。Istio 的 gateway 资源仅允许配置4-6层的负载属性，如暴露的端口，TLS配置等等，但结合 Istio 的Virtual service，就可以像管理 Istio 网格中的其他数据面流量一样管理Gateway 的流量。
+与其他控制进入系统的流量的机制(如 Kubernetes ingress API)不同，Istio gateway 允许利用 Istio 的流量路由的强大功能和灵活性。Istio 的 gateway 资源仅允许配置 4-6 层的负载属性，如暴露的端口，TLS 配置等等，但结合 Istio 的 Virtual service，就可以像管理 Istio 网格中的其他数据面流量一样管理 Gateway 的流量。
 
-Gateway 主要用于管理 Ingress 流量，但也可以配置 egress gateway。通过egress gateway 可以配置流量离开网格的特定节点，限制哪些服务可以访问外部网络，或通过 egress 安全控制来提高网格的安全性。gateway 可以用于配置为一个纯粹的内部代理。
+Gateway 主要用于管理 Ingress 流量，但也可以配置 egress gateway。通过 egress gateway 可以配置流量离开网格的特定节点，限制哪些服务可以访问外部网络，或通过 egress 安全控制来提高网格的安全性。gateway 可以用于配置为一个纯粹的内部代理。
 
-istio (通过 `istio-ingressgateway` 和 `istio-egressgateway` 参数)提供了一些预配置的gateway代理，`default` profile 下仅会部署 ingress gateway。gateway可以通过部署文件进行部署，也可以单独部署。
+istio (通过 `istio-ingressgateway` 和 `istio-egressgateway` 参数)提供了一些预配置的 Gateway 代理，`default` profile 下仅会部署 ingress gateway。Gateway 可以通过部署文件进行部署，也可以单独部署。
 
 下面是 `default` profile 默认安装的 ingress
 
@@ -241,13 +236,14 @@ NAME                   AGE
 istio-ingressgateway   4d20h
 ```
 
-可以看到该ingress就是一个普通的 pod，该pod仅包含一个 istio-proxy 容器
+可以看到该 ingress 就是一个普通的 pod，该 pod 仅包含一个 istio-proxy 容器
 
 ```bash
 $ kubectl get pod -n istio-system |grep ingress
 istio-ingressgateway-64f6f9d5c6-qrnw2 1/1 Running 0 4d20h
 ```
-下面是一个gateway的例子，用于配置外部HTTPS的ingress流量：
+
+下面是一个 Gateway 的例子，用于配置外部 HTTPS 的 ingress 流量：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -255,10 +251,10 @@ kind: Gateway
 metadata:
   name: ext-host-gwy
 spec:
-  selector:              #指定gateway配置下发的代理，如具有标签app: my-gateway-controller的pod
+  selector:              #指定 gateway 配置下发的代理，如具有标签 app: my-gateway-controller 的 pod
     app: my-gateway-controller
   servers:
-  - port:                #gateway pod暴露的端口信息
+  - port:                #gateway pod 暴露的端口信息
       number: 443
       name: https
       protocol: HTTPS
@@ -281,7 +277,7 @@ metadata:
 spec:
   hosts:
   - ext-host.example.com
-  gateways:        #将gateway "ext-host-gwy"绑定到virtual service "virtual-svc"上
+  gateways:        #将 gateway "ext-host-gwy" 绑定到 virtual service "virtual-svc"上
   - ext-host-gwy
 ```
 
@@ -296,6 +292,7 @@ Istio 支持对接 Kubernetes、Consul 等多种不同的注册中心，控制�
 ### ServiceEntry 示例和属性介绍
 
 对于网格外部的服务，下面的 ServiceEntry 示例表示网格内部的应用通过 https 访问外部的 API。
+
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
@@ -314,6 +311,7 @@ spec:
 
 对于在网格内部但不属于平台服务注册表的服务，使用下面的示例可以将一组在非托管 VM 上运行的 MongoDB 实例添加到 Istio 的注册中心，以便可以将这些服务视为网格中的任何其他服务。
 ```yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
@@ -352,7 +350,7 @@ Istio 提供了三种访问外部服务的方法：
 2. 配置 ServiceEntry 以提供对外部服务的受控访问。这是 Istio 官方推荐使用的方法。
 3. 对于特定范围的 IP，完全绕过 sidecar。仅当出于性能或其他原因无法使用 sidecar 配置外部访问时，才建议使用该配置方法。
 
-这里，我们重点讨论第2种方式，也就是使用 ServiceEntry 完成对网格外部服务的受控访问。
+这里，我们重点讨论第 2 种方式，也就是使用 ServiceEntry 完成对网格外部服务的受控访问。
 
 对于 sidecar 对外部服务的处理方式，istio 提供了两种选项: 
 
@@ -391,7 +389,8 @@ spec:
 
 使用 ServiceEntry 可以使网格内部服务发现并访问外部服务，除此之外，还可以对这些到外部服务的流量进行管理。结合 VirtualService 为对应的 ServiceEntry 配置外部服务访问规则，如请求超时、故障注入等，实现对指定服务的受控访问。
 
-下面的示例就是为外部服务 httpbin.org 设置了超时时间，当请求时间超过3s时，请求就会直接中断，避免因外部服务访问时延过高而影响内部服务的正常运行。由于外部服务的稳定性通常无法管控和监测，这种超时机制对内部服务的正常运行具有重要意义。
+下面的示例就是为外部服务 httpbin.org 设置了超时时间，当请求时间超过 3s 时，请求就会直接中断，避免因外部服务访问时延过高而影响内部服务的正常运行。由于外部服务的稳定性通常无法管控和监测，这种超时机制对内部服务的正常运行具有重要意义。
+
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -409,6 +408,7 @@ spec:
 ```
 
 同样的，我们也可以为 ServiceEntry 设置故障注入规则，为系统测试提供基础。下面的示例表示为所有访问 `httpbin.org` 服务的请求注入一个403错误。
+
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -429,7 +429,7 @@ spec:
 
 ### 小结
 
-本节主要介绍了 VirtualService / DestinationRule / Gateway / ServiceEntry 的概念、功能和一些典型的配置示例。VirtualServce 和 DestinationRule 都是 Istio 流量路由功能的关键部分。Gateway 用于控制南北流量的网关，将 VirtualService 绑定到 Gateway 上，可以控制进入的 HTTP/TCP 流量。通过使用 ServiceEntry，可以使网格内部的服务正常发现和路由到外部服务，并在此基础上，结合 VirtualService 实现请求超时、故障注入等限于篇幅，本节只是做了简要地说明，您可以在小结末尾的参考中查看更多的说明信息和完整的配置示例。
+本小节主要介绍了 VirtualService、DestinationRule、Gateway、 ServiceEntry 的概念、功能和一些典型的配置示例。VirtualServce 和 DestinationRule 都是 Istio 流量路由功能的关键部分。Gateway 是用于控制南北流量的网关，将 VirtualService 绑定到 Gateway 上，可以控制进入的 HTTP/TCP 流量。通过使用 ServiceEntry，可以使网格内部的服务正常发现和路由到外部服务，并在此基础上，结合 VirtualService 实现请求超时、故障注入等功能。限于篇幅，本小节只是做了简要地说明，您可以在小结末尾的参考中查看更多的说明信息和完整的配置示例。
 
 
 ### 参考
@@ -437,4 +437,3 @@ spec:
 - [istio.io / Concepts / Traffic Management](https://istio.io/docs/concepts/traffic-management/)
 - [用 Istio 实现金丝雀部署](https://istio.io/zh/blog/2017/0.1-canary/)
 - [HTTPMatchRequest 参考](https://istio.io/docs/reference/config/networking/virtual-service/#HTTPMatchRequest)
-- [Istio的流量管理(概念)(istio 系列二)](https://www.cnblogs.com/charlieroro/p/12869477.html)
