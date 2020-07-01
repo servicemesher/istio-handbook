@@ -4,18 +4,18 @@ reviewers: ["rootsongjc","GuangmingLuo","malphi"]
 ---
 
 # Zipkin
-Zipkin 是一个分布式跟踪系统，它有助于收集服务的调用关系和服务的调用时序数据，包括收集数据和结果展示。它基于 Google Dapper 论文设计，由 Twitter 实现并基于 Apache 2.0 协议开源。
+Zipkin 是一个分布式跟踪系统，它用于收集服务的调用关系和服务的调用时序数据，包括收集数据和结果展示。它基于 Google Dapper 论文设计，由 Twitter 实现并基于 Apache 2.0 协议开源。
 
 ## 追踪原理
-在分布式系统架构中，用户的一次请求，往往需要经过不同的服务和模块，最终才能够返回请求结果。不同的“微服务”之间，每次调用都会形成一个完整的调用链，组成一个树形结构。
+在分布式系统架构中，用户的一次请求，往往需要经过不同的服务和模块，每次调用都会形成一个完整的调用链，组成一个树形结构。
 ![微服务间调用的树状结构](../images/zipkin-user-invoke-link.png)
 
-这样一颗完整的树，我们称为 `Trace`， 树里的每一个节点，我们称之为 `Span` 。当服务被调用的时，都会为 `Trace` 和 `Span` 生成唯一的 `ID` 标识，通过记录调用发起方 `parentId` ，我们就可以很清晰的将每一个 `Span` 串联起来，形成一条完整的调用链，这是分布式调用链追踪的基本原理。
+这样一颗完整的树，我们称为 `Trace`， 树里的每一个节点，我们称之为 `Span` 。当服务被调用的时，都会为 `Trace` 和 `Span` 生成唯一的 `ID` 标识，从调用发起方 `parentId` 开始，将每一个 Span 串联起来，形成一条完整的调用链，这是分布式调用链追踪的基本原理。
 
-当然，Zipkin 兼容 `OpenTracing` 协议，所以 `Span` 还会记录其他的信息，例如：时间戳、Span 上下文、以及额外的 K/V Tag 等。
+Zipkin 兼容 `OpenTracing` 协议，所以 `Span` 还会记录其他的信息，例如：时间戳、Span 上下文、以及额外的 K/V Tag 等。
 
 ## Envoy-Zipkin 架构
-在 `Istio` 中，`Envoy` 原生支持分布式追踪系统 Zipkin。当请求流量被 `Envoy` Sidecar 拦截时，`Envoy` 会自动为 HTTP Headers 添加 `x-b3` 开头的 Headers 和 `x-request-id`。业务系统在调用下游服务时需要将这些 Headers 信息加入到请求中，下游的 `Envoy` Sidecar 收到请求后，会将 `Span` 上报给 `Zipkin` ，最终由 Zipkin 解析出完整的调用链。
+在 `Istio` 中，`Envoy` 原生支持分布式追踪系统 Zipkin。当第一个请求被 `Envoy` Sidecar 拦截时，`Envoy` 会自动为 HTTP Headers 添加 `x-b3` 开头的 Headers 和 `x-request-id`，业务系统在调用下游服务时需要将这些 Headers 信息加入到请求头中，下游的 `Envoy` Sidecar 收到请求后，会将 `Span` 上报给 `Zipkin` ，最终由 Zipkin 解析出完整的调用链。
 
 详细的过程大致为：
 * 如果请求来源没有 Trace 相关的 Headers，则会在流量进入 POD 之前创建一个 Root Span。
@@ -78,7 +78,7 @@ public Response bookReviewsById(@PathParam("productId") int productId,
 ## 环境准备
 请先按照本书指引使用 `demo` 配置安装 Istio ，并部署 `Bookinfo` 示例应用程序，再进行以下配置：
 
-1. 打开 tracing 功能，并配置 tracing provider 为 Zipkin：
+1. 要启用 tracing 功能，需要配置 tracing provider 为 Zipkin：
     ```
     $ istioctl manifest apply --set values.tracing.enabled=true --set values.tracing.provider=zipkin
     ✔ Istio core installed
@@ -87,7 +87,7 @@ public Response bookReviewsById(@PathParam("productId") int productId,
     ✔ Addons installed
     ✔ Installation complete
     ```
-    此命令会启用“开箱即用”的 Zipkin 演示环境。
+    此命令会启用一个“开箱即用”的 Zipkin 演示环境。
     > 注意，默认采样率为 1%，你可以通过 `--set values.pilot.traceSampling=<Value>` 来配置采样率。Value 范围在 0.0 到 100.0 之间，精度为 0.01 。例如，Value 配置 0.01 意味着 10000 请求中跟踪 1 个请求。
 
 2. 如果你的集群已部署 Zipkin ，你可以直接使用以下命令进行配置：
@@ -101,13 +101,13 @@ public Response bookReviewsById(@PathParam("productId") int productId,
     ```
     * 请将 GATEWAY_URL 替换为 `ingressgateway` 的 IP 地址。
     
-    命令执行完成后，追踪数据已经上报至 Zipkin 了。
+    命令执行完成后，追踪数据就会上报至 Zipkin 了。
 
 
 ## 访问 Zipkin Dashboard
-Zipkin 作为 Istio 的插件，可以通过配置 Ingress Gateway 来进行访问，请参考官方文档获取配置信息：[https://istio.io/latest/docs/tasks/observability/gateways/](https://istio.io/latest/docs/tasks/observability/gateways/)，本文不再赘述。
+Istio 内置的 Zipkin ，可以通过配置 Ingress Gateway 来进行访问，请参考官方文档获取配置信息：[https://istio.io/latest/docs/tasks/observability/gateways/](https://istio.io/latest/docs/tasks/observability/gateways/)，本文不再赘述。
 
-如果 Istio 部署在本地环境，可以使用以下命令配置端口转发，此命令会随机使用一个本地端口作为请求访问端口：
+如果 Istio 部署在本地环境，可以通过 istioctl dashboard 命令访问：
 ```
 $ istioctl dashboard zipkin
 http://localhost:39877
@@ -128,14 +128,14 @@ $ kubectl port-forward svc/tracing 8080:80 -n istio-system
 
 有了 Zipkin，我们能够非常清晰地查看每一个服务的依赖以及每一次请求的时序数据，为我们在庞大的微服务系统里排查延迟问题、调用链异常等问题提供了极大的便利。
 
-最后，需要留意到的是：采集追踪信息并不是对业务毫无侵入性，业务系统需要在调用下游服务时传递用于追踪的 Headers 。在实践中，我们可以将这部分业务逻辑编写至我们的“中间件”或者“拦截器”内，减轻对业务的负担和侵入性。
+最后，需要注意的是：采集追踪信息并不是对业务毫无侵入性，业务系统需要在调用下游服务时传递用于追踪的 Headers 。在实践中，我们可以将这部分业务逻辑编写至我们的“中间件”或者“拦截器”内，减轻对业务的负担和侵入性。
 
 ## 生产建议
 对于生产环境，我们提供以下几点建议：
 1. Istio 提供“开箱即用”的 Zipkin 采用内存的存储方式，Zipkin POD 被销毁后数据随即消失。在生产中需要单独配置持久化存储如：Elasticserach ，具体可参阅 Zipkin 官方文档。
 2. Demo 中 Zipkin 默认采样率为 `1%`，在生产环境中建议根据业务系统的流量大小进行合理配置。
 3. Zipkin 传输层默认使用 HTTP 的方式传输，大规模的使用场景建议使用 Kafka 进行数据传输。
-4. Zipkin 设计初衷是纯粹的追踪系统，为了做到更高性能的追踪数据采集和展示，应尽可能减少 Span 中自定义 K/V 信息，尤其避免将日志信息存存储至 Span 。
+4. Zipkin 的设计初衷是实现一个纯粹的追踪系统，为了做到更高性能的追踪数据采集和展示，应尽可能减少 Span 中自定义 K/V 信息，尤其避免将日志信息存存储至 Span 。
 
 
 ## 参考
