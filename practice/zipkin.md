@@ -135,7 +135,7 @@ $ kubectl port-forward svc/tracing 8080:80 -n istio-system
 1. Istio 提供“开箱即用”的 Zipkin 采用内存的存储方式，Zipkin POD 被销毁后数据随即消失。在生产中需要单独配置持久化存储如：Elasticserach ，具体可参阅 Zipkin 官方文档。
 2. Demo 中 Zipkin 默认采样率为 `1%`，在生产环境中建议根据业务系统的流量大小进行合理配置。
 3. Zipkin 传输层默认使用 HTTP 的方式传输，大规模的使用场景建议使用 Kafka 进行数据传输。
-4. Zipkin 的设计初衷是实现一个纯粹的追踪系统，为了做到更高性能的追踪数据采集和展示，应尽可能减少 Span 中自定义 K/V 信息，尤其避免将日志信息存存储至 Span 。
+4. Zipkin 的设计初衷是实现一个纯粹的追踪系统，为了做到更高性能的追踪数据采集和展示，应尽可能减少 Span 中自定义 K/V 信息，尤其避免将日志信息存储至 Span 。
 
 
 ## 参考
