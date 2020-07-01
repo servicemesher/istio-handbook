@@ -1,6 +1,6 @@
 ---
 authors: ["sunzhaochang","ycliu912"]
-reviewers: ["rootsongjc","GuangmingLuo","ikingye","tony-Ma-yami","malphi"，“wangfakang”]
+reviewers: ["rootsongjc","GuangmingLuo","ikingye","tony-Ma-yami","malphi",“wangfakang”]
 ---
 
 # 路由
