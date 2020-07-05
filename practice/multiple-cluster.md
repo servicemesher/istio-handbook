@@ -13,9 +13,10 @@ istio 在 1.1 后提供了两类多集群的连通的部署模式:
 
 「多控制面」模式，各网格之间服务实例无法自动共享，互相访问不透明. 应用场景有限，实现相对简单。
 
-「单控制面」模式，根据各集群是否属于同一个网络，还可以细分为「单网络单控制面」和「多网络单控制面」。
+「单控制面」模式，根据各集群是否属于同一个网络，还可以细分为「单网络单控制面」和「多网络单控制面」:
 
 「单网络单控制面」模式，支持多 kubernetes 集群融合为一个服务网格，但是该种模式对网络有严格的要求: 需要所有集群处于同一个扁平网络，pod ip 互通且不重叠，使用 VPN 连通多集群网络是常见的一个选项。不过这些网络需求在实际环境可能难以满足，也限制了该模式的应用场景。
+
 「多网络单控制面」模式，同样实现了多 kubernetes 集群融合为一个服务网格，且在网络上没有上述限制，每个多 kubernetes 集群是一个独立的网络，甚至可以分布于不同地域。但其实现也最复杂，且该模式要求开启服务间 mTLS 通信，通信效率上也有一定影响。
 
 ## 多控制面
@@ -96,7 +97,7 @@ dnsConfig:
 
 在多控制面网格拓扑中，每个集群身份都是对等的，对某个集群来说，任何其他集群都是远端集群。kubernetes service 默认使用 `svc.cluster.local` 作为域名后缀，kubernetes 集群内自带的 DNS 服务（KubeDNS 或者 CoreDNS），负责解析 service 域名。
 
-在该模式下，为了区别请求的目的端是本集群服务还是远端集群服务，istio 使用 `svc.cluster.global` 指向远端集群服务。需要理解的是，默认情况下，isito 本身不会影响 kubernetes 集群内的 DSN 条目。不过我们上一步中安装了一个 `istiocoredns`，该组件会负责解析 `svc.cluster.global` 的域名查询。
+在该模式下，为了区别请求的目的端是本集群服务还是远端集群服务，istio 使用 `svc.cluster.global` 指向远端集群服务。默认情况下，isito 本身不会影响 kubernetes 集群内的 DSN 条目。不过我们上一步中安装了一个 `istiocoredns`，该组件会负责解析 `svc.cluster.global` 的域名查询。
 
 ### 配置 ServiceEntry
 
@@ -225,7 +226,7 @@ istio 会结合这些信息，来判断 2 个 pod 是否属于同一个集群，
 
 ### 远端集群安装
 
-```
+```yaml
 apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
@@ -274,7 +275,7 @@ spec:
 
 ### 关于 mTLS 和 AUTO_PASSTHROUGH
 
-通常来说, istio ingress gateway 需要配套指定服务的 VirtualService，用以指定 ingress 流量的后端服务. 但在「多网络模式」中, 该 ingress gateway 需要作为本数据面所有服务的流量入口. 也就是所有服务共享单个 ingress gateway (单个 IP)，这里其实是利用了 TLS 中的 [SNI(Server Name Indication)](https://en.wikipedia.org/wiki/Server_Name_Indication)。
+通常来说，istio ingress gateway 需要配套指定服务的 VirtualService，用以指定 ingress 流量的后端服务. 但在「多网络模式」中，该 ingress gateway 需要作为本数据面所有服务的流量入口. 也就是所有服务共享单个 ingress gateway (单个 IP)，这里其实是利用了 TLS 中的 [SNI(Server Name Indication)](https://en.wikipedia.org/wiki/Server_Name_Indication)。
 
 传统的 ingress gateway 承载的是南北流量(server-client)，这里的 ingress gateway 属于网格内部流量，承载的是东西流量(server-server)。 设置`AUTO_PASSTHROUGH`，可以允许服务无需配置 VirtualService，而直接使用 TLS 中的 SNI 值来表示 upstream，服务相关的 service/subset/port 都可以编码到 SNI 内容中。
 
@@ -314,7 +315,7 @@ stringData:
           token: {{ REMOTE_CLUSTER_TOKEN }}
 ```
 
-secret name 并不重要，pilot 会 watch 所有包含 label `istio/multiCluster: "true"` 的 secret。istio 提供了生成以上 secret 的简化命令，注意生成的远端集群 secret, 最终是 apply 到主集群中：
+secret name 并不重要，pilot 会 watch 所有包含 label `istio/multiCluster: "true"` 的 secret。istio 提供了生成以上 secret 的简化命令，注意生成的远端集群 secret，最终是 apply 到主集群中：
 
 ```shell
 $ istioctl x create-remote-secret --name ${REMOTE_CLUSTER_NAME} --context=${REMOTE_CLUSTER_CTX} | \
@@ -329,7 +330,7 @@ $ istioctl x create-remote-secret --name ${REMOTE_CLUSTER_NAME} --context=${REMO
 
 「单控制面」模式，将多个集群联结为一个统一的服务网格，集群间同名服务自动共享服务实例。这种模式适合于业务联系紧密的多集群，甚至是业务对等的多集群。这些集群间服务互访较多，所有集群共享流控治理规则。可以实现「地域感知路由」、「异地容灾」等高级的网格应用场景。
 
-至于选择「单网络单控制面」还是「多网络单控制面」，更多的是依赖集群间的网络连通现状。「单网络」模式要求集群与集群处于同一个网络平面，pod IP 不重叠且可以直连；如果网络拓扑不满足，那么可以选择「多网络」模式，该模式下每个集群都有一个入口网关，供其他集群访问流量进入，唯一需要考虑的是业务能否接受 mTLS 带来的开销。
+至于选择「单网络单控制面」还是「多网络单控制面」，更多的是依赖集群间的网络连通现状。「单网络」模式要求集群与集群处于同一个网络平面，pod IP 不重叠且可以直连；如果网络拓扑不满足，那么可以选择「多网络」模式，该模式下每个集群都有一个入口网关，供其他集群访问流量进入，不过需要考虑的是业务能否接受 mTLS 带来的开销。
 
 以上是 istio 最常见的多集群模式，istio 还可以实现其他更复杂的拓扑，比如多个远端集群，有部分属于相同网络，另一部分属于不同网络；另外控制面组件还可能以冗余的方式，分布到多个集群，这样可以有多个主集群，用以提高控制面的可用性。不过这些模式对服务网格的理解和运维能力要求更高，用户应该谨慎选型。
 
