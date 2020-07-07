@@ -4,7 +4,7 @@ reviewers: ["rootsongjc","GuangmingLuo","malphi"]
 ---
 
 # Jaeger
-Jaeger 是由 Uber 开源的分布式追踪系统，它采用 Go 语言编写，主要借鉴了 Google Dapper 论文和 Zipkin 的设计，兼容 OpenTracing 以及 Zipkin 追踪格式，目前已成为 CNCF 基金会的开源项目。
+`Jaeger` 是由 Uber 开源的分布式追踪系统，它采用 Go 语言编写，主要借鉴了 `Google Dapper` 论文和 `Zipkin` 的设计，兼容 `OpenTracing` 以及 `Zipkin` 追踪格式，目前已成为 CNCF 基金会的开源项目。
 
 ## Envoy-Jaeger 架构
 `Envoy` 原生支持 `Jaeger`，追踪所需 `x-b3` 开头的 Header 和 `x-request-id` 在不同的服务之间由业务逻辑进行传递，并由 `Envoy` 上报给 `Jaeger`，最终 `Jaeger` 生成完整的追踪信息。
