@@ -85,9 +85,11 @@ $ kubectl port-forward svc/tracing 8080:80 -n istio-system
 ![Jaeger 追踪记录详情](../images/jaeger-detail.png)
 
 `Jaeger` 还能够展示服务依赖，点击顶部的“Dependencies” 菜单获取。
+
 ![Jaeger 请求依赖](../images/jaeger-dependencies.png)
 
 除此之外，`Jaeger` 还有一项强大的功能：对比不同请求的差异。点击顶部的 “Compare” 菜单，输入想要对比的 TraceId 查看差异。
+
 ![Jaeger 请求差异对比](../images/jaeger-compare.png)
 
 `Jaeger` 出生虽然较晚，相比较其他的分布式追踪工具，具有以下特性：
