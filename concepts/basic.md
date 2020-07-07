@@ -1,6 +1,6 @@
 ---
 authors: ["GuangmingLuo"]
-reviewers: [""]
+reviewers: ["rootsongjc"]
 ---
 
 # Service Mesh 基本概念
