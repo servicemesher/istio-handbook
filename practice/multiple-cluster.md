@@ -11,19 +11,19 @@ Istio 在 1.1 后提供了两类多集群的连通的部署模式：
 2. 单控制面，也称为“共享控制面”模式
 
 
-「多控制面」模式，各网格之间服务实例无法自动共享，互相访问不透明. 应用场景有限，实现相对简单。
+「多控制面」模式，各网格之间服务实例无法自动共享，互相访问不透明。应用场景有限，实现相对简单。
 
 「单控制面」模式，根据各集群是否属于同一个网络，还可以细分为「单网络单控制面」和「多网络单控制面」:
 
-「单网络单控制面」模式，支持多 kubernetes 集群融合为一个服务网格，但是该种模式对网络有严格的要求: 需要所有集群处于同一个扁平网络，pod ip 互通且不重叠，使用 VPN 连通多集群网络是常见的一个选项。不过这些网络需求在实际环境可能难以满足，也限制了该模式的应用场景。
+「单网络单控制面」模式，支持多 Kubernetes 集群融合为一个服务网格，但是该种模式对网络有严格的要求: 需要所有集群处于同一个扁平网络，Pod IP 互通且不重叠，使用 VPN 连通多集群网络是常见的一个选项。不过这些网络需求在实际环境可能难以满足，也限制了该模式的应用场景。
 
-「多网络单控制面」模式，同样实现了多 kubernetes 集群融合为一个服务网格，且在网络上没有上述限制，每个多 kubernetes 集群是一个独立的网络，甚至可以分布于不同地域。但其实现也最复杂，且该模式要求开启服务间 mTLS 通信，通信效率上也有一定影响。
+「多网络单控制面」模式，同样实现了多 Kubernetes 集群融合为一个服务网格，且在网络上没有上述限制，每个多 Kubernetes 集群是一个独立的网络，甚至可以分布于不同地域。但其实现也最复杂，且该模式要求开启服务间 mTLS 通信，通信效率上也有一定影响。
 
 ## 多控制面
 
 ![多控制面](../images/multicluster-with-gateways.svg)
 
-多控制面部署模式中，每个 kubernetes 集群中都包含一套独立的 istio 控制面，istio 并不会主动打通各集群间的服务访问，用户需要主动注册集群间互访的服务条目，这些包括设置 DNS 和 gateway，注册 ServiceEntry 等。下面我们以集群 1 访问集群 2 中的 httpbin.bar 服务为例，解析多控制面服务网格连通的核心流程。
+多控制面部署模式中，每个 Kubernetes 集群中都包含一套独立的 istio 控制面，istio 并不会主动打通各集群间的服务访问，用户需要主动注册集群间互访的服务条目，这些包括设置 DNS 和 gateway，注册 ServiceEntry 等。下面我们以集群 1 访问集群 2 中的 httpbin.bar 服务为例，解析多控制面服务网格连通的核心流程。
 
 ### 配置各集群 CA 证书
 
@@ -44,9 +44,9 @@ kubectl create secret generic cacerts -n istio-system \
 
 ### 安装控制面
 
-使用 IstioOperator 在各集群中分别安装控制面：
+使用 `IstioOperator` 在各集群中分别安装控制面：
 
-``` shell
+```bash
 $ istioctl install \
     -f manifests/examples/multicluster/values-istio-multicluster-gateways.yaml
 ```
@@ -86,7 +86,7 @@ spec:
 
 上面的配置会安装一个 `istiocoredns` 服务，用于解析远端服务的 DNS 地址。该服务使用的镜像是 coredns 官方镜像。
 
-`podDNSSearchNamespaces` 配置会影响后续 pod 注入的内容，具体地会调整 pod 的 dnsConfig，该配置将修改 pod `/etc/resolv.conf` 文件中 DNS searches 配置，为 pod 增加了 2 个 DNS 搜索域。
+`podDNSSearchNamespaces` 配置会影响后续 Pod 注入的内容，具体地会调整 Pod 的 dnsConfig，该配置将修改 Pod `/etc/resolv.conf` 文件中 DNS searches 配置，为 Pod 增加了 2 个 DNS 搜索域。
 
 ```yaml
 dnsConfig:
@@ -95,9 +95,9 @@ dnsConfig:
   - default.svc.cluster.global
 ```
 
-在多控制面网格拓扑中，每个集群身份都是对等的，对某个集群来说，任何其他集群都是远端集群。kubernetes service 默认使用 `svc.cluster.local` 作为域名后缀，kubernetes 集群内自带的 DNS 服务（KubeDNS 或者 CoreDNS），负责解析 service 域名。
+在多控制面网格拓扑中，每个集群身份都是对等的，对某个集群来说，任何其他集群都是远端集群。Kubernetes service 默认使用 `svc.cluster.local` 作为域名后缀，Kubernetes 集群内自带的 DNS 服务（KubeDNS 或者 CoreDNS），负责解析 service 域名。
 
-在该模式下，为了区别请求的目的端是本集群服务还是远端集群服务，istio 使用 `svc.cluster.global` 指向远端集群服务。默认情况下，isito 本身不会影响 kubernetes 集群内的 DSN 条目。不过我们上一步中安装了一个 `istiocoredns`，该组件会负责解析 `svc.cluster.global` 的域名查询。
+在该模式下，为了区别请求的目的端是本集群服务还是远端集群服务，istio 使用 `svc.cluster.global` 指向远端集群服务。默认情况下，isito 本身不会影响 Kubernetes 集群内的 DSN 条目。不过我们上一步中安装了一个 `istiocoredns`，该组件会负责解析 `svc.cluster.global` 的域名查询。
 
 ### 配置 ServiceEntry
 
@@ -137,9 +137,9 @@ spec:
 
 ### SNI 感知网关分析
 
-> SNI(Server Name Indication)指定了 TLS 握手时要连接的 主机名。 SNI 协议是为了支持同一个 IP(和端口)支持多个域名
+> SNI（Server Name Indication）指定了 TLS 握手时要连接的主机名。SNI 协议是为了支持同一个 IP（和端口）支持多个域名。
 
-目的网关端口 15443 预设了 SNI 感知的 listener，具体地，从集群 1 中 client 发出的流量拦截到 sidecar 后，sidecar 会将其转换为 mTLS 流量，并带上 SNI 信息(httpbin)转发出去。流量到达集群 2 的 ingress gateway 15443 端口后，该 ingress gateway 会提取 SNI 信息，分析出实际的目的服务为 httpbin 服务，最终转发给集群 2 中 httpbin 服务的 pod。
+目的网关端口 15443 预设了 SNI 感知的 listener，具体地，从集群 1 中 client 发出的流量拦截到 sidecar 后，sidecar 会将其转换为 mTLS 流量，并带上 SNI 信息（httpbin）转发出去。流量到达集群 2 的 ingress gateway 15443 端口后，该 ingress gateway 会提取 SNI 信息，分析出实际的目的服务为 httpbin 服务，最终转发给集群 2 中 httpbin 服务的 pod。
 
 
 ```json
@@ -201,7 +201,7 @@ spec:
 
 ![单控制面](../images/multicluster-with-vpn.svg)
 
-与多控制面网格不同，单控制面网格中的所有集群，共享一个 istio 控制面，单控制面作为流控规则的唯一下发入口，会 watch 所有 kubernetes 集群的服务发现数据，所有集群数据面的 envoy 都会连接单控制面，获得 xDS 信息。
+与多控制面网格不同，单控制面网格中的所有集群，共享一个 istio 控制面，单控制面作为流控规则的唯一下发入口，会 watch 所有 Kubernetes 集群的服务发现数据，所有集群数据面的 Envoy 都会连接单控制面，获得 xDS 信息。
 
 「单网络单控制面」和 「多网络单控制面」的安装流程类似，简述如下。
 
@@ -213,11 +213,11 @@ spec:
 
 ### 主集群安装控制面
 
-我们将控制面所在的 kubernetes 称为主集群，其他集群称为远端集群。
+我们将控制面所在的 Kubernetes 称为主集群，其他集群称为远端集群。
 
 我们使用 IstioOperator 进行安装，安装之前，每个集群都要确定以下 2 个重要的拓扑配置：
 
-* 集群标识：每个集群都需要有一个唯一的集群名，
+* 集群标识：每个集群都需要有一个唯一的集群名；
 * 网络标识：标识集群所属的网络，「单网络模式」中，所有集群的网络标识都相同，「多网络模式」中，某些或者所有集群的网络标识不同。
 
 以上两个配置，会作为 pod 元数据写入到各集群的 sidecar injector 的配置中（configmap `istio-sidecar-injector`），然后再以环境变量的形式注入到 pod 的模板中，分别名为 `ISTIO_META_CLUSTER_ID` 和 `ISTIO_META_NETWORK`。
