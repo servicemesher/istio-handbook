@@ -16,6 +16,7 @@ Jaeger 是由 Uber 开源的分布式追踪系统，它采用 Go 语言编写，
 图中 Front Envoy 指的是第一个接收到请求的 Envoy Sidecar，它会负责创建 Root Span 并追加到请求 Header 内，请求到达不同的服务时，Envoy Sidecar 会将追踪信息进行上报。
 
 `Jaeger` 的内部组件架构与 EFK 日志系统架构有一定相似性：
+
 ![Jaeger 架构图（根据 Jaeger 官方重绘）](../images/jaeger-architecture.png)
 
 `Jaeger` 主要由以下几个部分组成：
