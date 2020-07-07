@@ -53,7 +53,7 @@
       - [ELK](practice/elk.md)
       - [EFK](practice/efk.md)
     - [分布式追踪](practice/distributed-tracing.md)
-      - [Jaeger](practice/Jaeger.md)
+      - [Jaeger](practice/jaeger.md)
       - [Zipkin](practice/zipkin.md)
       - [Skywalking](practice/skywalking.md)
   - [安全](practice/security.md)
