@@ -6,6 +6,17 @@ reviewers: ["rootsongjc","GuangmingLuo","malphi"]
 # Jaeger
 `Jaeger` 是由 Uber 开源的分布式追踪系统，它采用 Go 语言编写，主要借鉴了 `Google Dapper` 论文和 `Zipkin` 的设计，兼容 `OpenTracing` 以及 `Zipkin` 追踪格式，目前已成为 CNCF 基金会的开源项目。
 
+## 术语
+让我们来快速回顾一下 OpenTracing 规范定义的术语。
+
+### Span
+Span 是 `Jaeger` 的逻辑工作单元，具有请求名称、请求开始时间、请求持续时间。Span 会被嵌套并排序以展示服务间的关系。
+
+![Span Context 传递](../images/jaeger-span-service.png)![Spans-Trace 关系](../images/jaeger-time-line.png)
+
+### Trace
+`Jaeger` 在微服务系统中记录的完整的请求执行过程，并显示为 `Trace`， `Trace` 是系统的数据/执行路径。一个端到端的 `Trace` 由一个或多个 `Span` 组成。
+
 ## Envoy-Jaeger 架构
 `Envoy` 原生支持 `Jaeger`，追踪所需 `x-b3` 开头的 Header 和 `x-request-id` 在不同的服务之间由业务逻辑进行传递，并由 `Envoy` 上报给 `Jaeger`，最终 `Jaeger` 生成完整的追踪信息。
 
@@ -19,17 +30,24 @@ reviewers: ["rootsongjc","GuangmingLuo","malphi"]
 
 ![Jaeger 架构图（根据 Jaeger 官方重绘）](../images/jaeger-architecture.png)
 
-`Jaeger` 主要由以下几个部分组成：
+`Jaeger` 主要由以下几个组件构成：
 * Client：Jaeger 客户端，是 OpenTracing API 的具体语言实现，可以为各种开源框架提供分布式追踪工具。
-* Agent：监听在 UDP 端口的守护进程，部署在宿主机或容器内，屏蔽了 Client 和 Collector 之间的细节以及服务发现。用于接收 Client 发送过来的追踪数据，并将数据批量发送至 Collector。
-* Collector：用来接收 Agent 发送的数据，并异步地将数据写入后端存储，Collector 是无状态的。
-* DataBase：后端存储组件，支持内存、Cassandra、Elasticsearch 的存储方式。
+* Agent：监听在 UDP 端口的守护进程，以 Daemonset 的方式部署在宿主机或以 sidecar 方式注入容器内，屏蔽了 Client 和 Collector 之间的细节以及服务发现。用于接收 Client 发送过来的追踪数据，并将数据批量发送至 Collector。
+* Collector：用来接收 Agent 发送的数据，验证追踪数据，并建立索引，最后异步地写入后端存储，Collector 是无状态的。
+* DataBase：后端存储组件，支持内存、Cassandra、Elasticsearch、Kafka 的存储方式。
 * Query：用于接收查询请求，从数据库检索数据并通过 UI 展示。
 * UI：使用 React 编写，用于 UI 界面展示。
 
-在 `Istio` 提供“开箱即用”的追踪环境中，`Jaeger` 部署的 Pod 为 `istio-tracing`，使用 `jaegertracing/all-in-one` 镜像，包含：`Jaeger-agent`、`Jaeger-collector`、`Jaeger-query(UI)` 几个组件。
+在 `Istio` 提供“开箱即用”的追踪环境中，`Jaeger` 的部署方式是 `all-in-on` 的方式。该模式下部署的 Pod 为 `istio-tracing`，使用 `jaegertracing/all-in-one` 镜像，包含：`Jaeger-agent`、`Jaeger-collector`、`Jaeger-query(UI)` 几个组件。
 
 不同的是，`Bookinfo` 的业务代码并没有集成 `Jaeger-client` ，而是由 `Envoy` 将追踪信息直接上报到 `Jaeger-collector`，另外，存储方式默认为内存，随着 Pod 销毁，追踪数据将会被删除。
+
+## 部署方式
+`Jaeger` 的部署方式主要有以下几种：
+* `all-in-one` 部署 - 适用于快速体验 `Jaeger` ，所有追踪数据存储在内存中，不适用于生产环境。
+* `Kubernetes` 部署 - 通过在集群独立部署 `Jaeger` 各组件 manifest 完成，定制化程度高，可使用已有的 Elasticsearch、Kafka 服务，适用于生产环境。
+* `OpenTelemetry` 部署 - 适用于使用 `OpenTelemetry` API 的部署方式。
+* `Windows` 部署 - 适用于 `Windows` 环境的部署方式，通过运行 exe 可执行文件安装和配置。
 
 ## 环境准备
 请先按照本书指引部署 `Bookinfo` 示例应用程序，再进行以下配置：
@@ -59,7 +77,6 @@ reviewers: ["rootsongjc","GuangmingLuo","malphi"]
     命令执行完成后，追踪数据就会上报至 `Jaeger` 了。
 
 ## 访问 Jaeger Dashboard
-`Jaeger` 可以通过配置 Ingress Gateway 来进行访问，请参考官方文档获取配置信息：[https://istio.io/latest/docs/tasks/observability/gateways/](https://istio.io/latest/docs/tasks/observability/gateways/)，本文不再赘述。
 
 如果 Istio 部署在本地环境，可以通过 istioctl dashboard 命令访问：
 ```
@@ -88,7 +105,7 @@ $ kubectl port-forward svc/tracing 8080:80 -n istio-system
 
 ![Jaeger 请求依赖](../images/jaeger-dependencies.png)
 
-除此之外，`Jaeger` 还有一项强大的功能：对比不同请求的差异。点击顶部的 “Compare” 菜单，输入想要对比的 TraceId 查看差异。
+除此之外，从 `Jaeger` 1.7 开始新加入一项强大的功能：对比不同请求的差异。点击顶部的 “Compare” 菜单，输入想要对比的 TraceId 查看差异。
 
 ![Jaeger 请求差异对比](../images/jaeger-compare.png)
 
