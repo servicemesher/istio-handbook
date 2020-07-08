@@ -12,7 +12,7 @@ reviewers: ["rootsongjc","GuangmingLuo","malphi"]
 ### Span
 Span 是 `Jaeger` 的逻辑工作单元，具有请求名称、请求开始时间、请求持续时间。Span 会被嵌套并排序以展示服务间的关系。
 
-![Span Context 传递](../images/jaeger-span-service.png)![Spans-Trace 关系](../images/jaeger-time-line.png)
+![Trace-Span 关系图（根据 Jaeger 官方重绘）](../images/jaeger-trace-span.png)
 
 ### Trace
 `Jaeger` 在微服务系统中记录的完整的请求执行过程，并显示为 `Trace`， `Trace` 是系统的数据/执行路径。一个端到端的 `Trace` 由一个或多个 `Span` 组成。
