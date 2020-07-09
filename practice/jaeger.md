@@ -38,7 +38,7 @@ Span 是 `Jaeger` 的逻辑工作单元，具有请求名称、请求开始时�
 * Query：用于接收查询请求，从数据库检索数据并通过 UI 展示。
 * UI：使用 React 编写，用于 UI 界面展示。
 
-在 `Istio` 提供“开箱即用”的追踪环境中，`Jaeger` 的部署方式是 `all-in-on` 的方式。该模式下部署的 Pod 为 `istio-tracing`，使用 `jaegertracing/all-in-one` 镜像，包含：`Jaeger-agent`、`Jaeger-collector`、`Jaeger-query(UI)` 几个组件。
+在 `Istio` 提供“开箱即用”的追踪环境中，`Jaeger` 的部署方式是 `all-in-one` 的方式。该模式下部署的 Pod 为 `istio-tracing`，使用 `jaegertracing/all-in-one` 镜像，包含：`Jaeger-agent`、`Jaeger-collector`、`Jaeger-query(UI)` 几个组件。
 
 不同的是，`Bookinfo` 的业务代码并没有集成 `Jaeger-client` ，而是由 `Envoy` 将追踪信息直接上报到 `Jaeger-collector`，另外，存储方式默认为内存，随着 Pod 销毁，追踪数据将会被删除。
 
