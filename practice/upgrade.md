@@ -1,6 +1,6 @@
 ---
 authors: ["sunny0826"]
-reviewers: [""]
+reviewers: ["rootsongjc"]
 ---
 
 # 升级
@@ -45,7 +45,7 @@ istio-sidecar-injector-canary   2020-07-07T09:06:24Z
 
 只安装`canary`版本的控制平面并不会对现有的代理造成影响，要升级数据平面，将他们指向新的控制平面，需要在 namespace 中插入`istio.io/rev`标签。
 
-例如，想要要升级`default` namespace 的数据平面，需要添加`istio.io/rev`标签以指向`canary`版本的控制平面，并删除`istio-injection`标签：
+例如，想要升级`default` namespace 的数据平面，需要添加`istio.io/rev`标签以指向`canary`版本的控制平面，并删除`istio-injection`标签：
 
 ```bash
 $ kubectl label namespace default istio-injection- istio.io/rev=canary
