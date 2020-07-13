@@ -12,7 +12,7 @@
 - [Service Mesh 概述](concepts/overview.md)
   - [Service Mesh 基本概念](concepts/basic.md)
   - [后 Kubernetes 时代的微服务](concepts/microservices-in-post-kubernetes-era.md)
-  - [Istio 功能介绍](concepts/features.md)
+  - [Istio 是什么](concepts/istio.md)
 - [架构解析](concepts/architecture-overview.md)
   - [控制平面](concepts/control-plane.md)
     - [Pilot](concepts/pilot.md)
