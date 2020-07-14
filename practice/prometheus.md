@@ -13,7 +13,9 @@ Prometheus通过规则对Kubernetes集群中的数据源做服务发现（Servic
 
 从上图可以看出，Prometheus主要从两种数据源抓取指标：PushGateway和Exporters。PushGateway指的是服务将指标数据主动推给PushGateway服务，Prometheus再异步从PushGateway服务中抓取。而Exporters则主动暴露了HTTP服务接口，Prometheus定时从接口中抓取指标。
 
-而在istio中，各个组件是通过暴露HTTP接口的方式让Prometheus定时抓取的（采用了Exporters的方式）。打开Prometheus页面，在导航栏输入/targets上下文查看Prometheus通过服务发现得到的指标数据源：
+在istio中，各个组件是通过暴露HTTP接口的方式让Prometheus定时抓取的（采用了Exporters的方式）。在Kubernetes集群中，istio安装完成后，会在istio-system的namespace中部署Prometheus，并将istio组件各相关指标的数据源默认配置在Prometheus中。
+
+打开Prometheus页面，在导航栏输入/targets上下文查看Prometheus通过服务发现得到的指标数据源：
 
 ```bash
 http://<Prometheus URL>/targets
