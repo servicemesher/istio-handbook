@@ -58,7 +58,7 @@ $ kubectl get pods --context=minikube
 
 ## 安装 Istio
 
-从 Istio v1.15 版本开始，[使用 helm 安装](https://istio.io/zh/docs/setup/install/helm/)的方式已经废弃，需改用 [istioctl 安装](https://istio.io/zh/docs/setup/install/istioctl/)。
+从 Istio v1.5 版本开始，[使用 helm 安装](https://istio.io/zh/docs/setup/install/helm/)的方式已经废弃，需改用 [istioctl 安装](https://istio.io/zh/docs/setup/install/istioctl/)。
 
 在 [Istio release](https://github.com/istio/istio/releases) 页面下载与操作系统匹配的安装包，这里以 Istio 1.5 版本为例：
 ```bash
