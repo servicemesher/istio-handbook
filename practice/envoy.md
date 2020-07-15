@@ -1,6 +1,6 @@
 ---
 authors: ["wbpcode"]
-reviewers: [""]
+reviewers: ["rootsongjc"]
 ---
 
 # Envoy
@@ -9,16 +9,9 @@ Istio 通过在业务容器之中注入 Sidecar 来实现对微服务集群中�
 
 Istio 会将需要对外暴露的功能和接口注册到 API 网关，然后由 API 网关对外部客户端提供访问内部服务网格的统一入口。API 网关会负责提供外部请求的基础路由、负载均衡、认证鉴权、流量审计等等功能。在绝大部分情况下，API 网关都通过 HTTP 协议对外暴露相关服务。
 
-作为 Istio 服务网格所使用的默认数据面，Envoy 自然也能够胜任 API 网关的角色。实际上，**在 Istio 社区提供的默认部署方案之中，就已经包含了一套以 Envoy 为数据面、Istio 本身为控制面的 API 网关**。在按照社区提供的命令部署 Istio 完成之后，在 istio-system 名称空间下，就可以看到名为 istio-egressgateway 和 istio-ingressgateway 的两个额外的负载，前者用于管控服务网格的出口流量，而后者用于管控服务网格的入口流量，两者都是 Envoy 实例。当然，在大部分场景之中，istio-ingressgateway 更符合本节中 API 网关的角色，所以，接下来本节都将以 istio-ingressgateway 为例进行介绍。
+作为 Istio 服务网格所使用的默认数据面，Envoy 自然也能够胜任 API 网关的角色。实际上，**在 Istio 社区提供的部署方案之中，就已经包含了一套以 Envoy 为数据面、Istio 本身为控制面的 API 网关**。可以通过以下命令查看 Istio 中 Envoy 网关相关组件：
 
 ```bash
-$ istioctl install --set profile=demo
-✔ Istio core installed
-✔ Istiod installed
-✔ Egress gateways installed
-✔ Ingress gateways installed
-✔ Addons installed
-✔ Installation complete
 $ kubectl get deploy -n istio-system
 NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
 grafana                1/1     1            1           91m
@@ -29,6 +22,8 @@ istiod                 1/1     1            1           92m
 kiali                  1/1     1            1           91m
 prometheus             1/1     1            1           91m
 ```
+
+在 istio-system 名称空间下，可以看到名为 istio-egressgateway 和 istio-ingressgateway 的两个额外的负载，前者用于管控服务网格的出口流量，而后者用于管控服务网格的入口流量，两者都是 Envoy 实例。当然，在大部分场景之中，istio-ingressgateway 更符合本节中 API 网关的角色，所以，接下来本节都将以 istio-ingressgateway 为例进行介绍。如果读者目前仍旧没有自己的 Istio 环境，可以按照 [安装与部署](./setup.md) 中教程重新部署一套环境用于亲手实践本节接下来的内容。
 
 ## 预备工作
 
