@@ -76,7 +76,7 @@ e63c67b4-8b1f-4949-93a7-69ad68d93c95::0.0.0.0:15021  # <-- 用于健康检查
 root@$POD_NAME_OF_INGRESS:/# curl localhost:15000/config_dump
 ```
 
-显然，只开启了上述两个端口的 Envoy 目前仍旧不具备路由外部请求的能力。要让 Envoy 网关能够正常工作，接下来必须为 Envoy 网关创建 Gateway 资源。Gateway 可以看作是 Istio 对 Enovy 中监听器资源的一种抽象，也可以认为它就是一个虚拟网关。开发人员可以动态的创建 Gateway，再由 Istio 将 Gateway 转换为 Envoy 相关配置，通过 xDS 协议下发给 Envoy，最后由 Envoy 根据配置创建对应的监听器。
+显然，只开启了上述两个端口的 Envoy 目前仍旧不具备路由外部请求的能力。要让 Envoy 网关能够正常工作，接下来必须为 Envoy 网关创建 Gateway 资源。Gateway 可以看作是 Istio 对 Envoy 中监听器资源的一种抽象，也可以认为它就是一个虚拟网关。开发人员可以动态的创建 Gateway，再由 Istio 将 Gateway 转换为 Envoy 相关配置，通过 xDS 协议下发给 Envoy，最后由 Envoy 根据配置创建对应的监听器。
 
 Gateway 中包含监听端口、协议等配置。下面是一个示例，该示例在 Envoy 网关上打开 80 端口，并代理 HTTP 协议的请求：
 
@@ -173,11 +173,13 @@ $ curl $SERVICE_IP_OF_INGRESS:80/delay/3  -H"host:httpbin.example.com"
 
 如果从 API 网关的本质来看，现在本节已经将 API 网关与 Isito 对接的最核心内容介绍完毕了。API 网关的基础就是请求转发和路由，其他所有衍生出来的特性如限流、鉴权、黑白名单等等都只是在路由的基础之上扩展并通过更加灵活的配置来控制而已。
 
-Virtual Service 本身提供了更多了配置项来对路由做更进一步的配置，比如重试、比如错误注入，都已经算是功能层面的扩展，无碍于网关整体的设计，算是细枝末节。当读者认为普通的路由不能满足需求之时可以再去阅读[社区文档](https://istio.io/latest/docs/reference/config/networking/virtual-service/#VirtualService)来对各个字段做深入了解。
+Virtual Service 本身提供了更多配置项来对路由做更进一步的配置，比如重试、比如错误注入，都已经算是功能层面的扩展，无碍于网关整体的设计，算是细枝末节。当读者认为普通的路由不能满足需求之时可以再去阅读 [Istio 官方文档](https://istio.io/latest/docs/reference/config/networking/virtual-service/#VirtualService)来对各个字段做深入了解。
 
 ## 一个服务
 
-前文已经介绍了如何使用 Gateway 和 Virtual Service 来创建网关监听器以及路由，并且成功实现了一个简单的客户端请求转发。但实际上，仍存在最后一个问题，Envoy 要实现完整的路由转发，必须了解真实后端服务。但是 Gateway 仅仅用于控制监听器，Virtual Service 只包含请求匹配条件以及目标服务的名称。Envoy 数据面是从何处获取了后端服务地址等关键信息的呢？答案仍旧是 Istio。作为网关控制面，几乎所有的 Envoy 配置都由 Istio 通过 xDS 协议下发。Istio 默认会发现 Kubernertes 集群下的所有服务（当然，Istio 自然也可以对接其他服务注册中心来做服务发现，但是那已经超出了本节的内容范畴，所以不做赘述）并下发给 Envoy。Envoy 则根据配置将真实后端服务全部抽象为集群。Envoy 提供了 `/stats` 管理接口用于获取内部监控指标数据。可以通过该接口查看 Enovy 中当前活跃的集群数：
+前文已经介绍了如何使用 Gateway 和 Virtual Service 来创建网关监听器以及路由，并且成功实现了一个简单的客户端请求转发。但实际上，仍存在最后一个问题，Envoy 要实现完整的路由转发，必须了解真实后端服务。但是 Gateway 仅仅用于控制监听器，Virtual Service 只包含请求匹配条件以及目标服务的名称。Envoy 数据面是从何处获取了后端服务地址等关键信息的呢？答案仍旧是 Istio。作为网关控制面，几乎所有的 Envoy 配置都由 Istio 通过 xDS 协议下发。Istio 默认会发现 Kubernertes 集群下的所有服务（Istio 也可以对接其他服务注册中心来做服务发现）并下发给 Envoy。
+
+Envoy 则根据配置将真实后端服务全部抽象为集群。Envoy 提供了 `/stats` 管理接口用于获取内部监控指标数据。可以通过该接口查看 Envoy 中当前活跃的集群数：
 
 ```bash
 root@$POD_NAME_OF_INGRESS:/# curl localhost:15000/stats -s | grep cluster_manager.active_clusters
@@ -221,7 +223,7 @@ root@$POD_NAME_OF_INGRESS:/# curl localhost:15000/stats -s | grep cluster_manage
 cluster_manager.active_clusters: 62
 ```
 
-借助 Istio 的服务发现，Envoy 网关大部分时候都不需要分心去关注后端服务。但是，假如开发人员确实需要对后端服务做一些调整呢，比如同一个服务在集群中同时存在多个负载版本，希望区分开来；又或者针对特定的服务，希望才需特定的负载均衡策略；又或者希望针对后端服务能够自动进行健康检查等等。为了能够应用上述与服务相关的流量治理策略，Istio 提供了名为 Destination Rule 的资源。下面是一个 Destination Rule 示例：
+借助 Istio 的服务发现，Envoy 网关大部分时候都不需要分心去关注后端服务。但是，假如开发人员确实需要对后端服务做一些调整呢，比如同一个服务在集群中同时存在多个负载版本，希望区分开来；又或者针对特定的服务，希望采取特定的负载均衡策略；又或者希望针对后端服务能够自动进行健康检查等等。为了能够应用上述与服务相关的流量治理策略，Istio 提供了名为 Destination Rule 的资源。下面是一个 Destination Rule 示例：
 
 ```bash
 $ kubectl apply -f - <<EOF
@@ -326,11 +328,11 @@ $ curl $SERVICE_IP_OF_INGRESS/anything -H"host:httpbin.example.com"
 }
 ```
 
-本小节简单介绍了 Istio 中对服务的抽象以及  Destination Rule 的简单实践。当然，和 Virtual Service 一样，更多丰富的配置项可以直接阅读[社区文档](https://istio.io/latest/docs/reference/config/networking/destination-rule/)。本书限于篇幅，不能一一详述。
+本小节简单介绍了 Istio 中对服务的抽象以及  Destination Rule 的简单实践。当然，和 Virtual Service 一样，更多丰富的配置项可以直接阅读 [Istio 官方文档](https://istio.io/latest/docs/reference/config/networking/destination-rule/)。本书限于篇幅，不能一一详述。
 
 ## 小结
 
-本节介绍的是 Istio 对接 Envoy API 网关的一些基础内容以及 Istio 中 Gateway、Virtual Service、Destination Rule 三种配置资源与 Envoy 中监听器、路由和集群的映射关系。需要特别说明的是，Envoy 本身并不能算作是完整的 API 网关。Envoy 只是一个 L4/L7 网络代理，作为 Istio 默认网关的数据面，必须要依赖 Istio 才能实现完整的网关功能。在本节的示例当中，网关和服务网格共享了同一套 Istio 控制面。
+本节介绍的是 Istio 对接 Envoy API 网关的一些基础知识以及 Istio 中 Gateway、Virtual Service、Destination Rule 三种配置资源与 Envoy 中监听器、路由和集群的映射关系。需要特别说明的是，Envoy 本身并不能算作是完整的 API 网关。Envoy 只是一个 L4/L7 网络代理，作为 Istio 默认网关的数据面，必须要依赖 Istio 才能实现完整的网关功能。在本节的示例当中，网关和服务网格共享了同一套 Istio 控制面。
 
 由于服务网格的无侵入，API 网关可以不感知 Istio 并且与 Istio 完全独立。如 Gloo、Ambassador 等基于 Envoy 的其他 API 网关同样可以和 Istio 有很好的配合。有兴趣的读者可以做更进一步的了解。
 
