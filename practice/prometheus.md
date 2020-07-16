@@ -9,7 +9,7 @@ reviewers: [""]
 Prometheus 是一款开源的、自带时序数据库的监控告警系统。目前，Prometheus 已成为 Kubernetes 集群中监控告警系统的标配。Prometheus 的架构如下图所示：
 
 ![Prometheus Architecture](../images/promethues-architecture.png)
-Prometheus 通过规则对 Kubernetes 集群中的数据源做服务发现（Service Dicovery），再从数据源中抓取数据，存在它的时序数据库 TSDB 中。再根据配置的告警规则，触发告警条件后，将数据推给 AlertManager 服务，做告警服务的推送。同时，Prometheus中的数据也暴露了 HTTP 接口，通过 PromQL（一种特定的查询语法）可以将收集的数据查出，并展示出来。
+Prometheus 通过规则对 Kubernetes 集群中的数据源做服务发现（Service Dicovery），再从数据源中抓取数据，保存在它的时序数据库 TSDB 中。再根据配置的告警规则，将数据推给 AlertManager 服务，做告警信息的推送。同时，Prometheus 中也暴露了 HTTP 指标查询接口，通过 PromQL（一种特定的查询语法）可以将收集的数据查询并展示出来。
 
 从上图可以看出，Prometheus 主要从两种数据源抓取指标：PushGateway 和 Exporters。PushGateway 指的是服务将指标数据主动推给 PushGateway 服务，Prometheus 再异步从 PushGateway 服务中抓取。而 Exporters 则主动暴露了 HTTP 服务接口，Prometheus 定时从接口中抓取指标。
 
@@ -63,7 +63,7 @@ Prometheus 格式的指标数据由两行组成：
 envoy_listener_server_ssl_socket_factory_ssl_context_update_by_sds{listener_address="10.244.0.43_9080"}
 ```
 ![prometheus graph](../images/promethues-promql.png)
-以上是 Prometheus 的简介和基本用法
+
 
 ## Prometheus 基本配置
 
