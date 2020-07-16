@@ -192,7 +192,7 @@ data:
     ...
 ```
 
-修改完成后保存，Prometheus 的配置支持热更新，我们只需要给 Prometheus 加上 --web.enable-lifecycl启动参数
+修改完成后保存，Prometheus 的配置支持热更新，我们只需要给 Prometheus 加上 --web.enable-lifecycle 启动参数
 
 
 ```bash
@@ -226,11 +226,11 @@ http://<Prometheus URL>/config
 
 
 
-以上主要介绍了 Kubernetes 集群中 Prometheus 的基本配置，以及解释了在 Istio 安装完成后，其自带的 Pormetheus 默认对 Istio 各组件做了服务发现、指标标签修改等配置，最后演示了如何对 Prometheus 的配置做修改和热更新。
+本小节主要介绍了 Kubernetes 集群中 Prometheus 的基本配置，以及解释了在 Istio 安装完成后，其自带的 Pormetheus 默认对 Istio 各组件做了服务发现、指标标签修改等配置，最后演示了如何对 Prometheus 的配置做修改和热更新。
 
 ## Prometheus 中 Istio 的相关指标
 
-我们回到最开始提到的 Promehteus 的targets页面
+我们回到最开始提到的 Promehteus 的 targets 页面
 
 ![prometheus targets](../images/promethues-target.png)
 
