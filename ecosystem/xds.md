@@ -70,11 +70,11 @@ DiscoveryRequest 是结构化的请求，它为某个 Envoy 请求包含了某�
 | 属性名 | 类型 | 作用 |
 |:-:|:-:|:-:|
 |VersionInfo|string | 成功加载的资源版本号，首次为空 |
-|Node|*core.Node | 发起请求的节点信息，如位置信息等元数据 |
+|Node|`*core.Node` | 发起请求的节点信息，如位置信息等元数据 |
 |ResourceNames|[]string | 请求的资源名称列表，为空表示订阅所有的资源 |
 |TypeUrl|string | 资源类型 |
 |ResponseNonce|string|ACK/NACK 特定的 response|
-|ErrorDetail|*rpc.Status | 代理加载配置失败，ACK 为空 |
+|ErrorDetail|`*rpc.Status` | 代理加载配置失败，ACK 为空 |
 
 ### DiscoveryResponse
 
@@ -118,13 +118,13 @@ nonce: A
 
 如果更新被成功应用，version_info 将如图所示置为 X：
 
-![xds-ack](../images/xds-ack.svg)
+![xDS ACK](../images/xds-ack.png)
 
 #### NACK
 
 如果 Envoy 拒绝了配置更新 X，那么会返回具体的 error_detail 以及之前的版本号，下图中为空。
 
-![xds-nack](../images/xds-nack.svg)
+![xDS NACK](../images/xds-nack.png)
 
 对于 xDS 客户端来说，每当收到 DiscoveryResponse 时都应该进行 ACK 或 NACK。ACK 标识成功的配置更新，并且包含来自 DiscoveryResponse 的 version_info，而 NACK 标识失败的配置更新，并且包含之前的 version_info。只有 NACK 应该有 error_detail 字段。
 
@@ -161,11 +161,11 @@ Envoy 在启动时会和 Pilot 建立全双工的长链接，这就为实现双�
 
 在下面第一个例子中，客户端收到第一个更新并且返回 ACK，而第二次更新失败返回了 NACK，之后 xDS 客户端自发请求 'wc' 资源：
 
-![xds-incremental](../images/xds-incremental.svg)
+![增量 xDS](../images/xds-incremental.png)
 
 在网络重连以后，因为并没有对之前的状态进行保存，增量 xDS 客户端需要向服务器告知它已拥有的资源从而避免重复发送：
 
-![xds-incremental-reconnect](../images/xds-incremental-reconnect.svg)
+![xDS 增量重连](../images/xds-incremental-reconnect.png)
 
 ### 最终一致性
 
@@ -174,7 +174,7 @@ Envoy 在启动时会和 Pilot 建立全双工的长链接，这就为实现双�
 因为 Envoy xDS API 是满足最终一致性，部分流量可能在更新时被丢弃。比如只有集群 X 可以通过 CDS/EDS 发现，那么当引用集群 X 的路由配置更新时，并且在 CDS/EDS 更新前将配置指向集群 Y，那么在 Envoy 实例获取配置前的部分流量会被丢弃。
 
 对于一些应用来说可以接受暂时的流量丢弃，在客户端或者其他 Envoy Sidecar 的重试会掩盖这次丢弃。对于其它无法忍受数据丢弃的场景来说，流量丢弃可以通过更新对集群 X 和 Y 的 CDS/EDS 来避免，然后 RDS 更新里将 X 指向 Y，并且 CDS/EDS 更新中丢弃集群 X。
- 
+
 通常为了避免丢弃，更新的顺序应该遵循 make before break 规则，即：
 * CDS 更新应该被最先推送；
 * 对相应集群的 EDS 更新必须在 CDS 更新后到达；
