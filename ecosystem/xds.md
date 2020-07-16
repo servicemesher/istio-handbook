@@ -15,7 +15,7 @@ xDS 协议是 “X Discovery Service” 的简写，这里的 “X” 表示它�
 
 在 Pilot 和 Envoy 通信的场景中，xDS 协议是基于 gRPC 实现的传输协议，即 Envoy 通过 gRPC streaming 订阅 Pilot 的资源配置。Pilot 借助 ADS 对 API 更新推送排序的能力，按照 CDS-EDS-LDS-RDS 的顺序串行分发配置。
 
-![xds-pilot-envoy-arch](../images/xds-pilot-envoy.png)
+![xDS 交互](../images/xds-pilot-envoy.png)
 
 图中的 ADS 将 xDS 所有的协议都聚合到一起，即上文提到的 CDS、EDS、LDS 和 RDS 等，Envoy 通过这些 API 可以动态地从 Pilot 获取对 Cluster（集群）、Endpoint（集群成员）、Listener（监听器）和 Route（路由）等资源的配置。下表整理了主要的 xDS API：
 
@@ -61,7 +61,7 @@ EDS，CDS 等每个独立的服务都对应了不同的 gRPC 服务名称。对�
 
 作为 Pilot 和 Envoy 之间通信协议的 xDS，可以通过两种方式实现：gRPC 和 REST，无论哪种方法都是通过 xDS API 发送 DiscoveryRequest 请求，然后解析响应 DiscoveryResponse 中包含的配置信息并动态加载。
 
-![xds-envoy-pilot-flow](../images/xds-envoy-pilot-flow.png)
+![xDS 协议流程](../images/xds-envoy-pilot-flow.png)
 
 ### DiscoveryRequest
 
