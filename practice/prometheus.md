@@ -292,15 +292,15 @@ go_goroutines 41
 
 ![查看 Istio 组下的面板](../images/prometheus-grafana-istio-group.png)
 
-在 Istio 分组中有8块面板（Dashboard），分别对应了上文在 Prometheus 中看到的 Istio 相关组件的指标信息，我们选择其中的 Istio Citadel Dashboard 查看具体的面板信息，发现 Citadel 相关指标信息都以图表的形式展示了出来
+在 Istio 分组中有8块面板（Dashboard），分别对应了上文在 Prometheus 中看到的 Istio 相关组件的指标信息，我们选择其中的 Istio Citadel Dashboard 查看具体的面板信息，发现 Citadel 相关指标信息都以图表的形式展示了出来：
 
 ![查看 citadel 组件面板](../images/prometheus-grafana-citadel.png)
 
-那么要怎么根据图表找到对应的 Prometheus 指标和查询语句呢？以上图的第一个面板 CPU 为例，点击面板中的 CPU 标题，出现下拉框，点击 Edit 按钮。
+那么要怎么根据图表找到对应的 Prometheus 指标和查询语句呢？以上图的第一个面板 CPU 为例，点击面板中的 CPU 标题，出现下拉框，点击 Edit 按钮：
 
 ![编辑 citadel 组件面板](../images/prometheus-grafana-citadel-edit.png)
 
-跳转到了编辑页，这里可以对指标的查询条件、面板属性进行编辑。我们看到页面的下半部分就是对应的 Prometheus 指标查询语句
+跳转到了编辑页，这里可以对指标的查询条件、面板属性进行编辑，我们看到页面的下半部分就是对应的 Prometheus 指标查询语句：
 
 ![citadel 组件面板编辑页](../images/prometheus-grafana-citadel-edit-page.png)
 
