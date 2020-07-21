@@ -286,13 +286,13 @@ go_goroutines 41
 
 手动在 Prometheus 中输入指标名查询指标的值看起来很方便，但在 Istio 中有上百个指标，一个一个查询显得非常繁琐，有没有更加便捷的方式从 Prometheus 中获取到我们想要的数据呢？答案是肯定的，Istio 安装时帮我们装了一款大规模指标数据的可视化展现工具——Grafana，它通过采集 Prometheus 提供的指标数据，绘制成可视化的面板，大大提高了指标数据的可读性。关于它的详细介绍和使用方式在 Grafana 的章节中会有说明，这里简单带大家体验一下。
 
-我们打开 Grafana 页面，点击左上角的 Home 按钮查看名为 Istio 组下的面板：
+我们打开 Grafana 页面，点击左上角的 Home 按钮查看名为 Istio 分组下的面板：
 
 ![Grafana 主页](../images/prometheus-grafana-home.png)
 
 ![查看 Istio 组下的面板](../images/prometheus-grafana-istio-group.png)
 
-在 Istio 组中有8块面板（Dashboard），分别对应了上文在 Prometheus 中看到的 Istio 相关组件的指标信息，我们选择其中的 Istio Citadel Dashboard 查看具体的面板信息，发现 Citadel 相关指标信息都以图表的形式展示了出来。
+在 Istio 分组中有8块面板（Dashboard），分别对应了上文在 Prometheus 中看到的 Istio 相关组件的指标信息，我们选择其中的 Istio Citadel Dashboard 查看具体的面板信息，发现 Citadel 相关指标信息都以图表的形式展示了出来
 
 ![查看 citadel 组件面板](../images/prometheus-grafana-citadel.png)
 
@@ -300,7 +300,7 @@ go_goroutines 41
 
 ![编辑 citadel 组件面板](../images/prometheus-grafana-citadel-edit.png)
 
-跳转到了编辑页，这里可以对图表的查询条件、面板属性进行编辑，我们看到页面的下半部分就是对应的 Prometheus 指标查询语句。
+跳转到了编辑页，这里可以对指标的查询条件、面板属性进行编辑。我们看到页面的下半部分就是对应的 Prometheus 指标查询语句
 
 ![citadel 组件面板编辑页](../images/prometheus-grafana-citadel-edit-page.png)
 
