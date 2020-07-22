@@ -1,11 +1,10 @@
 ---
 authors: ["lianghao"]
-reviewers: [""]
+reviewers: ["rootsongjc"]
 ---
 
 # Prometheus
 
-## Prometheus 简介
 Prometheus 是一款开源的、自带时序数据库的监控告警系统。目前，Prometheus 已成为 Kubernetes 集群中监控告警系统的标配。Prometheus 的架构如下图所示：
 
 ![Prometheus 架构图](../images/promethues-architecture.png)
@@ -24,9 +23,8 @@ Prometheus 通过规则对 Kubernetes 集群中的数据源做服务发现（Ser
 http://<Prometheus URL>:9090/targets
 
 ```
+
 ![查看 Prometheus 数据源页面](../images/promethues-target.png)
-
-
 
 点开其中的 envoy-stats，可以看到该数据源中有 Endpoint、State、Labels、Last Scrape、Scrape Duration、Error 六列：
 
@@ -38,6 +36,7 @@ http://<Prometheus URL>:9090/targets
  - Error：获取数据源信息失败的原因；
 
 ![查看 Prometheus 数据源详情页](../images/prometheus-target-detail.png)
+
 在集群中可以直接访问上图中 envoy-stats 这个 target 中第一行的 Endpoint URL（URL中的IP为Pod在集群中的 IP，因此在集群外部无法访问），得到如下 Prometheus 格式的指标数据：
 
 ```bash
@@ -58,6 +57,7 @@ envoy_cluster_client_ssl_socket_factory_ssl_context_update_by_sds{cluster_name="
 envoy_listener_server_ssl_socket_factory_ssl_context_update_by_sds{listener_address="[fe80__48ad_9ff_feee_915f]_9080"} 0
 
 ```
+
 Prometheus 格式的指标数据由两行组成：
 - 第一行以#号开头，是对指标的说明，包括指标名、指标类型；
 - 第二行为指标具体的数据，一行代表一个监控项，以Key-Value形式返回。Key为指标名，Value为指标值，指标名后面的花括号则标识指标带有的标签（Label），例如要查询 envoy_cluster_client_ssl_socket_factory_ssl_context_update_by_sds 这个指标中标签为 listener_address，且标签值为10.244.0.43_9080的数据，打开 Promehteus 的 Graph 界面，输入以下 PromQL 语句，点击 Execute 查询即可筛选出匹配的数据（PromQL 是一种查询 Prometheus 指标数据的语法）；
@@ -65,6 +65,7 @@ Prometheus 格式的指标数据由两行组成：
 ```
 envoy_listener_server_ssl_socket_factory_ssl_context_update_by_sds{listener_address="10.244.0.43_9080"}
 ```
+
 ![Prometheus 数据查询示例](../images/promethues-promql.png)
 
 
@@ -78,6 +79,7 @@ $ kubectl exec -it prometheus-7cb88b5945-8jbkf -n istio-system sh
 /prometheus $ ls /etc/prometheus/
 prometheus.yml
 ```
+
 打开 prometheus.yml 查看 Prometheus 的配置（也可以直接打开 istio-system 命名空间下的名为 Prometheus 的 ConfigMap 查看）。
 
 ```bash
@@ -116,6 +118,7 @@ scrape_configs:
     target_label: __address__  
     ...
 ```
+
 由于配置文件太长，这里截取了开头的一部分。我们发现 Prometheus 中已经帮我们配置好了从 Istio 组件中抓取指标数据的各项配置规则，那么这些配置具体是什么意思呢？
 Prometheus 的配置文件主要由一下几部分组成：
 
@@ -165,6 +168,7 @@ scrape_configs:
     replacement: $1:15090
     target_label: __address__  
 ```
+
 配置文件中提到的内置标签替换是怎么回事呢？我们先回到 Prometheus 的 targets 页面，把鼠标指针放在 Labels 列中的蓝色标签上，发现弹出了一些以双下划线开头的标签，这就是上面所提到的内置标签。因为 Prometheus 天然兼容 Kubernetes，当它部署在 Kubernetes 集群中，且通过 kubernetes_sd_configs 这种方式配置服务发现时，会默认给各指标加上 Kubernetes 相关的内置标签，如：该指标服务所在的计算节点名、Pod IP、命名空间、暴露的端口等。
 
 ![查看 Prometheus 内置标签](../images/prometheus-internal-label.png)
@@ -215,19 +219,19 @@ $ kubectl edit deployment prometheus -n istio-system
 
 ```
 
-
 然后再调用 Prometheus 的 HTTP API 即可更新配置：
 
 ```bash
 $ curl -X POST http://<Prometheus URL>:9090/-/reload
 ```
+
 打开 Prometheus 的 config 页面检查配置是否生效：
+
 ```bash
 http://<Prometheus URL>/config
 ```
+
 ![Prometheus 配置更新检查](../images/prometheus-update-config-check.png)
-
-
 
 本小节主要介绍了 Kubernetes 集群中 Prometheus 的基本配置，以及解释了在 Istio 安装完成后，其自带的 Pormetheus 默认对 Istio 各组件做了服务发现、指标标签修改等配置，最后演示了如何对 Prometheus 的配置做修改和热更新。
 
@@ -252,8 +256,6 @@ http://<Prometheus URL>/config
 
 ![查看 citadel 组件数据源列表](../images/prometheus-citadel-metrics.png)
 
-
-
 ```bash
 $ curl http://10.244.0.48:15014/metrics
 # HELP citadel_secret_controller_svc_acc_created_cert_count The number of certificates created due to service account creation.
@@ -275,7 +277,6 @@ go_gc_duration_seconds_count 7935
 # TYPE go_goroutines gauge
 go_goroutines 41
 ...
-
 ```
 
 我们可以看到 citadel 组件提供的指标中创建证书和 go 进程相关的指标数据，指标的格式上文中已有说明，这里不再赘述。
@@ -312,8 +313,8 @@ go_goroutines 41
 
 ## 参考
 
-- [istio 官方文档](https://istio.io/latest/docs/reference/commands/)
-- [overview - prometheus.io](https://prometheus.io/docs/introduction/overview/)
+- [Istio 官方文档](https://istio.io/latest/docs/reference/commands/)
+- [Prometheus 简介](https://prometheus.io/docs/introduction/overview/)
 
 
 
