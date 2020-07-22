@@ -53,7 +53,7 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 | ![](https://avatars2.githubusercontent.com/u/463772?s=60&v=4) | [zhongfox](https://github.com/zhongfox) | 钟华 | ![](https://avatars2.githubusercontent.com/u/29272249?s=60&v=4) | [tx19980520](https://github.com/tx19980520) | 谭骁 |
 | ![](https://avatars2.githubusercontent.com/u/8142348?s=60&v=4) | [lyzhang1999](https://github.com/lyzhang1999) | 王炜 | ![](https://avatars3.githubusercontent.com/u/22499672?s=60&v=4) | [Liu-HongYe](https://github.com/Liu-HongYe) | 刘洪晔 |
 | ![](https://avatars3.githubusercontent.com/u/15208260?s=60&v=4) | [ycliu912](https://github.com/ycliu912) | 刘艳超 | ![](https://avatars3.githubusercontent.com/u/22319610?s=60&v=4) |[mlycore](https://github.com/mlycore)|苗立尧|
-| ![](https://avatars0.githubusercontent.com/u/61925099?s=60&v=4) | [mcsos](https://github.com/mcsos) | 郭栋 | ![](https://avatars1.githubusercontent.com/u/14137033?s=60&v=4) |[lianghao208](https://github.com/lianghao208) |粱昊 |
+| ![](https://avatars0.githubusercontent.com/u/61925099?s=60&v=4) | [mcsos](https://github.com/mcsos) | 郭栋 | ![](https://avatars1.githubusercontent.com/u/14137033?s=60&v=4) |[lianghao208](https://github.com/lianghao208) |梁豪 |
 
 **[认领章节](wg/process.md)并提交 PR，成功合并后即可成为作者，期待你的加入。**
 
