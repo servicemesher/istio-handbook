@@ -13,6 +13,61 @@ Grafana 是一款开源的指标数据可视化工具，有着功能齐全的度
 
 ## Grafana 的使用和配置
 
+### 安装
+
+在安装 Istio 时，我们使用 istioctl 的方式进行安装，如果在 istioctl 中使用了 demo 选项进行安装，Grafana 组件将会默认被安装：
+
+```bash
+$ istioctl manifest apply --set profile=demo
+```
+
+如果使用了默认选项进行安装，则需要指定 --set addonComponents.grafana.enabled=true 参数：
+
+```bash
+$ istioctl manifest apply --set addonComponents.grafana.enabled=true
+```
+
+### 访问主页
+
+Istio 安装完成后，想要在浏览器中访问 Grafana 主页，可以将 Grafana 的 service 设置为 NodePort类型：
+
+```bash
+# 设置 Grafana 的 service 为 NodePort 类型
+$ kubectl edit service grafana -n istio-system
+kind: Service
+metadata:
+  ...
+  labels:
+    app: grafana
+    release: istio
+  name: grafana
+  namespace: istio-system
+  ...
+spec:
+  clusterIP: 10.96.188.25
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: http
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: grafana
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
+# Grafana 的 service 已经设置为 NodePort 类型
+$ kubectl get service grafana -n istio-system
+NAME      TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+grafana   NodePort   10.96.188.25   <none>        3000:31652/TCP   25d
+
+```
+
+设置为 NodePort 类型后，集群为 Grafana 服务随机分配了一个3万以上的端口，同时集群中的所有节点的 kube-proxy 进程都监听了这个端口（这里我的集群为我分配了31652端口），此时我们打开浏览器，访问集群中的任意一台机器的这个端口，都能访问到 Grafana 服务。
+
+也可以为 Grafana 服务配置 Ingressgateway：
+
 ### 登录设置
 
 我们打开 Grafana 主页，发现没有跳转到登录页面，可以直接访问：
@@ -214,7 +269,7 @@ istio-mesh-dashboard.json         istio-workload-dashboard.json
 
 ![创建可视化面板](../images/grafana-new-dashboard.png)
 
-进入面板的 Query 页面，在 Query 旁的数据源下拉框中选择 Istio 的 Prometheus 数据源，在 Metrics 输入框中输入 PromQL（一种用于查询 Prometheus 指标数据的特殊查询语句），右上角选择 5 min 即可查询到 Galley 组件近 5 分钟的 CPU 使用情况：
+进入面板的 Query 页面，在 Query 旁的数据源下拉框中选择 Istio 的 Prometheus 数据源，在 Metrics 输入框中输入 PromQL（一种用于查询 Prometheus 指标数据的特殊查询语句）：sum(rate(container_cpu_usage_seconds_total{job="kubernetes-cadvisor",container_name=~"galley", pod_name=~"istio-galley-.*"}[1m]))，右上角选择 5 min 即可查询到 Galley 组件近 5 分钟的 CPU 使用情况：
 
 ![面板 Query 配置页面](../images/grafana-panel-query.png)
 
