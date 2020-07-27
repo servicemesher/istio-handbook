@@ -9,7 +9,7 @@ reviewers: [""]
 
 Istio 中的安全架构是由多个组件协同完成的。Citadel 是负责安全的主要组件，用于密钥和证书的管理；Pilot 会将安全策略配置分发给 Envoy 代理；Envoy 执行安全策略来实现访问控制。下图展示了 Istio 的安全架构和运作流程。
 
-![安全架构](../images/concept-security-arch.jpg)
+![安全架构（图片来自Istio官方网站）](../images/concept-security-arch.jpg)
 
 
 

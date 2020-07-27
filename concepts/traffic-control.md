@@ -9,7 +9,7 @@ reviewers: [""]
 
 而使用 Istio 就可以轻松的实现各种维度的流量控制。下图是典型的金丝雀发布策略：根据权重把 5% 的流量路由给新版本，如果服务正常，再逐渐转移更多的流量到新版本。
 
-![金丝雀发布示意图](../images/concept-trafficcontrol-canary.png)
+![金丝雀发布示意图（图片来自Istio官方网站）](../images/concept-trafficcontrol-canary.png)
 
 Istio 中的流量控制功能主要分为三个方面：
 
@@ -25,11 +25,11 @@ Istio 为了控制服务请求，引入了服务版本（version）的概念，�
 
 下图展示了使用服务版本实现路由分配的例子。服务版本定义了版本号（v1.5、v2.0-alpha）和环境（us-prod、us-staging）两种信息。服务 B 包含了 4 个 Pod，其中 3 个是部署在生产环境的 v1.5 版本，而 Pod4 是部署在预生产环境的 v2.0-alpha 版本。运维人员可以根据服务版本来指定路由规则，使 99% 的流量流向 v1.5 版本，而 1% 的流量进入 v2.0-alpha 版本。
 
-<img src="../images/concept-feature-routing.png" alt="路由示意图" style="zoom:33%;" />
+<img src="../images/concept-feature-routing.png" alt="路由示意图（图片来自Istio官方网站）" style="zoom:33%;" />
 
 除了上面介绍的服务间流量控制外，还能控制与网格边界交互的流量。可以在系统的入口和出口处部署 Sidecar 代理，让所有流入和流出的流量都由代理进行转发。负责入和出的代理就叫做入口网关和出口网关，它们把守着进入和流出网格的流量。下图展示了 Ingress 和 Egress 在请求流中的位置，有了他们俩，也就可以控制出入网格的流量了。
 
-<img src="../images/concept-feature-gateway.png" alt="入口和出口网关" style="zoom:33%;" />
+<img src="../images/concept-feature-gateway.png" alt="入口和出口网关（图片来自Istio官方网站）" style="zoom:33%;" />
 
 Istio 还能设置流量策略。比如可以对连接池相关的属性进行设置，通过修改最大连接等参数，实现对请求负载的控制。还可以对负载均衡策略进行设置，在轮询、随机、最少访问等方式之间进行切换。还能设置异常探测策略，将满足异常条件的实例从负载均衡池中摘除，以保证服务的稳定性。
 
@@ -58,16 +58,19 @@ Isito 支持注入两种类型的故障：延迟和中断。延迟是模拟网�
 Istio 里用于实现流量控制的 CRDs 主要有以下几个：
 
 - VirtualService：用于网格内路由的设置；
-
 - DestinationRule：定义路由的目标服务和流量策略；
-
 - ServiceEntry：注册外部服务到网格内，并对其流量进行管理；
-
 - Ingress、Egress gateway：控制进出网格的流量；
-
 - Sidecar：对 Sidecar 代理进行整体设置；
 
 Istio 通过这些自定义资源，实现了对网格内部、网格外部、进出网格边界的流量的全面的控制。也就是说所有和网格产生交互的流量都可以被 Istio 所控制，其设计思路堪称完美。下图是这几种资源的示意图。
 
 <img src="../images/concept-trafficcontrol-crd.png" alt="流量crd" style="zoom:50%;" />
 
+## 小结
+
+流量控制是 Service Mesh 最核心的功能，也是服务治理最主要的手段之一。Istio 从路由、弹性和调试三个方面提供了丰富的流量控制功能，可以对微服务应用进行全面的流量治理。用于实现流量控制的自定义资源主要包括：VirtualService、DestinationRule、ServiceEntry 等。它们配合在一起，使得 Istio 可以全面的管理与网格交互的流量。在实践章节我们会对这些核心资源做详细的介绍。
+
+## 参考
+
+* [流量管理](https://istio.io/latest/docs/concepts/traffic-management/)
