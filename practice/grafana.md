@@ -96,7 +96,7 @@ Grafana 的仪表盘可以通过三种方式创建：
 Istio 的仪表盘就是通过第三种方式创建的，Istio 在安装 Grafana 组件时，在 Grafana 的 Pod 中以 ConfigMap 的形式挂载了 Istio 各个组件的仪表盘 JSON 配置文件：
 
 ```bash
-# 查看 Grafana 相关的 ConfigMap，发现 Istio 各组件的仪表盘配置都已配置在 ConfigMap 中
+# 查看 Grafana 相关的 ConfigMap， Istio 各组件的仪表盘配置在 ConfigMap 中
 $ kubectl get cm -n istio-system |grep istio-grafana
 istio-grafana                                                        2         20d
 istio-grafana-configuration-dashboards-citadel-dashboard             1         20d
@@ -218,19 +218,56 @@ istio-mesh-dashboard.json         istio-workload-dashboard.json
 
 ![面板 Query 配置页面](../images/grafana-panel-query.png)
 
-点击左侧第二个圆钮进入 Visualization 配置页面，该页面可以调整图表的样式、选择可视化面板的类型等，还可以为图表中的数据设置跳转链接
+点击左侧第二个圆钮进入 Visualization 配置页面，该页面可以调整图表的样式、选择可视化面板的类型等，还可以为图表中的数据设置跳转链接。
 
 ![面板 Visualization 配置页面](../images/grafana-panel-visualization.png)
 
-点击左侧第三个圆钮进入 General 配置页面，该页面主要对该面板做常规配置，如：面板标题、描述、链接等
+点击左侧第三个圆钮进入 General 配置页面，该页面主要对该面板做常规配置，如：面板标题、描述、链接等。
 
 ![面板 General 配置页面](../images/grafana-panel-general.png)
 
-点击左侧第四个圆钮进入 Alert 配置页面，该页面用于配置告警规则
+点击左侧第四个圆钮进入 Alert 配置页面，该页面用于配置告警规则。
 
 ![面板 Alert 配置页面](../images/grafana-panel-alert.png)
 
-### 
+### Variables 配置
 
+在 Grafana 中，Variables (变量)充当占位符的作用，我们可以在指标查询和面板标题中使用变量。同时，我们可以使用仪表板顶部的下拉框来选择变量不同的值，动态地改变面板的指标查询语句。这里我们通过配置变量下拉框，来创建一个可选择不同 Pod 的 CPU 使用量的可视化面板。
 
+在上一步中，我们已经完成了可视化面板的创建，在面板的 Query 配置页面中，我们发现 Prometheus 查询语句的 job、container_name、pod_name 三个标签是通过赋值进行硬编码的：
 
+![面板 Query 配置页面](../images/grafana-panel-query.png)
+
+我们将它的值替换成变量占位符（以$开头）：
+
+![面板变量占位符替换](../images/grafana-dashboard-replace-variables.png)
+
+现在开始初始化这三个变量，我们点击右上角的设置按钮，进入设置界面：
+
+![点击仪表盘设置按钮](../images/grafana-dashboard-setting.png)
+
+选择 Variables 菜单，点击 Add variable 添加变量：
+
+![添加变量](../images/grafana-dashboard-variables.png)
+
+我们首先添加名为 jobs 的变量，因为该变量的值是通过下拉框进行选择查询的，因此为 Query 类型。为该变量下拉框设置一个标题：数据源。该变量的值来自于 Prometheus 数据源中 container_cpu_usage_seconds_total 指标中的 job 标签，因此我们在 Query 输入框中配置 label_values( Prometheus 指标名, Prometheus 指标标签) 语句来为 job 变量获取值，我们也可以在 Regex 中对查询结果进行正则匹配筛选我们想要的值。设置完成后，在页面下方的 Preview of values 栏中可以预览该变量匹配到的值。
+
+![添加 jobs 变量](../images/grafana-dashboard-variables-job.png)
+
+和添加 jobs 变量方式相同，我们继续添加 contianers 和 pods 变量，由于这三个变量之间存在依赖关系：containers 变量的值依赖于 jobs 变量的值，pods 变量的值又依赖于 containers 变量的值，我们在 containers 变量的配置中的 Query 输入框中为 container_cpu_usage_seconds_total 指标引入 jobs 变量作为标签的筛选条件：
+
+![添加 contianers 变量](../images/grafana-dashboard-variables-container.png)
+
+在 pods 变量的配置中的 Query 输入框中为 container_cpu_usage_seconds_total 指标引入 jobs 和 containers 变量同时作为标签的筛选条件：
+
+![添加 pods 变量](../images/grafana-dashboard-variables-pod.png)
+
+变量配置完后保存仪表盘设置，回到仪表盘首页，发现页面顶部多了三个下拉选择框，下拉框的值分别对应了三个变量的值：jobs、containers、pods。通过动态调整这三个变量的值，可以查看不同数据源、不同容器、不同 Pod 的 CPU 使用量的可视化图表面板。
+
+![带有变量下拉选择框的仪表盘](../images/grafana-dashboard-home.png)
+
+Variable 不仅仅可以通过下拉框的方式赋值，它还有 custom、text box、constant、data source、interval 等类型，这里不详细介绍，更多关于 Variables 设置的详细信息可参考：[Grafana 的 Variables 设置文档](https://grafana.com/docs/grafana/latest/variables/templates-and-variables/)。
+
+### 参考
+
+- [Grafana 官方文档](https://grafana.com/docs/grafana/latest/)
