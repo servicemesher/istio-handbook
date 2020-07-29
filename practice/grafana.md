@@ -135,7 +135,7 @@ Grafana里面的用户有三种权限：Admin、Editor 和 Viewer。Admin 权限
 $ curl http://$GATEWAY_URL/productpage
 ```
 
-不断刷新页面（或在命令行中不断发送请求命令）以产生少量流量。再次查看 Istio 流量仪表盘，发现仪表盘中出现可视化图表数据，它反映了集群中所产生的流量。
+不断刷新 Bookinfo 页面（或在命令行中不断发送请求命令）以产生少量流量。再次查看 Istio 流量仪表盘，发现仪表盘中出现可视化图表数据，它反映了集群中所产生的流量。
 
 ![Istio 流量仪表盘](../images/grafana-dashboard-with-traffic.png)
 
