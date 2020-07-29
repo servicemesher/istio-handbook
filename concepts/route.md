@@ -8,9 +8,9 @@ reviewers: [""]
 
 在 Istio 中，通过几个重要的 CRD（CustomResourceDefinitions）来实现路由转发，包括 VirtualService、DestinationRule 以及 ServiceEntry。
 
-其中 VirtualService 定义了路由的行为，包括匹配条件等；DestinationRule 定义路由后的目标规则，包括负载均衡、连接池等配置；ServiceEntry 定义了一种将外部服务暴露在网格内的能力。
+其中 VirtualService 定义了路由的行为，包括匹配条件等；DestinationRule 定义路由后的目标规则，包括负载均衡、连接池等配置；ServiceEntry 实现了一种将外部服务暴露在网格内的能力。
 
-通过以上的 CRD，Istio 可以非常简单的对服务间访问进行流量控制，通过可以通过组合配置，实现熔断、重试、超时等流量控制；同时也可以通过配置实现金丝雀发布，A/B 测试等功能。
+通过以上的 CRD，Istio 可以非常简单的对服务间访问进行流量控制，通过组合配置，实现熔断、重试、超时等流量控制；同时也可以通过配置实现金丝雀发布，A/B 测试等功能。
 
 本章主要介绍通过核心 CRD 实现路由的能力，并对路由中典型的流控策略进行介绍，包括权重分流、负载均衡、熔断配置等。
 
@@ -22,7 +22,7 @@ VirtualService 定义了请求在网格中如何路由。通过 VirtualService �
 如图所示，我们可以清晰的看到，VirtualService（以下简称 VS ）主要包括的配置属性为：hosts、gateways、http、tls、tcp 以及 exportsTo。
 
 * hosts: string 数组类型。定义了路由所指向的目标主机。可以是通配符 *, 也可以指定确定的主机名。
-* gateways: string 数组类型。定义了该 VS 所作用的网关或 sidecar。声明 Gateway ，采用 <gateway namespace>/<gateway name>，如果不指定 namespace，则默认为 VirtualService 所属 namespace。
+* gateways: string 数组类型。定义了该 VS 所作用的网关或 sidecar。声明 Gateway ，采用 "<gateway namespace>/<gateway name>"，如果不指定 namespace，则默认为 VirtualService 所属 namespace。
 默认该字段为 mesh，表示该VS作用于网格内的所有 sidecar。需要注意的是，如果需要作用于 gateway 和 sidecar，需要显示声明 mesh 和具体的 gateway。
 * http: HTTPRoute 数组类型。定义 HTTP 路由规则，用于处理 HTTP 流量，主要包括 HTTP、HTTP2、GRPC。
 * tls: TLSRoute 数组类型。用于处理非终结 TLS 和 HTTPS 流量。
@@ -31,7 +31,7 @@ VirtualService 定义了请求在网格中如何路由。通过 VirtualService �
 
 从类图可以看出，HTTPRoute 提供的配置属性最多，HTTP 也是当前 Istio 中支持最完整的协议。本文通过对 HTTPRoute 的详细剖析，阐述 Istio 路由。
 
-可以看到 HTTPRoute 的主要配置包括：match、route、redirect、rewrite、retries 等。通过 HTTPRoute，定义 match 条件以及满足条件后路由策略。将满足 HTTPMatchRequest 匹配条件的流量，都被路由至 HTTPRouteDestination 定义的目的，执行 HTTPRedirect 定义的重定向，HTTPRewrite 定义的重写，HTTPRetry 定义的重试以及 HTTPFaultInjection 定义的故障注入等策略。
+可以看到 HTTPRoute 的主要配置包括：match、route、redirect、rewrite、retries 等。通过 HTTPRoute，定义 match 条件以及满足条件后路由策略。满足 HTTPMatchRequest 匹配条件的流量，都被路由至 HTTPRouteDestination 定义的目的，执行 HTTPRedirect 定义的重定向，HTTPRewrite 定义的重写，HTTPRetry 定义的重试以及 HTTPFaultInjection 定义的故障注入等策略。
 
 HTTPMatchRequest 定义了路由规则的匹配条件，包括 uri、method、authority、headers、queryParams 等匹配条件。其中 uri，method，authority为 StringMatch 类型。StringMatch 类型描述了 string 的匹配类型，包括精确（exact）、前缀（prefix）以及正则（regex）三种类型。而 Headers 和 queryParams 则是 Map<string, StringMatch> 类型。
 需要注意的是 match 字段是 HTTPMatchRequest 的数组类型，每一组 HTTPMatchRequest 中的条件是与的关系，即所有的匹配条件均满足，方可进行 match。但是不同的 match 之间是或的关系，只要满足任意一组 match 即可执行路由策略。因此 match 之间是顺序优先匹配，一旦 match 匹配成功，就不会进行后续的 match。
@@ -66,10 +66,10 @@ HTTPRoute 中的 route 是 HTTPRouteDestination 数组类型，主要包括三�
 * destination: 必填字段，定义流量的目标地址。destination 中声明的 host 必须是 Istio 注册中心中的真实服务，可以是网格内注册的服务也可以是 ServiceEntry 定义的网格外的服务。
 同时 destination 中的 subset 字段声明了服务中的不同子集。通过和 DestinationRule 的结合，达到版本分流的效果，实现 A/B 测试和金丝雀发布。
 * weight: 流量打到对应 destination 的权重比例，默认为 100。所有 HTTPRouteDestination 中的 weight 之和必须等于 100。
-* headers: 作为 route 的高级配置，用于对请求（request）/响应（response）中的 header 进行高级配置。分别包括 request header的 set、add、remove 操作，以及 response header 的 set、add、remove 操作。
+* headers: 作为 route 的高级配置，用于对请求（request）/ 响应（response）中的 header 进行高级配置。分别包括 request header 的 set、add、remove 操作，以及 response header 的 set、add、remove 操作。
 
 在下面的示例中，本文基于 Kubernetes 注册发现，主机名即为 Kubernetes 服务名。
-对于匹配 uri 为 /ratings/ 前缀的请求，路由到 ratings.prod.svc.cluster.local 的后端。25% 的流量打到 v1 版本；75% 的流量打到 v2 版本，同时对 remove 掉响应 header rate。
+对于匹配 uri 为 /ratings/ 前缀的请求，路由到 ratings.prod.svc.cluster.local 的后端。25% 的流量打到 v1 版本；75% 的流量打到 v2 版本，同时会 remove 掉响应 header rate。
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -101,7 +101,7 @@ VirtualService 定义了丰富的路由规则，本章主要通过 HTTPRoute 的
 
 ## DestinationRule（目标规则）
 上一节我们提到了 destination 中的 subset，在示例中也看到了 subset 的声明。读者可能会有疑问，这个 subset 的定义来自哪里呢。答案就是本节将要介绍的 DestinationRule。
-VirtualService 定义了路由规则，指明了流量通过何种匹配方式进行转发。DestinationRule 通过定义服务子集，声明路由指向不同的服务实例。同时，通过 DestinationRule 提供的流控策略配置，包括负载均衡，异常检测等高级配置，更丰富的对流量进行治理。
+VirtualService 定义了路由规则，指明了流量通过何种匹配方式进行转发。DestinationRule 通过定义服务子集，声明路由指向不同的服务实例。同时，通过 DestinationRule 提供流控策略配置，包括负载均衡，异常检测等高级配置，更丰富的对流量进行治理。
 
 DestinationRule（目标规则）的主要配置属性包括：hosts、trafficPolicy、subsets、exportTo。DestinationRule 类图如下所示:
 
@@ -117,7 +117,7 @@ DestinationRule（目标规则）的主要配置属性包括：hosts、trafficPo
 loadBalancer 用于定义流控策略中的负载均衡配置，主要定义包括简单负载均衡（SimpleLB）以及一致性哈希负载均衡（ConsistentHashLB）。其中 SimpleLB 主要包括几种典型的负载均衡算法，即 ROUND ROBIN (也是默认的负载均衡算法)，LEAST_CONN (最少请求连接)，RANDOM（随机)。同样的，
 ConsistentHashLB 提供了基于 httpHeaderName (HTTP请求头)，httpCookie(Cookie)，useSourceIp (源IP)，httpQueryParameterName(http query) 的一致性 Hash 计算因子，同时提供了 Hash 环大小的配置，默认为 1024。需要明确的是，在配置负载均衡策略时候，SimpleLB 和 ConsistentHashLB 只能选择一个，同时，每一种策略中的 LB 算法也只能选择其中一个进行配置。
 
-在下面展示的示例中，定义一个 DestinationRule, 本文基于 Kubernetes 注册中心，因此服务名即为服务 host。可以看到，服务的 host 为：ratings.prod.svc.cluster.local，通过 subsets 定义 subset 名称为 version3, 代表所有 label 包含 version:v3 的服务实例。通过通过 trafficPolicy 中的
+在下面展示的示例中，定义一个 DestinationRule, 本文基于 Kubernetes 注册中心，因此服务名即为服务 host。可以看到，服务的 host 为：ratings.prod.svc.cluster.local，通过 subsets 定义 subset 名称为 version3, 代表所有 label 包含 version:v3 的服务实例。通过 trafficPolicy 中的
 loadBalancer 定义，version3 的负载均衡策略为 ROUND_ROBIN；其他服务实例的负载均衡策略则为 LEAST_CONN。
 
 ```yaml
@@ -159,8 +159,8 @@ ServiceEntry的简单类图如下所示，
 * endpoints: 表示与服务相关的网络地址。在 Istio 1.6 之前是 Endpoint 类型，1.6版本后，为 WorkloadEntry 数组类型。
 * exportTo:  同 VirtualService 和 DestinationRule 中的该字段定义相同，表示该 ServiceEntry 的作用于，'*'代表作用于所有 namespace，'.'代表作用于本 namespace。
 
-下面的示例，在 egress namespace 中定义一个名为 external-svc-httpbin 的 ServiceEntry CRD。定义了服务 host 为 httpbin.com，暴露在80端口上的协议为 HTTP 协议。同时，声明了该 ServiceEntry 的作用域仅为 egress namespace。
-即控制了该 ServiceEntry 仅可被 egress namespace 中定义的 VirtualService 以及 DestinationRule 资源使用。
+下面的示例，在 egress namespace 中定义一个名为 external-svc-httpbin 的 ServiceEntry CRD。定义了服务 host 为 httpbin.com，暴露在80端口上的协议为 HTTP 协议。同时，声明了该 ServiceEntry 的作用域仅为 egress 命名空间。
+即控制了该 ServiceEntry 仅可被 egress 命名空间中定义的 VirtualService 以及 DestinationRule 资源使用。
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
