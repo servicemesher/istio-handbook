@@ -29,7 +29,9 @@ $ istioctl manifest apply --set addonComponents.grafana.enabled=true
 
 ### 访问主页
 
-Istio 安装完成后，想要在浏览器中访问 Grafana 主页，可以将 Grafana 的 service 设置为 NodePort类型：
+Istio 安装完成后，想要在浏览器中访问 Grafana 主页，有多种方式：
+
+方法一、可以将 Grafana 的 service 设置为 NodePort类型：
 
 ```bash
 # 设置 Grafana 的 service 为 NodePort 类型
@@ -64,9 +66,19 @@ grafana   NodePort   10.96.188.25   <none>        3000:31652/TCP   25d
 
 ```
 
-设置为 NodePort 类型后，集群为 Grafana 服务随机分配了一个3万以上的端口，同时集群中的所有节点的 kube-proxy 进程都监听了这个端口（这里我的集群为我分配了31652端口），此时我们打开浏览器，访问集群中的任意一台机器的这个端口，都能访问到 Grafana 服务。
+设置为 NodePort 类型后，集群为 Grafana 服务随机分配了一个3万以上的端口，同时集群中的所有节点的 kube-proxy 进程都监听了这个端口（这里我的集群为我分配了 31652 端口，下文以该端口为例），此时我们打开浏览器，访问集群中的任意一台机器的 31652 端口，都能访问到 Grafana 服务的主页。
 
-也可以为 Grafana 服务配置 Ingressgateway：
+方法二、在 Kubernetes 环境中，执行以下命令：
+
+```bash
+$ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
+```
+
+在浏览器中访问 http://localhost:3000/ 即可访问 Grafana 主页。
+
+![Grafana 主页](../images/grafana-home.png)
+
+
 
 ### 登录设置
 
@@ -110,6 +122,30 @@ spec:
 当 **GF_AUTH_ANONYMOUS_ENABLED** 环境变量设置为 "true" 时，表示开启匿名免登录访问。而 **GF_AUTH_ANONYMOUS_ORG_ROLE** 环境变量设置为 Admin 则表示匿名免登录时具有 Admin 权限。
 
 Grafana里面的用户有三种权限：Admin、Editor 和 Viewer。Admin 权限为管理员权限，具有最高的执行权限，包括对用户、Data Sources（数据源）、DashBoard（可视化仪表盘）的增删改查操作。拥有 Editor 权限的用户仅对 DashBoard（可视化仪表盘）有增删改查操作。而拥有 Viewer 权限的用户仅可以查看 DashBoard（可视化仪表盘），详情查看：[Grafana 的用户权限角色说明](https://grafana.com/docs/grafana/latest/permissions/organization_roles/)。
+
+### 查看应用流量与工作负载
+
+在浏览器中访问 http://localhost:3000/dashboard/db/istio-mesh-dashboard 打开 Istio 流量仪表盘。
+
+![Istio 流量仪表盘](../images/grafana-istio-mesh-dashboard.png)
+
+在集群中部署 [Bookinfo](https://istio.io/latest/zh/docs/examples/bookinfo/) 应用后，在浏览器中访问 `http://$GATEWAY_URL/productpage` 访问 Bookinfo 应用的产品主页或者在命令行中使用以下命令访问（`$GATEWAY_URL` 是在 [Bookinfo](https://istio.io/latest/zh/docs/examples/bookinfo/) 示例中设置的值）：
+
+```bash
+$ curl http://$GATEWAY_URL/productpage
+```
+
+不断刷新页面（或在命令行中不断发送请求命令）以产生少量流量。再次查看 Istio 流量仪表盘，发现仪表盘中出现可视化图表数据，它反映了集群中所产生的流量。
+
+![Istio 流量仪表盘](../images/grafana-dashboard-with-traffic.png)
+
+在浏览器中访问 http://localhost:3000/[dashboard/db/istio-service-dashboard](http://localhost:3000/dashboard/db/istio-service-dashboard) 打开 Istio 可视化服务仪表盘。可以查看服务自身的网络指标以及服务的客户端工作负载（调用该服务的工作负载）和服务端工作负载（提供该服务的工作负载）的详细指标。
+
+![Istio 可视化服务仪表盘](../images/grafana-istio-service-dashboard.png)
+
+在浏览器中访问 http://localhost:3000/dashboard/db/istio-workload-dashboard 打开 Istio 可视化工作负载仪表盘。这里给出了每一个服务的工作负载，以及该服务的入站工作负载（将请求发送到该服务的工作负载）和出站工作负载（该服务向其它服务发送请求的工作负载）的详细指标。
+
+![Istio 可视化工作负载仪表盘](../images/grafana-istio-workload-dashboard.png)
 
 ### 数据源配置
 
@@ -325,4 +361,7 @@ Variable 不仅仅可以通过下拉框的方式赋值，它还有 custom、text
 
 ### 参考
 
+- [Istio Visualizing Metrics with Grafana](https://istio.io/latest/docs/tasks/observability/metrics/using-istio-dashboard/)
+
 - [Grafana 官方文档](https://grafana.com/docs/grafana/latest/)
+
