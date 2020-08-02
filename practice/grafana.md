@@ -9,7 +9,7 @@ reviewers: [""]
 
 Grafana 是一款开源的指标数据可视化工具，有着功能齐全的度量仪表盘、图表等时序数据展示面板，支持 Zabbix、InfluentDB、Prometheus、Elasticsearch、MySQL 等数据源的指标展示，详情查看：[Grafana 支持的数据源类型](https://grafana.com/docs/grafana/latest/features/datasources/#supported-data-sources/)。
 
-总而言之，Grafana 是一款提供了将时间序列数据库（TSDB）数据转换为精美的图形和可视化面板的工具。在 Istio 安装完成后，默认已经将 Grafana 服务以 Pod 的方式运行起来，同时也配置了 Istio 中的 Prometheus 作为数据源，定时地从 Prometheus 中采集 Istio 各组件的指标数据，进行可视化展示。
+在 Istio 中，也引入了 Grafana 这样一款提供了将时间序列数据库（TSDB）数据转换为精美的图形和可视化面板的工具。Grafana 让用户能够更直观地观测到集群中各项数据指标的变化趋势（网格流量变化、组件资源使用情况等），是 Isito 实现可观测性最重要的组件之一。在 Istio 安装时，我们可以通过配置将 Grafana 服务默认安装在 Istio-system 命名空间下，Istio安装完成后，默认配置了 Istio 中的 Prometheus 作为数据源，定时地从 Prometheus 中采集 Istio 各组件的指标数据，进行可视化展示。
 
 ## Grafana 的使用和配置
 
@@ -121,7 +121,7 @@ spec:
 
 当 **GF_AUTH_ANONYMOUS_ENABLED** 环境变量设置为 "true" 时，表示开启匿名免登录访问。而 **GF_AUTH_ANONYMOUS_ORG_ROLE** 环境变量设置为 Admin 则表示匿名免登录时具有 Admin 权限。
 
-Grafana里面的用户有三种权限：Admin、Editor 和 Viewer。Admin 权限为管理员权限，具有最高的执行权限，包括对用户、Data Sources（数据源）、DashBoard（可视化仪表盘）的增删改查操作。拥有 Editor 权限的用户仅对 DashBoard（可视化仪表盘）有增删改查操作。而拥有 Viewer 权限的用户仅可以查看 DashBoard（可视化仪表盘），详情查看：[Grafana 的用户权限角色说明](https://grafana.com/docs/grafana/latest/permissions/organization_roles/)。
+Grafana 里面的用户有三种权限：Admin、Editor 和 Viewer。Admin 权限为管理员权限，具有最高的执行权限，包括对用户、Data Sources（数据源）、DashBoard（可视化仪表盘）的增删改查操作。拥有 Editor 权限的用户仅对 DashBoard（可视化仪表盘）有增删改查操作。而拥有 Viewer 权限的用户仅可以查看 DashBoard（可视化仪表盘），详情查看：[Grafana 的用户权限角色说明](https://grafana.com/docs/grafana/latest/permissions/organization_roles/)。
 
 ### 查看应用流量与工作负载
 
@@ -139,7 +139,7 @@ $ curl http://$GATEWAY_URL/productpage
 
 ![Istio 流量仪表盘](../images/grafana-dashboard-with-traffic.png)
 
-在浏览器中访问 http://localhost:3000/[dashboard/db/istio-service-dashboard](http://localhost:3000/dashboard/db/istio-service-dashboard) 打开 Istio 可视化服务仪表盘。可以查看服务自身的网络指标以及服务的客户端工作负载（调用该服务的工作负载）和服务端工作负载（提供该服务的工作负载）的详细指标。
+在浏览器中访问 http://localhost:3000/dashboard/db/istio-service-dashboard 打开 Istio 可视化服务仪表盘。可以查看服务自身的网络指标以及服务的客户端工作负载（调用该服务的工作负载）和服务端工作负载（提供该服务的工作负载）的详细指标。
 
 ![Istio 可视化服务仪表盘](../images/grafana-istio-service-dashboard.png)
 
@@ -164,17 +164,17 @@ Grafana 的 Prometheus 数据源配置主要由四部分组成：
 - 数据源的名称；
 - Prometheus 数据源的 HTTP 地址和访问方式（分为 Grafana 服务器访问和浏览器直接访问两种方式）；
 - 抓取数据源时所使用的认证授权信息（包含各种认证授权协议和证书信息），因为 Istio 的 Prometheus 默认没有对访问设置权限且走的是 HTTP 协议，这里默认不填；
-- 抓取时间间隔、超时时间和请求数据源的 HTTP 请求方法设置；
+- 抓取时间间隔、超时时间和请求数据源的 HTTP 请求方法设置。
 
 ### 数据仪表盘配置
 
 我们回到首页，点击左上角的 Home 按钮进入 Dashboard （仪表盘）总览页面，可以看到总览页面中有一组名为 Istio 的仪表盘列表：
 
-![查看 Istio 组下的面板](../images/prometheus-grafana-istio-group.png)
+![Istio 组下的数据面板](../images/prometheus-grafana-istio-group.png)
 
 选择其中的 Istio Galley Dashboard 查看具体的仪表盘信息，发现 Galley 相关指标信息都以图表的形式展示了出来：
 
-![查看 galley 组件面板](../images/grafana-galley-dashboard.png)
+![galley 组件面板](../images/grafana-galley-dashboard.png)
 
 回到仪表盘总览页面，右侧有仪表盘的新建（New dashboard）和导入（Import dashboard）按钮。
 
@@ -182,7 +182,7 @@ Grafana 的仪表盘可以通过三种方式创建：
 
 - 页面中点击 New dashboard，通过可视化界面进行具体的参数配置；
 - 页面中点击 Import dashboard，导入 JSON 配置文件（Grafana 仪表盘可以通过 JSON 数据格式的文件进行配置）；
-- 在 Grafana 的配置文件中指定仪表盘的 JSON 配置文件路径，启动后默认加载所配置的仪表盘；
+- 在 Grafana 的配置文件中指定仪表盘的 JSON 配置文件路径，启动后默认加载所配置的仪表盘。
 
 Istio 的仪表盘就是通过第三种方式创建的，Istio 在安装 Grafana 组件时，在 Grafana 的 Pod 中以 ConfigMap 的形式挂载了 Istio 各个组件的仪表盘 JSON 配置文件：
 
@@ -303,7 +303,7 @@ istio-mesh-dashboard.json         istio-workload-dashboard.json
 
 由于仪表盘的 JSON 配置文件组成较为复杂，一般情况下仅对其做导入和导出操作，不涉及对 JSON 文件的修改，这里不对 JSON 配置文件的具体组成做详细讲解。在日常使用中创建自定义的仪表盘一般使用上面提到的第一种方式：点击 New dashboard 按钮在可视化界面中创建。点击创建按钮后，选择 Add Query 创建可视化面板：
 
-![创建可视化面板](../images/grafana-new-dashboard.png)
+![可视化面板创建](../images/grafana-new-dashboard.png)
 
 进入面板的 Query 页面，在 Query 旁的数据源下拉框中选择 Istio 的 Prometheus 数据源，在 Metrics 输入框中输入 PromQL（一种用于查询 Prometheus 指标数据的特殊查询语句）：sum(rate(container_cpu_usage_seconds_total{job="kubernetes-cadvisor",container_name=~"galley", pod_name=~"istio-galley-.*"}[1m]))，右上角选择 5 min 即可查询到 Galley 组件近 5 分钟的 CPU 使用情况：
 
@@ -339,19 +339,19 @@ istio-mesh-dashboard.json         istio-workload-dashboard.json
 
 选择 Variables 菜单，点击 Add variable 添加变量：
 
-![添加变量](../images/grafana-dashboard-variables.png)
+![变量添加](../images/grafana-dashboard-variables.png)
 
 我们首先添加名为 jobs 的变量，因为该变量的值是通过下拉框进行选择查询的，因此为 Query 类型。为该变量下拉框设置一个标题：数据源。该变量的值来自于 Prometheus 数据源中 container_cpu_usage_seconds_total 指标中的 job 标签，因此我们在 Query 输入框中配置 label_values( Prometheus 指标名, Prometheus 指标标签) 语句来为 job 变量获取值，我们也可以在 Regex 中对查询结果进行正则匹配筛选我们想要的值。设置完成后，在页面下方的 Preview of values 栏中可以预览该变量匹配到的值。
 
-![添加 jobs 变量](../images/grafana-dashboard-variables-job.png)
+![jobs 变量添加](../images/grafana-dashboard-variables-job.png)
 
 和添加 jobs 变量方式相同，我们继续添加 contianers 和 pods 变量，由于这三个变量之间存在依赖关系：containers 变量的值依赖于 jobs 变量的值，pods 变量的值又依赖于 containers 变量的值，我们在 containers 变量的配置中的 Query 输入框中为 container_cpu_usage_seconds_total 指标引入 jobs 变量作为标签的筛选条件：
 
-![添加 contianers 变量](../images/grafana-dashboard-variables-container.png)
+![contianers 变量添加](../images/grafana-dashboard-variables-container.png)
 
 在 pods 变量的配置中的 Query 输入框中为 container_cpu_usage_seconds_total 指标引入 jobs 和 containers 变量同时作为标签的筛选条件：
 
-![添加 pods 变量](../images/grafana-dashboard-variables-pod.png)
+![pods 变量添加](../images/grafana-dashboard-variables-pod.png)
 
 变量配置完后保存仪表盘设置，回到仪表盘首页，发现页面顶部多了三个下拉选择框，下拉框的值分别对应了三个变量的值：jobs、containers、pods。通过动态调整这三个变量的值，可以查看不同数据源、不同容器、不同 Pod 的 CPU 使用量的可视化图表面板。
 
@@ -359,7 +359,7 @@ istio-mesh-dashboard.json         istio-workload-dashboard.json
 
 Variable 不仅仅可以通过下拉框的方式赋值，它还有 custom、text box、constant、data source、interval 等类型，这里不详细介绍，更多关于 Variables 设置的详细信息可参考：[Grafana 的 Variables 设置文档](https://grafana.com/docs/grafana/latest/variables/templates-and-variables/)。
 
-### 参考
+## 参考
 
 - [Istio Visualizing Metrics with Grafana](https://istio.io/latest/docs/tasks/observability/metrics/using-istio-dashboard/)
 
