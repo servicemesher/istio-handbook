@@ -5,8 +5,6 @@ reviewers: [""]
 
 # Grafana
 
-## Grafana 简介
-
 Grafana 是一款开源的指标数据可视化工具，有着功能齐全的度量仪表盘、图表等时序数据展示面板，支持 Zabbix、InfluentDB、Prometheus、Elasticsearch、MySQL 等数据源的指标展示，详情查看：[Grafana 支持的数据源类型](https://grafana.com/docs/grafana/latest/features/datasources/#supported-data-sources/)。
 
 在 Istio 中，也引入了 Grafana 这样一款提供了将时间序列数据库（TSDB）数据转换为精美的图形和可视化面板的工具。Grafana 让用户能够更直观地观测到集群中各项数据指标的变化趋势（网格流量变化、组件资源使用情况等），是 Isito 实现可观测性最重要的组件之一。在 Istio 安装时，我们可以通过配置将 Grafana 服务默认安装在 Istio-system 命名空间下，Istio安装完成后，默认配置了 Istio 中的 Prometheus 作为数据源，定时地从 Prometheus 中采集 Istio 各组件的指标数据，进行可视化展示。
