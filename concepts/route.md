@@ -4,13 +4,13 @@ reviewers: ["wangfakang"]
 ---
 
 # 路由
-维基百科中给路由的定义是：通过互联的网络将信息从源地址传输到目的地址的活动。在 Istio 中的路由，结合维基百科的定义，即从源服务到目标服务的调用。在 Istio 中，通过几个重要的 CRD（CustomResourceDefinitions）来实现路由转发，包括 VirtualService、DestinationRule 以及 ServiceEntry：
+路由在维基百科中的定义是：通过互联的网络将信息从源地址传输到目的地址的活动。在 Istio 中的路由，结合维基百科的定义，即从源服务到目标服务的调用。在 Istio 中，通过下面几个重要的 CRD（CustomResourceDefinitions）来实现路由转发，包括 VirtualService、DestinationRule 以及 ServiceEntry：
 
 * VirtualService 定义了路由的行为，包括匹配条件等；
 * DestinationRule 定义路由后的目标规则，包括负载均衡、连接池等配置；
 * ServiceEntry 实现了一种将外部服务暴露在网格内的能力；
 
-通过以上 CRD 的配置，服务之间访问的流量可以通过 Istio 控制，实现熔断、重试、超时等功能；同时也可以通过配置实现金丝雀发布，A/B 测试等功能。
+Istio 通过以上 CRD 的配置就可以实现服务之间的治理，如实现熔断、重试、超时等功能，同时也可以通过配置实现金丝雀发布，A/B 测试等功能。
 本章主要介绍 Istio 如何通过 CRD 控制数据面的路由能力，并对路由中典型的流控策略进行介绍，包括权重分流、负载均衡、熔断配置等。
 
 ## VirtualService(虚拟服务)
@@ -35,7 +35,7 @@ VirtualService 定义了请求在网格中如何路由。通过 VirtualService �
 HTTPMatchRequest 定义了路由规则的匹配条件，包括 uri、method、authority、headers、queryParams 等匹配条件。其中 uri，method，authority 为 StringMatch 类型。StringMatch 类型描述了 string 的匹配类型，包括精确（exact）、前缀（prefix）以及正则（regex）三种类型。而 Headers 和 queryParams 则是 Map<string, StringMatch> 类型。
 需要注意的是 match 字段是 HTTPMatchRequest 的数组类型，每一组 HTTPMatchRequest 中的条件是与的关系，即所有的匹配条件均满足，方可进行 match。但是不同的 match 之间是或的关系，只要满足任意一组 match 即可执行路由策略。因此 match 之间是顺序优先匹配，一旦 match 匹配成功，就不会进行后续的 match。
 
-在下面的示例中，虽然 match 包含了两个 HTTPMatchRequest 元素，其中包括 uri 以 /ratings/ 开头的请求，或者 uri 以 /ratings/v2/ 开头并且 header 中的 end-user 取值为 jason 的请求。但是，由于 uri 以 /ratings/ 开头 match 会优先匹配，所以，该 VirtualService 的 match 匹配生效的只是第一个 match 匹配。
+在下面的示例中，虽然 match 包含了两个 HTTPMatchRequest 元素（其中包括 uri 以 /ratings/ 开头的请求，或 uri 以 /ratings/v2/ 开头并且 header 中的 end-user 取值为 jason 的请求），但是由于 uri 以 /ratings/ 开头 match 会优先匹配，所以，该 VirtualService 的 match 匹配生效的只是第一个 match 匹配。
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -107,15 +107,15 @@ DestinationRule（目标规则）的主要配置属性包括：hosts、trafficPo
 ![DestinationRule类图](../images/concept-route-class-destinationrule.png)
 
 * hosts: string 类型，对应注册中心中的服务名，可以为 Kubernetes 中的服务名或在 ServiceEntry 中定义的主机名；
-* trafficPolicy: 目标规则的流控策略，包括可以配置负载均衡策略 (loadBalancer)、连接池配置（connectionPool）、异常检测（OutlierDetection）等配置；
+* trafficPolicy: 目标规则的流控策略，包括可以配置负载均衡策略 (LoadBalancer)、连接池配置（ConnectionPool）、异常检测（OutlierDetection）等配置；
 * subsets: 定义服务的不同版本，支持在同版本上配置不同的流控策略，具体的配置即 TrafficPolicy；
 * exportTo: 声明该 Destination 的作用域，'.' 代表本 namespace, '*' 代表整个网格；
 
 从类图可以看出其中最为复杂的也是最丰富的配置便是 trafficPolicy 的配置。本文主要通过负载均衡策略的配置为读者拨云见日，快速了解 DestinationRule 的相关配置提供帮助。
 
-loadBalancer 用于定义流控策略中的负载均衡配置，主要定义包括简单负载均衡（SimpleLB）以及一致性哈希负载均衡（ConsistentHashLB）。其中 SimpleLB 主要包括几种典型的负载均衡算法，即 ROUND ROBIN (轮询策略，也是默认的负载均衡算法)，LEAST_CONN (最少请求连接)，RANDOM（随机)。同样的，ConsistentHashLB 提供了基于 httpHeaderName (HTTP 请求头)，httpCookie(Cookie)，useSourceIp (源 IP)，httpQueryParameterName(http query) 的一致性 Hash 计算因子，同时提供了 Hash 环大小的配置，默认为 1024。需要明确的是，在配置负载均衡策略时候，SimpleLB 和 ConsistentHashLB 只能选择一个，同时，每一种策略中的 LB 算法也只能选择其中一个进行配置。
+LoadBalancer 用于定义流控策略中的负载均衡配置，主要定义包括简单负载均衡（SimpleLB）以及一致性哈希负载均衡（ConsistentHashLB）。其中 SimpleLB 主要包括几种典型的负载均衡算法，即 ROUND ROBIN (轮询策略，也是默认的负载均衡算法)，LEAST_CONN (最少请求连接)，RANDOM（随机)。同样的，ConsistentHashLB 提供了基于 httpHeaderName (HTTP 请求头)，httpCookie(Cookie)，useSourceIp (源 IP)，httpQueryParameterName(http query) 的一致性 Hash 计算因子，同时提供了 Hash 环大小的配置，默认为 1024。需要明确的是，在配置负载均衡策略时候，SimpleLB 和 ConsistentHashLB 只能选择一个，同时，每一种策略中的 LB 算法也只能选择其中一个进行配置。
 
-在下面展示的示例中，定义一个 DestinationRule, 本文基于 Kubernetes 注册中心，因此服务名即为服务 host。可以看到，服务的 host 为：ratings.prod.svc.cluster.local，通过 subsets 定义 subset 名称为 version3, 代表所有 label 包含 version:v3 的服务实例。通过 trafficPolicy 中的loadBalancer 定义，version3 的负载均衡策略为 ROUND_ROBIN；其他服务实例的负载均衡策略则为 LEAST_CONN。
+在下面展示的示例中，定义一个 DestinationRule, 本文基于 Kubernetes 注册中心，因此服务名即为服务 host。可以看到，服务的 host 为：ratings.prod.svc.cluster.local，通过 subsets 定义 subset 名称为 version3, 代表所有 label 包含 version:v3 的服务实例。通过 trafficPolicy 中的 LoadBalancer 定义，version3 的负载均衡策略为 ROUND_ROBIN；其他服务实例的负载均衡策略则为 LEAST_CONN。
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -178,7 +178,7 @@ spec:
   resolution: DNS
  ```
 ## 小结
-本节主要讲解路由的概念，通过对 VirtualService，DestinationRule 以及 ServiceEntry 三个 CRD 的配置及示例讲解，带读者认识 Istio 中的路由。
+本节主要讲解路由的概念，通过对 VirtualService，DestinationRule 以及 ServiceEntry 三个 CRD 的配置及示例讲解，带读者认识了 Istio 中的路由。
  
 ## 参考
  - [istio.io/Configuration/Traffic Management](https://istio.io/latest/docs/reference/config/networking/)
