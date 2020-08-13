@@ -1,10 +1,11 @@
 {
-    "title": "Istio Handbook - Istio 服务网格进阶实战 by ServiceMesher(服务网格中文社区)",
+    "title": "Istio Handbook - Istio 服务网格进阶实战 by ServiceMesher(服务网格社区)",
     "description": "Istio Handbook - Istio 服务网格进阶实战，管理后 Kubernetes 时代的服务",
     "language": "zh-hans",
     "author": "ServiceMesher 社区",
     "links": {
         "sidebar": {
+            "云原生社区": "https://cloudnative.to",
             "ServiceMesher 社区": "https://www.servicemesher.com",
             "Istio 官网（中文）": "https://istio.io/zh/"
         }

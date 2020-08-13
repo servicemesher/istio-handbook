@@ -40,21 +40,21 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 以下是参与本书编写的人员名单（按参与时间排序）。
 
 
-| 头像 | GitHub | 姓名 | 头像 | GitHub | 姓名 |
-| :---: | :---: | :---: | :---: | :---: | :---: |
-| ![](https://avatars2.githubusercontent.com/u/3328185?s=60&v=4) | [rootsongjc](https://github.com/rootsongjc) | 宋净超 | ![](https://avatars2.githubusercontent.com/u/1321762?s=60&v=4) | [zhaohuabing](https://github.com/zhaohuabing) | 赵化冰 |
-| ![](https://avatars1.githubusercontent.com/u/24563928?s=60&v=4) | [sunny0826](https://github.com/sunny0826) | 郭旭东 | ![](https://avatars3.githubusercontent.com/u/16001996?s=60&v=4) | [GuangmingLuo](https://github.com/GuangmingLuo) | 罗广明 |
-| ![](https://avatars1.githubusercontent.com/u/1208287?s=60&v=4) | [malphi](https://github.com/malphi) | 马若飞 | ![](https://avatars0.githubusercontent.com/u/8215757?s=60&v=4) | [wangfakang](https://github.com/wangfakang) | 王发康 |
-| ![](https://avatars3.githubusercontent.com/u/42396612?s=60&v=4) | [tony-Ma-yami](https://github.com/tony-Ma-yami) | 马博 | ![](https://avatars3.githubusercontent.com/u/730866?s=60&v=4) | [hb-chen](https://github.com/hb-chen) | 陈洪波 |
-| ![](https://avatars1.githubusercontent.com/u/13655991?s=60&v=4) | [dangpf](https://github.com/dangpf) | 党鹏飞 | ![](https://avatars2.githubusercontent.com/u/5086059?s=60&v=4) | [violetgo](https://github.com/violetgo) | 高威 |
-| ![](https://avatars1.githubusercontent.com/u/7353685?s=60&v=4) | [wuti1609](https://github.com/wuti1609) | 马越 | ![](https://avatars0.githubusercontent.com/u/26428832?s=60&v=4) | [Lovnx](https://github.com/Lovnx) | 叶志远 |
-| ![](https://avatars1.githubusercontent.com/u/17958623?s=60&v=4) | [AsCat](https://github.com/AsCat) | 翁扬慧 | ![](https://avatars3.githubusercontent.com/u/18298595?s=60&v=4) | [linda01232003](https://github.com/linda01232003) | 崔晓晴 |
-| ![](https://avatars3.githubusercontent.com/u/12389633?s=60&v=4) | [wbpcode](https://github.com/wbpcode) | 王佰平 |![](https://avatars0.githubusercontent.com/u/13050217?s=60&v=4) | [sunzhaochang](https://github.com/sunzhaochang) | 孙召昌 |
-| ![](https://avatars2.githubusercontent.com/u/463772?s=60&v=4) | [zhongfox](https://github.com/zhongfox) | 钟华 | ![](https://avatars2.githubusercontent.com/u/29272249?s=60&v=4) | [tx19980520](https://github.com/tx19980520) | 谭骁 |
-| ![](https://avatars2.githubusercontent.com/u/8142348?s=60&v=4) | [lyzhang1999](https://github.com/lyzhang1999) | 王炜 | ![](https://avatars3.githubusercontent.com/u/22499672?s=60&v=4) | [Liu-HongYe](https://github.com/Liu-HongYe) | 刘洪晔 |
-| ![](https://avatars3.githubusercontent.com/u/15208260?s=60&v=4) | [ycliu912](https://github.com/ycliu912) | 刘艳超 | ![](https://avatars3.githubusercontent.com/u/22319610?s=60&v=4) |[mlycore](https://github.com/mlycore)|苗立尧|
-| ![](https://avatars0.githubusercontent.com/u/61925099?s=60&v=4) | [mcsos](https://github.com/mcsos) | 郭栋 | ![](https://avatars1.githubusercontent.com/u/14137033?s=60&v=4) |[lianghao208](https://github.com/lianghao208) |梁豪 |
-| ![](https://avatars3.githubusercontent.com/u/10829448?s=60&v=4) | [ethanhanjiahao](https://github.com/ethanhanjiahao) | 韩佳浩 | | | |
+| 头像                                                            | GitHub                                              | 姓名   | 头像                                                            | GitHub                                            | 姓名   |
+| :---:                                                           | :---:                                               | :---:  | :---:                                                           | :---:                                             | :---:  |
+| ![](https://avatars2.githubusercontent.com/u/3328185?s=60&v=4)  | [rootsongjc](https://github.com/rootsongjc)         | 宋净超 | ![](https://avatars2.githubusercontent.com/u/1321762?s=60&v=4)  | [zhaohuabing](https://github.com/zhaohuabing)     | 赵化冰 |
+| ![](https://avatars1.githubusercontent.com/u/24563928?s=60&v=4) | [sunny0826](https://github.com/sunny0826)           | 郭旭东 | ![](https://avatars3.githubusercontent.com/u/16001996?s=60&v=4) | [GuangmingLuo](https://github.com/GuangmingLuo)   | 罗广明 |
+| ![](https://avatars1.githubusercontent.com/u/1208287?s=60&v=4)  | [malphi](https://github.com/malphi)                 | 马若飞 | ![](https://avatars0.githubusercontent.com/u/8215757?s=60&v=4)  | [wangfakang](https://github.com/wangfakang)       | 王发康 |
+| ![](https://avatars3.githubusercontent.com/u/42396612?s=60&v=4) | [tony-Ma-yami](https://github.com/tony-Ma-yami)     | 马博   | ![](https://avatars3.githubusercontent.com/u/730866?s=60&v=4)   | [hb-chen](https://github.com/hb-chen)             | 陈洪波 |
+| ![](https://avatars1.githubusercontent.com/u/13655991?s=60&v=4) | [dangpf](https://github.com/dangpf)                 | 党鹏飞 | ![](https://avatars2.githubusercontent.com/u/5086059?s=60&v=4)  | [violetgo](https://github.com/violetgo)           | 高威   |
+| ![](https://avatars1.githubusercontent.com/u/7353685?s=60&v=4)  | [wuti1609](https://github.com/wuti1609)             | 马越   | ![](https://avatars0.githubusercontent.com/u/26428832?s=60&v=4) | [Lovnx](https://github.com/Lovnx)                 | 叶志远 |
+| ![](https://avatars1.githubusercontent.com/u/17958623?s=60&v=4) | [AsCat](https://github.com/AsCat)                   | 翁扬慧 | ![](https://avatars3.githubusercontent.com/u/18298595?s=60&v=4) | [linda01232003](https://github.com/linda01232003) | 崔晓晴 |
+| ![](https://avatars3.githubusercontent.com/u/12389633?s=60&v=4) | [wbpcode](https://github.com/wbpcode)               | 王佰平 | ![](https://avatars0.githubusercontent.com/u/13050217?s=60&v=4) | [sunzhaochang](https://github.com/sunzhaochang)   | 孙召昌 |
+| ![](https://avatars2.githubusercontent.com/u/463772?s=60&v=4)   | [zhongfox](https://github.com/zhongfox)             | 钟华   | ![](https://avatars2.githubusercontent.com/u/29272249?s=60&v=4) | [tx19980520](https://github.com/tx19980520)       | 谭骁   |
+| ![](https://avatars2.githubusercontent.com/u/8142348?s=60&v=4)  | [lyzhang1999](https://github.com/lyzhang1999)       | 王炜   | ![](https://avatars3.githubusercontent.com/u/22499672?s=60&v=4) | [Liu-HongYe](https://github.com/Liu-HongYe)       | 刘洪晔 |
+| ![](https://avatars3.githubusercontent.com/u/15208260?s=60&v=4) | [ycliu912](https://github.com/ycliu912)             | 刘艳超 | ![](https://avatars3.githubusercontent.com/u/22319610?s=60&v=4) | [mlycore](https://github.com/mlycore)             | 苗立尧 |
+| ![](https://avatars0.githubusercontent.com/u/61925099?s=60&v=4) | [mcsos](https://github.com/mcsos)                   | 郭栋   | ![](https://avatars1.githubusercontent.com/u/14137033?s=60&v=4) | [lianghao208](https://github.com/lianghao208)     | 梁豪   |
+| ![](https://avatars3.githubusercontent.com/u/10829448?s=60&v=4) | [ethanhanjiahao](https://github.com/ethanhanjiahao) | 韩佳浩 |                                                                 |                                                   |        |
 
 **[认领章节](wg/process.md)并提交 PR，成功合并后即可成为作者，期待你的加入。**
 
@@ -68,13 +68,7 @@ Istio Service Mesh Advanced Practical - Master the Services in Post Kubernetes E
 
 - 请先阅读本书的[参与流程](wg/process.md)。
 - 参与写作请参考[写作规范](wg/specification.md)。
-- 有任何问题请与本书[编委会](wg/editorial-board.md)联系。
-- 使用钉钉扫描下面的二维码加入本书讨论群。
 
-<p align="center">
-    <img src="images/istio-handbook-team.jpg" alt="钉钉群二维码" />
-  </a>
-</p>
 
 ## 目录预览图
 

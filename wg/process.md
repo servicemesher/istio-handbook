@@ -24,13 +24,9 @@ Istio Handbook 参与流程如下图所示。
 
 ### 准备工作
 
-- 账号：您需要先准备一个钉钉号和 GitHub 账号。钉钉用来协作和沟通，Github 进行任务认领和 PR 提交。
-- 申请加入：请使用钉钉扫描下面的二维码协作群，通过审批后您需要登记一下基本信息（具体见群公告），之后管理员会将您添加到 ServiceMesher 的 GitHub 组织，即可正式参与写作。
+- 账号：您需要先准备一个 GitHub 账号。本书通过微信用来协作和沟通，Github 进行任务认领和 PR 提交。
+- 申请加入：请添加 [Jimmy Song](https://jimmysong.io/contact) 微信，备注（姓名-公司）并说明加入 Istio Handbook 协作群，之后管理员会将您添加到 ServiceMesher 的 GitHub 组织，即可正式参与写作。
 
-<p align="center">
-    <img src="../images/istio-handbook-team.jpg" alt="钉钉群二维码" />
-   </a>
-</p>
 
 - 为保证本书内容的一致性和准确性，请在参与前仔细阅读[协作规范](specification.md)；
 - 仓库和分支管理
