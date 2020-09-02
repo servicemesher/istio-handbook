@@ -119,8 +119,8 @@ $ kubectl exec -it $FORTIO_POD  -c fortio -- /usr/bin/fortio load -c 30 -qps 0 -
 
 结果类似下面这样，大概为 3% 的成功率：
 
-```
-root@yq01-sys-ote01.yq01.baidu.com:istio-1.6.5 kubectl exec -it $FORTIO_POD  -c fortio -- /usr/bin/fortio load -c 30 -qps 0 -n 300 -loglevel Warning http://httpbin:8000/get
+```shell
+$ kubectl exec -it $FORTIO_POD  -c fortio -- /usr/bin/fortio load -c 30 -qps 0 -n 300 -loglevel Warning http://httpbin:8000/get
 14:50:39 I logger.go:114> Log level is now 3 Warning (was 2 Info)
 Fortio 1.6.7 running at 0 queries per second, 56->56 procs, for 300 calls: http://httpbin:8000/get
 Starting at max qps with 30 thread(s) [gomax 56] for exactly 300 calls (10 per thread + 0)
