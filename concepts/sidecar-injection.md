@@ -34,7 +34,7 @@ reviewers: [""]
 Istio 中提供了以下两种 sidecar 注入方式：
 
 - 使用 `istioctl` 手动注入。
-- 基于 Kubernetes 的 [突变 webhook 入驻控制器（mutating webhook addmission controller](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/) 的自动 sidecar 注入方式。
+- 基于 Kubernetes 的 [突变 webhook 入驻控制器（mutating webhook addmission controller)](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/) 的自动 sidecar 注入方式。
 
 不论是手动注入还是自动注入，sidecar 的注入过程都需要遵循如下步骤：
 
