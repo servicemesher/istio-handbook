@@ -11,11 +11,11 @@ reviewers: ["rootsongjc","GuangmingLuo"]
 
 而 Service Mesh 的本质则是将此类通用的功能沉淀至 sidecar 中，由 sidecar 接管服务的流量并对其进行治理。在这个思路下，可以通过流量劫持的手段，做到代码零侵入性。这样可以让业务开发人员更关心业务功能。而底层功能由于对业务零侵入，也使得基础功能的升级和快速的更新迭代成为可能。
 
-Istio 是近年来 Service Mesh 的代表作，而 Istio 流量管理的核心组件就是是 Pilot。Pilot 主要功能就是管理和配置部署在特定 Istio 服务网格中的所有 sidecar 代理实例。它管理 sidecar 代理之间的路由流量规则，并配置故障恢复功能，如超时、重试和熔断。
+Istio 是近年来 Service Mesh 的代表作，而 Istio 流量管理的核心组件就是 Pilot。Pilot 主要功能就是管理和配置部署在特定 Istio 服务网格中的所有 sidecar 代理实例。它管理 sidecar 代理之间的路由流量规则，并配置故障恢复功能，如超时、重试和熔断。
 
 ## Pilot 架构
 
-![Polot 架构（图片来自Istio官方网站）](../images/pilot-arch.png)
+![Pilot 架构（图片来自Istio官方网站）](../images/pilot-arch.png)
 
 根据上图， Pilot 几个关键的模块如下。
 
@@ -41,7 +41,7 @@ Sidecar 通过 xDS API 可以动态获取 Listener （监听器）、Route （�
 - LDS，Listener 发现服务：Listener 监听器控制 sidecar 启动端口监听（目前只支持 TCP 协议），并配置 L3/L4 层过滤器，当网络连接达到后，配置好的网络过滤器堆栈开始处理后续事件。
 - RDS，Router 发现服务：用于 HTTP 连接管理过滤器动态获取路由配置，路由配置包含 HTTP 头部修改（增加、删除 HTTP 头部键值），virtual hosts （虚拟主机），以及 virtual hosts 定义的各个路由条目。
 - CDS，Cluster 发现服务：用于动态获取 Cluster 信息。
-- EDS，Endpoint 发现服务：用与动态维护端点信息，端点信息中还包括负载均衡权重、金丝雀状态等，基于这些信息，sidecar 可以做出智能的负载均衡决策。
+- EDS，Endpoint 发现服务：用于动态维护端点信息，端点信息中还包括负载均衡权重、金丝雀状态等，基于这些信息，sidecar 可以做出智能的负载均衡决策。
 
 通过采用该标准 API， Istio 将控制面和数据面进行了解耦，为多种数据平面 sidecar 实现提供了可能性。例如蚂蚁金服开源的 Golang 版本的 Sidecar [MOSN (Modular Observable Smart Network)](https://github.com/mosn/mosn)。
 
@@ -288,7 +288,7 @@ Pilot 中，目前实现了 `ConfigStoreCache` 的 `controller` 主要有以下�
 - `kube/ingress/controller.go`
 - `memory/controller.go`
 
-其中比较关键的是 `crd controller`。CRD 是 `CustomResourceDefinition` 的缩写 ，CRD Contriller 利用 `SharedIndexInformer` 实现对 CRD 资源的 `list/watch`。将 `Add`、`Update`、`Delete` 事件涉及到的 CRD 资源对象封装为一个 Task ，并 push 到 `ConfigController` 的 `queue` 里，`queue` 队列始终处于监听状态，只要队列中有内容，就会回调 `task` 函数执行。关键代码的实现如下：
+其中比较关键的是 `crd controller`。CRD 是 `CustomResourceDefinition` 的缩写 ，CRD Controller 利用 `SharedIndexInformer` 实现对 CRD 资源的 `list/watch`。将 `Add`、`Update`、`Delete` 事件涉及到的 CRD 资源对象封装为一个 Task ，并 push 到 `ConfigController` 的 `queue` 里，`queue` 队列始终处于监听状态，只要队列中有内容，就会回调 `task` 函数执行。关键代码的实现如下：
 
 ```go
 //go 语言，源码摘自 pilot-discovery，pilot-discovery 实现配置监听的关键部分，接上一段代码中的 registerHandlers
