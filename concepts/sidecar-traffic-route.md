@@ -15,7 +15,7 @@ reviewers: ["rootsongjc"]
 * Host： 能够进行网络通信的实体（如移动设备、服务器上的应用程序）。在此文档中，host 是一个逻辑上的网络应用程序。一个物理硬件上可能运行有多个 host，只要它们是可以独立寻址的。在 EDS 接口中，也使用 “endpoint” 来表示一个应用实例，对应一个 IP + port 的组合。
 * Downstream： 下游 host 连接到 Envoy，发送请求并接收响应。
 * Upstream： 上游 host 接收来自 Envoy 的连接和请求，并返回响应。
-* Listener： 监听器是一个命名网络地址（例如，端口、unix domain socket等)，可以被下游客户端连接。Envoy 中暴露一个或者多个给下游主机连接的监听器。在 Envoy 中,listener 可以绑定到端口上直接对外提供服务，也可以不绑定到端口上，而是接收其他 listener 转发的请求。
+* Listener： 监听器是一个命名网络地址（例如，端口、unix domain socket 等)，可以被下游客户端连接。Envoy 中暴露一个或者多个给下游主机连接的监听器。在 Envoy 中，listener 可以绑定到端口上直接对外提供服务，也可以不绑定到端口上，而是接收其他 listener 转发的请求。
 * Cluster： 集群是指 Envoy 连接的一组上游主机，集群中的主机是对等的，对外提供相同的服务，这些主机一起组成了一个可以提供负载均衡和高可用的服务集群。Envoy 通过服务发现来发现集群的成员。可以选择通过主动健康检查来确定集群成员的健康状态。Envoy 通过负载均衡策略决定将请求路由到哪个集群成员。
 
 ## XDS服务接口
@@ -150,7 +150,7 @@ kubectl exec -it productpage-v1-6d8bc58dd7-ts8kw -c istio-proxy curl http://127.
 
 ##### Outbound Cluster
 
-这部分的 cluster  占了绝大多数，该类 cluster  对应于 Envoy 所在节点的外部服务。以 reviews 为例，对于 productpage 来说,reviews 是一个外部服务，因此其 cluster  名称中包含 outbound 字样。
+这部分的 cluster  占了绝大多数，该类 cluster 对应于 Envoy 所在节点的外部服务。以 reviews 为例，对于 productpage 来说，reviews 是一个外部服务，因此其 cluster 名称中包含 outbound 字样。
 
 从 reviews 服务对应的 cluster 配置中可以看到，其类型为 EDS，即表示该 cluster 的 endpoint 来自于动态发现，动态发现中 eds_config 则指向了ads，最终指向 static resource 中配置的 xds-grpc cluster，即 Pilot 的地址。
 
@@ -176,7 +176,7 @@ kubectl exec -it productpage-v1-6d8bc58dd7-ts8kw -c istio-proxy curl http://127.
 }
 ```
 
-可以通过Pilot的调试接口获取该 cluster 的 endpoint：
+可以通过 Pilot 的调试接口获取该 cluster 的 endpoint：
 
 ```bash
 curl http://10.97.222.108:15014/debug/edsz > pilot_eds_dump
@@ -235,7 +235,7 @@ curl http://10.97.222.108:15014/debug/edsz > pilot_eds_dump
 
 ##### Inbound Cluster
 
-对于 Envoy 来说，inbound cluster 对应于入向请求的 upstream 集群， 即 Envoy 自身所在节点的服务。对于 productpage Pod 上的 Envoy，其对应的 Inbound cluster 只有一个，即 productpage。该 cluster 对应的 host 为127.0.0.1，即环回地址上 productpage 的监听端口。由于 iptable 规则中排除了127.0.0.1，入站请求通过该 Inbound cluster 处理后将跳过 Envoy，直接发送给 productpage 进程处理。
+对于 Envoy 来说，inbound cluster 对应于入向请求的 upstream 集群， 即 Envoy 自身所在节点的服务。对于 productpage Pod 上的 Envoy，其对应的 Inbound cluster 只有一个，即 productpage。该 cluster 对应的 host 为127.0.0.1，即回环地址上 productpage 的监听端口。由于 iptable 规则中排除了127.0.0.1，入站请求通过该 Inbound cluster 处理后将跳过 Envoy，直接发送给 productpage 进程处理。
 
 ```json
 {
@@ -291,7 +291,7 @@ curl http://10.97.222.108:15014/debug/edsz > pilot_eds_dump
 
 ##### PassthroughCluster
 
-该 cluster 的 type 被设置为 `ORIGINAL_DST` 类型， 表明任何发向该 cluster 的请求都会被直接发送到其请求中的原始目地的，Envoy 不会对请求进行重新路由，
+该 cluster 的 type 被设置为 `ORIGINAL_DST` 类型， 表明任何发向该 cluster 的请求都会被直接发送到其请求中的原始目地的，Envoy 不会对请求进行重新路由。
 
 ```json
 {
@@ -388,7 +388,7 @@ filterchain 中的第一个 filter chain 中是一个 upstream cluster 为 Black
 
 ##### Outbound Listener
 
-Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以用于处理出向请求。bookinfo 示例程序中使用了9080作为微服务的业务端口，因此我们这里主要分析9080这个业务端口的 listenrer。和其他所有 Outbound listener 一样，该 listener 配置了"bind_to_port”: false 属性，因此该 listener 没有被绑定到 tcp 端口上，其接收到的所有请求都转发自15001端口的 Virtual listener。
+Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以用于处理出向请求。bookinfo 示例程序中使用了9080作为微服务的业务端口，因此我们这里主要分析9080这个业务端口的 listener。和其他所有 Outbound listener 一样，该 listener 配置了"bind_to_port”: false 属性，因此该 listener 没有被绑定到 tcp 端口上，其接收到的所有请求都转发自15001端口的 Virtual listener。
 
 该listener 的名称为0.0.0.0_9080,因此会匹配发向任意 IP 的9080端口的请求，bookinfo 程序中的 productpage,revirews,ratings,details 四个服务都使用了9080端口，那么 Envoy 如何区别处理这四个服务呢？
 > 备注： 根据业务逻辑，实际上 productpage 并不会调用 ratings 服务，但 Istio 并不知道各个业务之间会如何调用，因此将所有的服务信息都下发到了 Envoy 中。这样做对 Envoy 的内存占用和效率有一定影响，如果希望去掉 Envoy 配置中的无用数据，可以通过 sidecar CRD 对 Envoy 的 ingress 和 egress service 配置进行调整。
@@ -446,11 +446,11 @@ Envoy 为网格中的外部服务按端口创建多个 Outbound listener，以�
 
 在较早的版本中，Istio 采用同一个 VirtualListener 在端口 15001 上同时处理入向和出向的请求。该方案存在一些潜在的问题，例如可能会导致出现死循环，参见[这个 PR](https://github.com/istio/istio/pull/15713)。在 1.4 版本之后，Istio 为 Envoy 单独创建了 一个 VirtualInboundListener，在 15006 端口监听入向请求，原来的 15001 端口只用于处理出向请求。
 
-另外一个变化是当 VirtualInboundListener 接收到请求后，将直接在 VirtualInboundListener 采用一系列 filterChain 对入向请求进行处理，而不是像 VirtualOutboundListene 一样分发给其它独立的 listener 进行处理。
+另外一个变化是当 VirtualInboundListener 接收到请求后，将直接在 VirtualInboundListener 采用一系列 filterChain 对入向请求进行处理，而不是像 VirtualOutboundListener 一样分发给其它独立的 listener 进行处理。
 
 这样修改后，Envoy 配置中入向和出向的请求处理流程被完全拆分开，请求处理流程更为清晰，可以避免由于配置导致的一些潜在错误。
 
-下图是 bookinfo 例子中 reviews 服务中 Enovy Proxy 的 VirutalInbound listener 配置。 在配置中采用注释标注了各个不同作用的 filter chain。
+下图是 bookinfo 例子中 reviews 服务中 Envoy Proxy 的 VirtualInbound listener 配置。 在配置中采用注释标注了各个不同作用的 filter chain。
 
 ```json
 {
