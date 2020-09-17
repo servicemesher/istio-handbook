@@ -82,7 +82,7 @@ spec:
 
 ### Gateway
 
-Gateway 定义了所有HTTP/TCP流量进入网格或者从网格中出站的统一入口和出口。它描述了一组对外公开的端口、协议、负载均衡、以及 SNI 配置。Istio Gateway 包括 Ingress Gateway 与 Egress Gateway，分别用来配置网格的入口流量与出口流量。Ingress Gateway 使用 istio-ingressgateway 负载均衡器来代理流量，而 istio-ingressgateway 的本质是一个 Envoy 代理。它的一个简单示例如下：
+Gateway 定义了所有 HTTP/TCP 流量进入网格或者从网格中出站的统一入口和出口。它描述了一组对外公开的端口、协议、负载均衡、以及 SNI 配置。Istio Gateway 包括 Ingress Gateway 与 Egress Gateway，分别用来配置网格的入口流量与出口流量。Ingress Gateway 使用 istio-ingressgateway 负载均衡器来代理流量，而 istio-ingressgateway 的本质是一个 Envoy 代理。它的一个简单示例如下：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -143,7 +143,7 @@ spec:
 - `80`端口附属配置的 host 为`uk.bookinfo.com`，`eu.bookinfo.com`，同时在`tls`中配置如果使用 HTTP1.1 协议访问将会被返回301，要求使用 HTTPS 访问，通过这种配置变相的禁止了对`uk.bookinfo.com`，`eu.bookinfo.com`域名的 HTTP1.1 协议的访问入口。
 - `443`端口为 TLS/HTTPS 访问的端口，表示接受`uk.bookinfo.com`，`eu.bookinfo.com`域名的 HTTPS 协议的访问，`protocol`属性指定了他的协议类型。在`tls`的配置中指定了他的会话模式为单向 TLS ，也指定了服务端证书和私钥的存放地址。
 - `9443`端口也是提供 TLS/HTTPS 访问，与 `443`不同的是他的认证不是指定存放证书的地址，而是通过 credentialName 名称从 Kubernetes 的证书管理中心拉取。
-- `9080`端口为一个提供简单 HTTP1.1 协议请求的端口。这里我们注意到它的hosts中配置了 `ns1/*` 与 `ns2/foo.bar.com` 这个配置项表示只允许`ns1`这个 Namespace 下的 VirtualService 绑定它以及 `ns2` 这个命名空间下配置了 `host` 为`foo.bar.com` 的 VirtualService 绑定它。
+- `9080`端口为一个提供简单 HTTP1.1 协议请求的端口。这里我们注意到它的 hosts 中配置了 `ns1/*` 与 `ns2/foo.bar.com` 这个配置项表示只允许`ns1`这个 Namespace 下的 VirtualService 绑定它以及 `ns2` 这个命名空间下配置了 `host` 为`foo.bar.com` 的 VirtualService 绑定它。
 - `2379`端口提供了一个`MONGO`协议的请求端口。允许所有 `host` 绑定它。
 
 Egress Gateway 提供了对网格的出口流量进行统一管控的功能，在安装 Istio 时默认是不开启的。可以使用以下命令查看是否开启。
@@ -225,7 +225,7 @@ $ kubectl get configmap istio -n istio-system -o yaml  \
 
 ### Sidecar
 
-在默认的情况下，Istio 中所有Pod中的 Envoy 代理都是可以被寻址的。然而在某些场景下，我们为了做资源隔离，希望只访问某些 Namespace 下的资源。这个时候，我们就可以使用 Sidecar 配置来实现。下面是一个简单的示例：
+在默认的情况下，Istio 中所有 Pod 中的 Envoy 代理都是可以被寻址的。然而在某些场景下，我们为了做资源隔离，希望只访问某些 Namespace 下的资源。这个时候，我们就可以使用 Sidecar 配置来实现。下面是一个简单的示例：
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
