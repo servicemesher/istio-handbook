@@ -78,7 +78,7 @@ $ istioctl proxy-config endpoints ${pod_name}.default --cluster xds-grpc -ojson 
 
 升级过程中可能发生流量中断。为了缩短流量中断时间，请确保每个组件（Citadel 除外）至少运行有两个副本。同时，确保 `PodDisruptionBudgets` 配置最小可用性为 1。
 
-`istoctl` 通过查看支持的版本列表，验证是否支持从当前 Istio 版本升级：
+`istioctl` 通过查看支持的版本列表，验证是否支持从当前 Istio 版本升级：
 
 ```bash
 $ istioctl manifest versions
