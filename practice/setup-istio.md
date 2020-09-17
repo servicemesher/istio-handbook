@@ -66,6 +66,7 @@ $ curl -L https://raw.githubusercontent.com/istio/istio/release-1.5/release/down
 ```
 
 安装目录内容：
+
 |目录|包含内容|
 |---|---|
 |`bin`| 包含 istioctl 的客户端文件 |
