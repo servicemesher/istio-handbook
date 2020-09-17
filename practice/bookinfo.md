@@ -33,7 +33,7 @@ Bookinfo 应用分为四个单独的微服务， 这些服务对 Istio 并无依
 ## 部署应用
 
 
-想要将应用接入 Istio 服务网格，需要将应用所在的命名空间进行 yaml 配置，以打入对应可自动注入 Sidecar的标签，通过重启应用来完成自动加入网格的动作。最终加入到服务网格中的 Bookinfo 应用架构如下所示：
+想要将应用接入 Istio 服务网格，需要将应用所在的命名空间进行 yaml 配置，以打入对应可自动注入 Sidecar 的标签，通过重启应用来完成自动加入网格的动作。最终加入到服务网格中的 Bookinfo 应用架构如下所示：
 
 ![Bookinfo Application](../images/Bookinfo-Application.png)
 
@@ -54,7 +54,7 @@ $ kubectl label namespace default istio-injection=enabled
 $ kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
 ```
 
-如果您在安装过程中禁用了 Sidecar 自动注入功能而选择手动注入 Sidecar，请在部署应用之前使用 `istioctl kube-inject`命令修改 `bookinfo.yaml` 文件，该命令可以从 Istio ConfigMap中动态获取网格配置。
+如果您在安装过程中禁用了 Sidecar 自动注入功能而选择手动注入 Sidecar，请在部署应用之前使用 `istioctl kube-inject`命令修改 `bookinfo.yaml` 文件，该命令可以从 Istio ConfigMap 中动态获取网格配置。
 
 
 ```bash
