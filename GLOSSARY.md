@@ -25,6 +25,10 @@ destination.workload.name: example
 ```
 属性被 Istio 的策略和遥测功能所使用。
 
+## B3 HTTP Header
+
+在实现分布式追踪时，需要采用一种传输机制（wire protocol）来在上下游服务（进程）之间传递跟踪的上下文信息（SpanContext），以将上下游服务中生成的 Span 关联到同一个 Trace 上。需要传递的上下文内容包括 TraceId、Span Id 等内容。 [B3 HTTP Header](https://github.com/openzipkin/b3-propagation)是分布式追踪系统 [Zipkin](https://zipkin.io/) 采用 HTTP header 来传递SpanContext 的传输机制，其内容采用16进制字符进行编码，上游服务在对下游服务进行 HTTP 方法调用时，会将相应的 B3 HTTP Header 加入到 HTTP 请求头部中，以将 SpanContext 传递到下游服务。
+
 ## Cluster
 
 集群是运行容器化应用程序的一组计算节点。 通常，组成集群的计算节点彼此可以直接连接。 集群通过规则或策略限制外部访问。

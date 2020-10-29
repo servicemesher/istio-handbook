@@ -61,7 +61,7 @@ Katacoda 官方提供了 CLI 工具，帮助您创建 Scenarios。
 
 通过 npm 命令安装 `npm i katacoda-cli --global`。
 
-命令遵循语法的是 `$ katacoda COMMAND`
+命令遵循的语法是 `$ katacoda COMMAND`
 
 安装完成后，可以通过运行命令 `katacoda --help` 查看帮助信息。
 

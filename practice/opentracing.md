@@ -62,8 +62,9 @@ reviewers: ["rootsongjc", "GuangmingLuo"]
 一个 Span 的数据结构中包含以下内容：
 
 * name: Span 所代表的操作名称，例如 REST 接口对应的资源名称。
-* Start timestamp: Span 所代表操作的开始时间
-* Finish timestamp: Span 所代表的操作的的结束时间
+* Start timestamp: Span 所代表操作的开始时间。
+* Finish timestamp: Span 所代表的操作的的结束时间。
+* Logs：一系列摘要日志，每个摘要日志由一个键值对组成，包含Span内的错误堆栈与事件信息。
 * Tags：一系列标签，每个标签由一个键值对组成。该标签可以是任何有利于调用分析的信息，例如方法名，URL 等。
 * SpanContext：用于跨进程边界传递 Span 相关信息，在进行传递时需要结合一种序列化协议 （Wire Protocol） 使用。
 * References：该Span引用的其它关联 Span，主要有两种引用关系，Childof 和 FollowsFrom。
@@ -103,7 +104,7 @@ OpenTracing 中的 Tracer API 只定义了 inject 和 extract 两个方法接口
 
 ## 小结
 
-在本节中，我们介绍了分布式追踪和 OpenTracing 的一些基本概念，在下面的章节中，我们将继续介绍如何使用 OpenTracing 来增强 Istio 的分布式追踪，包括实现 SpanContext 传递，提供方法级别的追踪以及异步消息的追踪。
+在本节中，我们介绍了 OpenTracing 的一些基本概念，在下面的章节中，我们将继续介绍如何使用 OpenTracing 来增强 Istio 的分布式追踪，包括实现 SpanContext 传递，提供方法级别的追踪以及异步消息的追踪。
 
 ## 参考
 

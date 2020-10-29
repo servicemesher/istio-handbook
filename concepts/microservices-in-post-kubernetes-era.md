@@ -13,7 +13,7 @@ reviewers: ["Guangmingluo"]
 1. Kubernetes、xDS 协议（[Envoy](https://github.com/envoyproxy/envoy)、[MOSN](https://github.com/mosn/mosn) 等）与 Istio 之间又是什么关系？
 1. 到底该不该上 Service Mesh？
 
-这一节我们将试图带您梳理清楚 Kubernetes、xDS 协议以及 Istio Service Mesh 之间的内在联系。此外，本节还将介绍 Kubernetes 中的负载均衡方式，xDS 协议对于 Service Mesh 的意义以及为什么说及时有了 Kubernetes 还需要 Istio。
+这一节我们将试图带您梳理清楚 Kubernetes、xDS 协议以及 Istio Service Mesh 之间的内在联系。此外，本节还将介绍 Kubernetes 中的负载均衡方式，xDS 协议对于 Service Mesh 的意义以及为什么说即使有了 Kubernetes 还需要 Istio。
 
 使用 Service Mesh 并不是说与 Kubernetes 决裂，而是水到渠成的事情。Kubernetes 的本质是通过声明式配置对应用进行生命周期管理，而 Service Mesh 的本质是提供应用间的流量和安全性管理以及可观察性。假如你已经使用 Kubernetes 构建了稳定的微服务平台，那么如何设置服务间调用的负载均衡和流量控制？
 
@@ -52,7 +52,7 @@ Kubernetes 集群的每个节点都部署了一个 `kube-proxy` 组件，该组�
 
 ![Service Mesh 中的服务注册](../images/istio-service-registry.png)
 
-Istio Service Mesh 可以沿用了 Kubernetes 中的 service 做服务注册，还可以通过控制平面的平台适配器对接其他服务发现系统，然后生成数据平面的配置（使用 CRD 声明，保存在 etcd 中），数据平面的**透明代理**（transparent proxy）以 sidecar 容器的形式部署在每个应用服务的 pod 中，这些 proxy 都需要请求控制平面来同步代理配置。之所以说是透明代理，是因为应用程序容器完全无感知代理的存在，该过程 kube-proxy 组件一样需要拦截流量，只不过 `kube-proxy` 拦截的是进出 Kubernetes 节点的流量，而 sidecar proxy 拦截的是进出该 Pod 的流量，详见[理解 Istio Service Mesh 中 Envoy Sidecar 代理的路由转发](https://jimmysong.io/blog/envoy-sidecar-routing-of-istio-service-mesh-deep-dive/)。
+Istio Service Mesh 可以沿用 Kubernetes 中的 service 做服务注册，还可以通过控制平面的平台适配器对接其他服务发现系统，然后生成数据平面的配置（使用 CRD 声明，保存在 etcd 中），数据平面的**透明代理**（transparent proxy）以 sidecar 容器的形式部署在每个应用服务的 pod 中，这些 proxy 都需要请求控制平面来同步代理配置。之所以说是透明代理，是因为应用程序容器完全无感知代理的存在，该过程 kube-proxy 组件一样需要拦截流量，只不过 `kube-proxy` 拦截的是进出 Kubernetes 节点的流量，而 sidecar proxy 拦截的是进出该 Pod 的流量，详见[理解 Istio Service Mesh 中 Envoy Sidecar 代理的路由转发](https://jimmysong.io/blog/envoy-sidecar-routing-of-istio-service-mesh-deep-dive/)。
 
 **Service Mesh 的劣势**
 
@@ -125,7 +125,7 @@ Envoy 是 Istio Service Mesh 中默认的 Sidecar，Istio 在 Enovy 的基础上
 
 ### 基本术语
 
-下面是您应该了解的 Enovy 里的基本术语：
+下面是您应该了解的 Envoy 里的基本术语：
 
 - **Downstream（下游）**：下游主机连接到 Envoy，发送请求并接收响应，即发送请求的主机。
 - **Upstream（上游）**：上游主机接收来自 Envoy 的连接和请求，并返回响应，即接受请求的主机。

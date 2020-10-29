@@ -9,6 +9,7 @@ Service Mesh 的概念于 2016 年诞生至今仍在蓬勃发展，下面是由 
 
 - [amalgam8](https://github.com/amalgam8/amalgam8) - 用于异构微服务的基于版本的路由网格
 - [ambassador](https://github.com/datawire/ambassador) - 开源的基于 Envoy proxy 构建的用于微服务的 Kubernetes 原生 API 网关 [https://www.getambassador.io](https://www.getambassador.io/)
+- [Apache APISIX](https://github.com/apache/apisix) - Apache APISIX 是一个动态、实时、高性能的 API 网关，基于 Nginx/Openresty 网络库和 etcd 实现，提供负载均衡、动态上游、灰度发布、服务熔断、身份认证、可观测性等七层流量管理功能，可以用来处理网站、移动设备和 IoT 的流量，通常使用 Apache APISIX 来处理传统的南北向流量。 [http://apisix.apache.org/](http://apisix.apache.org/)
 - [aspen-mesh](https://github.com/aspenmesh) - 隶属于 F5 公司开发的 Service Mesh
 - [consul](https://github.com/hashicorp/consul) - Consul 一种分布式、高可用的数据中心感知解决方案，用于跨动态分布式基础架构连接和配置应用程序。<https://www.consul.io/>
 - [dubbo](https://github.com/apache/incubator-dubbo) - Apache Dubbo is a high-performance, java based, open source RPC framework. [http://dubbo.apache.org](http://dubbo.apache.org/)

@@ -9,7 +9,6 @@ Istio Handbook 编委会成立于 2020 年 2 月 27 日，以下是编委会成�
 | GitHub                                          | 姓名   | 公司      |
 | ----------------------------------------------- | ------ | --------- |
 | [GuangmingLuo](https://github.com/GuangmingLuo) | 罗广明 | 百度      |
-| [gorda](https://github.com/gorda)               | 官余棚 | 中天智慧  |
 | [ikingye ](https://github.com/ikingye )         | 叶王   | 百度      |
 | [malphi](https://github.com/malphi)             | 马若飞 | FreeWheel |
 | [rootsongjc](https://github.com/rootsongjc)     | 宋净超 | 蚂蚁金服  |
