@@ -13,7 +13,7 @@ Istio Handbook 编委会成立于 2020 年 2 月 27 日，以下是编委会成�
 | [malphi](https://github.com/malphi)             | 马若飞 | FreeWheel |
 | [rootsongjc](https://github.com/rootsongjc)     | 宋净超 | 蚂蚁金服  |
 | [stormgbs](https://github.com/stormgbs)         | 高步双 | 阿里云    |
-| [sunny0826](https://github.com/sunny0826)       | 郭旭东 | 凯京科技  |
+| [sunny0826](https://github.com/sunny0826)       | 郭旭东 | 爱乐奇  |
 | [wangfakang](https://github.com/wangfakang)     | 王发康 | 蚂蚁金服  |
 | [zhaohuabing](https://github.com/zhaohuabing)   | 赵化冰 | 中兴通讯  |
 
