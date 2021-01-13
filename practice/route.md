@@ -173,13 +173,13 @@ spec:
 
 ## DestinationRule
 
-Destination rule 是 Istio 流量路由功能的重要组成部分。一个 Virtual service 可以看作是如何将流量分发到给定的目标地址，然后调用 Destination rule 来配置分发到该目标地址的流量。Destination rule 在 Virtual service 的路由规则之后起作用(即在 Virtual service 的 `match` -> `route` -> `destination` 之后起作用，此时流量已经分发到真实的 service 上)，应用于真实的目标地址。
+DestinationRule 是 Istio 流量路由功能的重要组成部分。一个 VirtualService 可以看作是如何将流量分发到给定的目标地址，然后调用 DestinationRule 来配置分发到该目标地址的流量。DestinationRule 在 VirtualService 的路由规则之后起作用（即在 VirtualService 的 `match` -> `route` -> `destination` 之后起作用，此时流量已经分发到真实的 service 上），应用于真实的目标地址。
 
-特别地，可以使用 Destination rule 来指定命名的服务子集，例如根据版本对服务的实例进行分组，然后通过 Virtual service 的路由规则中的服务子集将控制流量分发到不同服务的实例中。
+特别地，可以使用 DestinationRule 来指定命名的服务子集，例如根据版本对服务的实例进行分组，然后通过 VirtualService 的路由规则中的服务子集将控制流量分发到不同服务的实例中。
 
-Destination rule 允许在调用完整的目标服务或特定的服务子集(如倾向使用的负载均衡模型，TLS 安全模型或断路器)时自定义 Envoy 流量策略。
+DestinationRule 允许在调用完整的目标服务或特定的服务子集，如倾向使用的负载均衡模型，TLS 安全模型或断路器时自定义 Envoy 流量策略。
 
-Istio 默认会使用轮询策略，此外 Istio 也支持如下负载均衡模型，可以在 Destination rule 中使用这些模型，将请求分发到特定的服务或服务子集。
+Istio 默认会使用轮询策略，此外 Istio 也支持如下负载均衡模型，可以在 DestinationRule 中使用这些模型，将请求分发到特定的服务或服务子集。
 
 - Random：将请求转发到一个随机的实例上
 - Weighted：按照指定的百分比将请求转发到实例上
@@ -187,7 +187,7 @@ Istio 默认会使用轮询策略，此外 Istio 也支持如下负载均衡模�
 
 # DestinationRule 示例
 
-下面的 Destination rule 使用不同的负载均衡策略为 my-svc 目的服务配置了3个不同的子集(subset)。
+下面的 DestinationRule 使用不同的负载均衡策略为 my-svc 目的服务配置了3个不同的子集（subset）。
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -203,7 +203,7 @@ spec:
   - name: v1  #subset1，将流量转发到具有标签 version:v1 的 deployment 对应的服务上
     labels:
       version: v1
-  - name: v2  #subset2，将流量转发到具有标签 version:v2 的 deployment 对应的服务上,指定负载均衡为轮询
+  - name: v2  #subset2，将流量转发到具有标签 version:v2 的 deployment 对应的服务上，指定负载均衡为轮询
     labels:
       version: v2
     trafficPolicy:
@@ -214,9 +214,9 @@ spec:
       version: v3
 ```
 
-每个子集由一个或多个 `labels` 定义，对应 Kubernetes 中的对象(如 pod )的 key/value 对。这些标签定义在 Kubernetes 服务的 deployment 的 metadata 中，用于标识不同的版本。
+每个子集由一个或多个 `labels` 定义，对应 Kubernetes 中的对象（如 pod）的 key/value 对。这些标签定义在 Kubernetes 服务的 deployment 的 metadata 中，用于标识不同的版本。
 
-除了定义子集外，Destination rule 还定义了该目的地中所有子集的默认流量策略，以及仅覆盖该子集的特定策略。默认的策略定义在 `subset` 字段之上，为 `v1` 和 `v3` 子集设置了随机负载均衡策略，在 `v2` 策略中使用了轮询负载均衡。
+除了定义子集外，DestinationRule 还定义了该目的地中所有子集的默认流量策略，以及仅覆盖该子集的特定策略。默认的策略定义在 `subset` 字段之上，为 `v1` 和 `v3` 子集设置了随机负载均衡策略，在 `v2` 策略中使用了轮询负载均衡。
 
 ## Gateway
 
@@ -311,7 +311,6 @@ spec:
 
 对于在网格内部但不属于平台服务注册表的服务，使用下面的示例可以将一组在非托管 VM 上运行的 MongoDB 实例添加到 Istio 的注册中心，以便可以将这些服务视为网格中的任何其他服务。
 ```yaml
-
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
@@ -335,7 +334,7 @@ spec:
 结合上面给出的示例，这里对 ServiceEntry 涉及的关键属性解释如下：
 
 * `hosts`: 表示与该 ServiceEntry 相关的主机名，可以是带有通配符前缀的 DNS 名称。
-* `address`: 与服务相关的虚拟 IP 地址，可以是 CIDR 前缀的形式。
+* `addresses`: 与服务相关的虚拟 IP 地址，可以是 CIDR 前缀的形式。
 * `ports`: 和外部服务相关的端口，如果外部服务的 endpoints 是 Unix socket 地址，这里必须只有一个端口。
 * `location`: 用于指定该服务属于网格内部（MESH_INTERNAL）还是外部（MESH_EXTERNAL）。
 * `resolution`: 主机的服务发现模式，可以是 NONE、STATIC、DNS。

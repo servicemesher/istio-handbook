@@ -176,9 +176,9 @@ spec:
     name: http
     protocol: HTTP
   resolution: DNS
- ```
+```
 ## 小结
 本节主要讲解路由的概念，通过对 VirtualService，DestinationRule 以及 ServiceEntry 三个 CRD 的配置及示例讲解，带读者认识了 Istio 中的路由。
- 
+
 ## 参考
- - [istio.io/Configuration/Traffic Management](https://istio.io/latest/docs/reference/config/networking/)
+ - [Traffic Management](https://istio.io/latest/docs/reference/config/networking/)
