@@ -171,7 +171,7 @@ $ curl $SERVICE_IP_OF_INGRESS:80/delay/3  -H"host:httpbin.example.com"
 
 从请求的结果可以发现，该 Virtual Service 已经生效。通过 Istio 的相关配置，访问 Envoy 的请求被成功转发给了后端 httpbin 服务。
 
-如果从 API 网关的本质来看，现在本节已经将 API 网关与 Isito 对接的最核心内容介绍完毕了。API 网关的基础就是请求转发和路由，其他所有衍生出来的特性如限流、鉴权、黑白名单等等都只是在路由的基础之上扩展并通过更加灵活的配置来控制而已。
+如果从 API 网关的本质来看，现在本节已经将 API 网关与 Istio 对接的最核心内容介绍完毕了。API 网关的基础就是请求转发和路由，其他所有衍生出来的特性如限流、鉴权、黑白名单等等都只是在路由的基础之上扩展并通过更加灵活的配置来控制而已。
 
 Virtual Service 本身提供了更多配置项来对路由做更进一步的配置，比如重试、比如错误注入，都已经算是功能层面的扩展，无碍于网关整体的设计，算是细枝末节。当读者认为普通的路由不能满足需求之时可以再去阅读 [Istio 官方文档](https://istio.io/latest/docs/reference/config/networking/virtual-service/#VirtualService)来对各个字段做深入了解。
 
