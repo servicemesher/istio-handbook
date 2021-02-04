@@ -243,7 +243,7 @@ ENTRYPOINT ["/usr/local/bin/pilot-agent"]
 
 我们看到 `istio-init` 容器的入口是 `/usr/local/bin/istio-iptables` 命令行，该命令行工具的代码的位置在 Istio 源码仓库的 [tools/istio-iptables](https://github.com/istio/istio/tree/master/tools/istio-iptables) 目录。
 
-注意：在 Istio 1.1 版本时还是使用 `isito-iptables.sh` 命令行来操作 IPtables。
+注意：在 Istio 1.1 版本时还是使用 `istio-iptables.sh` 命令行来操作 IPtables。
 
 ### Init 容器启动入口
 

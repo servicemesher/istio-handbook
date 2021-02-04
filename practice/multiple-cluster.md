@@ -98,7 +98,7 @@ dnsConfig:
 
 在多控制面网格拓扑中，每个集群身份都是对等的，对某个集群来说，任何其他集群都是远端集群。Kubernetes service 默认使用 `svc.cluster.local` 作为域名后缀，Kubernetes 集群内自带的 DNS 服务（KubeDNS 或者 CoreDNS），负责解析 service 域名。
 
-在该模式下，为了区别请求的目的端是本集群服务还是远端集群服务，istio 使用 `svc.cluster.global` 指向远端集群服务。默认情况下，isito 本身不会影响 Kubernetes 集群内的 DSN 条目。不过我们上一步中安装了一个 `istiocoredns`，该组件会负责解析 `svc.cluster.global` 的域名查询。
+在该模式下，为了区别请求的目的端是本集群服务还是远端集群服务，istio 使用 `svc.cluster.global` 指向远端集群服务。默认情况下，istio 本身不会影响 Kubernetes 集群内的 DSN 条目。不过我们上一步中安装了一个 `istiocoredns`，该组件会负责解析 `svc.cluster.global` 的域名查询。
 
 ### 配置 ServiceEntry
 

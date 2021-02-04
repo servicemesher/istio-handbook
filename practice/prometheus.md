@@ -115,7 +115,7 @@ scrape_configs:
     action: replace
     regex: ([^:]+)(?::\d+)?;(\d+)
     replacement: $1:15090
-    target_label: __address__  
+    target_label: __address__
     ...
 ```
 
@@ -166,7 +166,7 @@ scrape_configs:
     action: replace
     regex: ([^:]+)(?::\d+)?;(\d+)
     replacement: $1:15090
-    target_label: __address__  
+    target_label: __address__
 ```
 
 配置文件中提到的内置标签替换是怎么回事呢？我们先回到 Prometheus 的 targets 页面，把鼠标指针放在 Labels 列中的蓝色标签上，发现弹出了一些以双下划线开头的标签，这就是上面所提到的内置标签。因为 Prometheus 天然兼容 Kubernetes，当它部署在 Kubernetes 集群中，且通过 kubernetes_sd_configs 这种方式配置服务发现时，会默认给各指标加上 Kubernetes 相关的内置标签，如：该指标服务所在的计算节点名、Pod IP、命名空间、暴露的端口等。
@@ -209,9 +209,9 @@ $ kubectl edit deployment prometheus -n istio-system
  containers:
       - args:
         - --storage.tsdb.retention=6h
-        
+
         - --config.file=/etc/prometheus/prometheus.yml
-        
+
         - --web.enable-lifecycle
           image: docker.io/prom/prometheus:v2.15.1
           imagePullPolicy: IfNotPresent
@@ -309,7 +309,7 @@ go_goroutines 41
 
 ![Prometheus 中统计 citadel 组件的 CPU 使用量](../images/prometheus-cadital-query-cpu.png)
 
-以上就是 Prometheus 在 Istio 中的应用，Isito 各组件通过 HTTP 的形式暴露了 Prometheus 格式的指标数据抓取接口，Prometheus 通过配置对 Istio 各组件的服务发现和采集规则实现对其指标的采集，同时作为数据源提供给了 Grafana、Kiali 这样的可视化工具做数据展示。
+以上就是 Prometheus 在 Istio 中的应用，Istio 各组件通过 HTTP 的形式暴露了 Prometheus 格式的指标数据抓取接口，Prometheus 通过配置对 Istio 各组件的服务发现和采集规则实现对其指标的采集，同时作为数据源提供给了 Grafana、Kiali 这样的可视化工具做数据展示。
 
 ## 参考
 

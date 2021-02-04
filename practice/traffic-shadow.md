@@ -31,7 +31,7 @@ reviewers: ["malphi"]
 
 ![concepts-traffic-shadow-request](../images/concepts-traffic-shadow-request.png)
 
-在上面的请求链中，请求标头数据有什么变化呢？下图收集了它们请求标头中的所有信息，可以明显的对比出正式流量与镜像流量请求标头中`host`属性的区别（部分相同的属性值过长，这里只截取了前半段）。从图中我们可以看出，首先就是host属性值的不同，而区别就是多了一个`“-shadow”`的后缀。再者发现`x-forwarded-for`属性也不相同，`x-forwarded-for`协议头的格式是：`x-forwarded-for: client1, proxy1, proxy2`， 当流量经过 Envoy 代理时这个协议头将会把代理服务的 IP 添加进去。实例中`10.10.2.151`是我们云主机的 IP，而`10.10.2.121`是`isito-ingressgateway`所对应Pod的 IP 。从这里也能看到，镜像流量是由`istio-ingressgatway`发起的。除了这两个请求标头的不同，其他配置项是完全一样的。
+在上面的请求链中，请求标头数据有什么变化呢？下图收集了它们请求标头中的所有信息，可以明显的对比出正式流量与镜像流量请求标头中`host`属性的区别（部分相同的属性值过长，这里只截取了前半段）。从图中我们可以看出，首先就是host属性值的不同，而区别就是多了一个`“-shadow”`的后缀。再者发现`x-forwarded-for`属性也不相同，`x-forwarded-for`协议头的格式是：`x-forwarded-for: client1, proxy1, proxy2`， 当流量经过 Envoy 代理时这个协议头将会把代理服务的 IP 添加进去。实例中`10.10.2.151`是我们云主机的 IP，而`10.10.2.121`是`istio-ingressgateway`所对应Pod的 IP 。从这里也能看到，镜像流量是由`istio-ingressgatway`发起的。除了这两个请求标头的不同，其他配置项是完全一样的。
 
 ![concepts-traffic-shadow-header](../images/concepts-traffic-shadow-header.png)
 
@@ -181,8 +181,8 @@ EOF
 
 ```
 
-- 创建`httpbin`服务的默认路由策略，如下代码所示。 
-  - VirtualService 资源是 Istio 中的用来配置路由、流量转发权重占比等规则的一种 Kubernetes 自定义资源（CRDS），具体介绍详见： https://www.servicemesher.com/istio-handbook/concepts/virtualservice.html。 
+- 创建`httpbin`服务的默认路由策略，如下代码所示。
+  - VirtualService 资源是 Istio 中的用来配置路由、流量转发权重占比等规则的一种 Kubernetes 自定义资源（CRDS），具体介绍详见： https://www.servicemesher.com/istio-handbook/concepts/virtualservice.html。
   - DestinationRule 资源是 Istio 中用来配置客户端负载策略、连接池配置、异常点检测、服务子集等功能的一种 Kubernetes 自定义资源（CRDS），具体介绍详见：https://www.servicemesher.com/istio-handbook/concepts/destinationrule.html
 
 ```shell
@@ -457,7 +457,7 @@ EOF
 $ kubectl delete virtualservice httpbin
 $ kubectl delete destinationrule httpbin
 $ kubectl delete deploy httpbin-v1 httpbin-v2
-$ kubectl delete svc httpbin 
+$ kubectl delete svc httpbin
 ```
 
 ## 总结
